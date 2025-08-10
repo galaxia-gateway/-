@@ -2011,7 +2011,7 @@
               </div>
               <div class="form-group">
                   <label for="loginPassword">Password</label>
-                  <input type="text" id="loginPassword" required>
+                  <input type="password" id="loginPassword" required>
               </div>
               <button class="btn" onclick="login()">Login</button>
               <button class="btn btn-secondary" onclick="showRegister()">Create Account</button>
@@ -2048,7 +2048,7 @@
   </div>
 
   <!-- Main Application -->
-  <div class="main-app" id="mainApp" style="display: none;">
+  <div class="main-app" id="mainApp">
       <!-- Sidebar -->
       <div class="sidebar" id="sidebar">
           <div class="sidebar-header">
@@ -2652,35 +2652,374 @@
   </div>
 
   <script>
+      // Global Variables
+      let currentUser = null;
+      let isAdmin = false;
+      let currentSection = 'dashboard';
+      let executorTabs = [{ name: 'Script 1', content: '' }];
+      let activeExecutorTab = 0;
+      let editingScriptId = null;
+      let deletingScriptId = null;
+      let accessExpiration = null;
+      let countdownInterval = null;
 
-function login() {
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value.trim();
+      // Enhanced Database System
+      const DATABASE = {
+          users: 'galaxiaUsers',
+          games: 'galaxiaGames',
+          hubScripts: 'galaxiaHubScripts',
+          orders: 'galaxiaOrders',
+          blacklistedEmails: 'galaxiaBlacklistedEmails',
+          userTracking: 'galaxiaUserTracking'
+      };
 
-  if (email === adminEmail && password === adminPass) {
-    currentUser = {
-      username: "Admin",
-      email: adminEmail,
-      password: adminPass,
-      expiry: Date.now() + 99999999999 * 24 * 60 * 60 * 1000,
-      isAdmin: true,
-      games: [...sharedGames]
-    };
-    users[email] = currentUser;
-    showMainApp();
-    showAdminPanel();
-    return;
-  }
+      // Predefined keys (each worth 30 days)
+      const validKeys = [
+          'GALAXIA-2024-ALPHA',
+          'GALAXIA-2024-BETA',
+          'GALAXIA-2024-GAMMA',
+          'GALAXIA-2024-DELTA',
+          'GALAXIA-2024-EPSILON'
+      ];
 
-  if (!users[email] || users[email].password !== password) {
-    alert("Invalid email or password.");
-    return;
-  }
+      // Profanity filter
+      const profanityWords = ['badword1', 'badword2', 'inappropriate'];
 
-  currentUser = users[email];
-  showMainApp();
-}
-function showMainApp() {
+      // Script database - combined all scripts
+      const scriptDatabase = [
+          { id: 'iy', name: 'Infinite Yield', code: "loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()" },
+          { id: 'dex', name: 'Dark Dex', code: "loadstring(game:HttpGet('https://raw.githubusercontent.com/Babyhamsta/RBLX_Scripts/main/Universal/BypassedDarkDexV3.lua', true))()" },
+          { id: 'spy', name: 'Simple Spy', code: "loadstring(game:HttpGet('https://github.com/exxtremestuffs/SimpleSpySource/raw/master/SimpleSpy.lua'))()" },
+          { id: 'hydroxide', name: 'Hydroxide', code: "loadstring(game:HttpGet('https://raw.githubusercontent.com/Upbolt/Hydroxide/revision/init.lua'))()" },
+          { id: 'esp', name: 'Unnamed ESP', code: "loadstring(game:HttpGet('https://raw.githubusercontent.com/ic3w0lf22/Unnamed-ESP/master/UnnamedESP.lua'))()" },
+          { id: 'aimbot', name: 'Aimbot GUI', code: "loadstring(game:HttpGet('https://raw.githubusercontent.com/Exunys/Aimbot-V3/main/src/Aimbot.lua'))()" },
+          { id: 'fly', name: 'Fly GUI', code: "loadstring(game:HttpGet('https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt'))()" },
+          { id: 'speed', name: 'Speed GUI', code: "loadstring(game:HttpGet('https://raw.githubusercontent.com/JynxScript/SpeedScript/main/SpeedGUI.lua'))()" },
+          { id: 'noclip', name: 'Noclip GUI', code: "loadstring(game:HttpGet('https://raw.githubusercontent.com/Nicuse/RobloxScripts/main/NoClip.lua'))()" }
+      ];
+
+      // Enhanced Database Functions
+      function initializeDatabase() {
+          // Initialize all database collections if they don't exist
+          Object.values(DATABASE).forEach(key => {
+              if (!localStorage.getItem(key)) {
+                  localStorage.setItem(key, JSON.stringify([]));
+              }
+          });
+
+          // Initialize blacklisted emails if not exists
+          if (!localStorage.getItem(DATABASE.blacklistedEmails)) {
+              localStorage.setItem(DATABASE.blacklistedEmails, JSON.stringify([]));
+          }
+      }
+
+      function trackUserActivity(userId, action, details = {}) {
+          const tracking = JSON.parse(localStorage.getItem(DATABASE.userTracking) || '[]');
+          const activity = {
+              userId,
+              action,
+              details,
+              timestamp: Date.now(),
+              date: new Date().toISOString()
+          };
+          tracking.push(activity);
+          localStorage.setItem(DATABASE.userTracking, JSON.stringify(tracking));
+      }
+
+      function isEmailBlacklisted(email) {
+          const blacklistedEmails = JSON.parse(localStorage.getItem(DATABASE.blacklistedEmails) || '[]');
+          return blacklistedEmails.includes(email.toLowerCase());
+      }
+
+      function blacklistEmail(email) {
+          const blacklistedEmails = JSON.parse(localStorage.getItem(DATABASE.blacklistedEmails) || '[]');
+          if (!blacklistedEmails.includes(email.toLowerCase())) {
+              blacklistedEmails.push(email.toLowerCase());
+              localStorage.setItem(DATABASE.blacklistedEmails, JSON.stringify(blacklistedEmails));
+          }
+      }
+
+      function unblacklistEmail(email) {
+          let blacklistedEmails = JSON.parse(localStorage.getItem(DATABASE.blacklistedEmails) || '[]');
+          blacklistedEmails = blacklistedEmails.filter(e => e !== email.toLowerCase());
+          localStorage.setItem(DATABASE.blacklistedEmails, JSON.stringify(blacklistedEmails));
+      }
+
+      function addUserToWhitelist(user) {
+          const users = JSON.parse(localStorage.getItem(DATABASE.users) || '[]');
+          const existingUserIndex = users.findIndex(u => u.id === user.id);
+          
+          if (existingUserIndex !== -1) {
+              users[existingUserIndex] = user;
+          } else {
+              users.push(user);
+          }
+          
+          localStorage.setItem(DATABASE.users, JSON.stringify(users));
+          trackUserActivity(user.id, 'added_to_whitelist', { email: user.email, username: user.username });
+      }
+
+      function distributeGameToAllUsers(game) {
+          const users = JSON.parse(localStorage.getItem(DATABASE.users) || '[]');
+          users.forEach(user => {
+              if (!user.availableGames) {
+                  user.availableGames = [];
+              }
+              if (!user.availableGames.find(g => g.id === game.id)) {
+                  user.availableGames.push(game);
+              }
+          });
+          localStorage.setItem(DATABASE.users, JSON.stringify(users));
+          trackUserActivity('system', 'game_distributed', { gameId: game.id, gameName: game.name, userCount: users.length });
+      }
+
+      // Enhanced Player Count Fetching
+      async function fetchPlayerCount(gameUrl) {
+          try {
+              // Extract game ID from Roblox URL
+              const gameIdMatch = gameUrl.match(/\/games\/(\d+)/);
+              if (!gameIdMatch) {
+                  return Math.floor(Math.random() * 5000) + 100; // Fallback to random
+              }
+
+              const gameId = gameIdMatch[1];
+              
+              // Simulate API call (in real implementation, you'd use Roblox API)
+              // For demo purposes, return a simulated player count
+              const simulatedCount = Math.floor(Math.random() * 10000) + 500;
+              return simulatedCount;
+          } catch (error) {
+              console.error('Error fetching player count:', error);
+              return Math.floor(Math.random() * 5000) + 100; // Fallback
+          }
+      }
+
+      // Initialize app - Fixed loading screen issue
+      document.addEventListener('DOMContentLoaded', function() {
+          console.log('DOM loaded, starting initialization...');
+          initializeDatabase();
+
+          // Immediately hide loading screen and show auth
+          setTimeout(() => {
+              const loadingScreen = document.getElementById('loadingScreen');
+              if (loadingScreen) {
+                  loadingScreen.classList.add('hidden');
+                  checkAuthStatus();
+              }
+          }, 500); // Reduced to 500ms
+
+          // Initialize countdown
+          try {
+              startCountdown();
+          } catch (error) {
+              console.log('Countdown initialization failed:', error);
+          }
+      });
+
+      // Add a manual skip button for loading screen
+      function skipLoading() {
+          const loadingScreen = document.getElementById('loadingScreen');
+          if (loadingScreen) {
+              loadingScreen.classList.add('hidden');
+              checkAuthStatus();
+          }
+      }
+
+      // Enhanced Authentication Functions
+      function checkAuthStatus() {
+          const userData = localStorage.getItem('galaxiaUser');
+          if (userData) {
+              currentUser = JSON.parse(userData);
+              isAdmin = currentUser.username === 'GALAXIAADMIN';
+              showMainApp();
+          } else {
+              document.getElementById('authContainer').style.display = 'flex';
+          }
+      }
+
+      function showLogin() {
+          document.getElementById('loginForm').classList.remove('hidden');
+          document.getElementById('registerForm').classList.add('hidden');
+          clearErrors();
+      }
+
+      function showRegister() {
+          document.getElementById('loginForm').classList.add('hidden');
+          document.getElementById('registerForm').classList.remove('hidden');
+          clearErrors();
+      }
+
+      function clearErrors() {
+          document.getElementById('loginError').textContent = '';
+          document.getElementById('registerError').textContent = '';
+      }
+
+      function validateEmail(email) {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          return emailRegex.test(email);
+      }
+
+      function validatePassword(password) {
+          const hasUppercase = /[A-Z]/.test(password);
+          const hasNumber = /\d/.test(password);
+          return hasUppercase && hasNumber && password.length >= 6;
+      }
+
+      function containsProfanity(text) {
+          return profanityWords.some(word => text.toLowerCase().includes(word.toLowerCase()));
+      }
+
+      function register() {
+          const username = document.getElementById('registerUsername').value.trim();
+          const email = document.getElementById('registerEmail').value.trim();
+          const password = document.getElementById('registerPassword').value;
+          const confirmPassword = document.getElementById('confirmPassword').value;
+          const errorElement = document.getElementById('registerError');
+
+          // Validation
+          if (!username || !email || !password || !confirmPassword) {
+              errorElement.textContent = 'All fields are required.';
+              return;
+          }
+
+          if (containsProfanity(username)) {
+              errorElement.textContent = 'Username contains inappropriate content.';
+              return;
+          }
+
+          if (!validateEmail(email)) {
+              errorElement.textContent = 'Please enter a valid email address.';
+              return;
+          }
+
+          // Check if email is blacklisted
+          if (isEmailBlacklisted(email)) {
+              errorElement.textContent = 'This email address has been suspended. Contact support.';
+              return;
+          }
+
+          if (!validatePassword(password)) {
+              errorElement.textContent = 'Password must contain at least 1 uppercase letter and 1 number.';
+              return;
+          }
+
+          if (password !== confirmPassword) {
+              errorElement.textContent = 'Passwords do not match.';
+              return;
+          }
+
+          // Check for existing users
+          const existingUsers = JSON.parse(localStorage.getItem(DATABASE.users) || '[]');
+          if (existingUsers.some(user => user.email === email)) {
+              errorElement.textContent = 'Email already exists.';
+              return;
+          }
+
+          if (existingUsers.some(user => user.username === username)) {
+              errorElement.textContent = 'Username already exists.';
+              return;
+          }
+
+          // Create new user
+          const newUser = {
+              id: Date.now(),
+              username,
+              email,
+              password,
+              profilePic: null,
+              robloxConnected: false,
+              robloxUsername: '',
+              accessExpiration: Date.now() + (7 * 24 * 60 * 60 * 1000), // 7 days trial
+              blacklisted: false,
+              scripts: [],
+              availableGames: [],
+              registrationDate: Date.now(),
+              lastLogin: Date.now()
+          };
+
+          // Add to whitelist and track
+          addUserToWhitelist(newUser);
+          trackUserActivity(newUser.id, 'user_registered', { email, username });
+
+          errorElement.style.color = '#10b981';
+          errorElement.textContent = 'Account created successfully! You can now login.';
+
+          setTimeout(() => {
+              showLogin();
+          }, 1500);
+      }
+
+      function login() {
+          const email = document.getElementById('loginEmail').value.trim();
+          const password = document.getElementById('loginPassword').value;
+          const errorElement = document.getElementById('loginError');
+
+          if (!email || !password) {
+              errorElement.textContent = 'Please enter both email and password.';
+              return;
+          }
+
+          // Check if email is blacklisted
+          if (isEmailBlacklisted(email)) {
+              errorElement.textContent = 'This email address has been suspended. Contact support.';
+              return;
+          }
+
+          // Check for admin login
+          if (email === 'GALAXIAADMIN' && password === 'GALAXIAISRELEASING') {
+              currentUser = {
+                  id: 0,
+                  username: 'GALAXIAADMIN',
+                  email: 'admin@galaxia.com',
+                  profilePic: null,
+                  robloxConnected: true,
+                  robloxUsername: 'GalaxiaAdmin',
+                  accessExpiration: Date.now() + (99999999 * 24 * 60 * 60 * 1000), // 99999999 days
+                  blacklisted: false,
+                  scripts: [],
+                  availableGames: [],
+                  lastLogin: Date.now()
+              };
+              isAdmin = true;
+              localStorage.setItem('galaxiaUser', JSON.stringify(currentUser));
+              trackUserActivity(0, 'admin_login', { email });
+              showMainApp();
+              return;
+          }
+
+          // Regular user login
+          const existingUsers = JSON.parse(localStorage.getItem(DATABASE.users) || '[]');
+          const user = existingUsers.find(u => u.email === email && u.password === password);
+
+          if (!user) {
+              errorElement.textContent = 'Invalid email or password.';
+              return;
+          }
+
+          if (user.blacklisted) {
+              errorElement.textContent = 'Your account has been suspended. Contact support.';
+              return;
+          }
+
+          if (user.accessExpiration < Date.now()) {
+              errorElement.textContent = 'Your access has expired. Please redeem a new key.';
+              return;
+          }
+
+          // Update last login
+          user.lastLogin = Date.now();
+          const userIndex = existingUsers.findIndex(u => u.id === user.id);
+          existingUsers[userIndex] = user;
+          localStorage.setItem(DATABASE.users, JSON.stringify(existingUsers));
+
+          currentUser = user;
+          isAdmin = false;
+          localStorage.setItem('galaxiaUser', JSON.stringify(currentUser));
+          trackUserActivity(user.id, 'user_login', { email });
+          showMainApp();
+      }
+
+      function showMainApp() {
           document.getElementById('authContainer').classList.add('hidden');
           document.getElementById('mainApp').classList.add('visible');
 
@@ -4104,89 +4443,133 @@ function showMainApp() {
   </script>
 
   <script>
+      document.addEventListener("DOMContentLoaded", function () {
+          const iconMap = {
+              'icon-home': 'fa-house',
+              'icon-gamepad': 'fa-gamepad',
+              'icon-script': 'fa-scroll',
+              'icon-document': 'fa-file-lines',
+              'icon-lightning': 'fa-bolt',
+              'icon-settings': 'fa-gear',
+              'icon-ticket': 'fa-ticket',
+              'icon-question': 'fa-circle-question',
+              'icon-users': 'fa-users',
+              'icon-clipboard': 'fa-clipboard',
+              'icon-user': 'fa-user',
+              'icon-clock': 'fa-clock',
+              'icon-star': 'fa-star',
+              'icon-check': 'fa-check',
+              'icon-camera': 'fa-camera',
+              'icon-lock': 'fa-lock',
+              'icon-error': 'fa-xmark'
+          };
 
-function login() {
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value.trim();
+          for (const cls in iconMap) {
+              document.querySelectorAll(`.${cls}`).forEach(el => {
+                  const icon = document.createElement('i');
+                  icon.className = `fa-solid ${iconMap[cls]}`;
+                  icon.style.marginRight = '8px';
+                  el.innerHTML = '';
+                  el.appendChild(icon);
+              });
+          }
+      });
+  </script>
 
-  if (email === adminEmail && password === adminPass) {
-    currentUser = {
-      username: "Admin",
-      email: adminEmail,
-      password: adminPass,
-      expiry: Date.now() + 99999999999 * 24 * 60 * 60 * 1000,
-      isAdmin: true,
-      games: [...sharedGames]
-    };
-    users[email] = currentUser;
-    showMainApp();
-    showAdminPanel();
-    return;
-  }
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const usernameInput = document.getElementById('registerUsername');
+    const emailInput = document.getElementById('registerEmail');
+    const passwordInput = document.getElementById('registerPassword');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
 
-  if (!users[email] || users[email].password !== password) {
-    alert("Invalid email or password.");
-    return;
-  }
+    const badWords = ['fuck', 'shit', 'bitch', 'nigga', 'ass', 'cunt', 'dick'];
 
-  currentUser = users[email];
-  showMainApp();
-}
-function showMainApp() {
-  document.getElementById("authContainer").classList.add("hidden");
-  const app = document.getElementById("mainApp");
-  app.classList.add("visible");
-  app.style.display = "flex";
-  renderGames();
-}
-
-function showAdminPanel() {
-  const adminPanel = document.getElementById("adminPanel");
-  if (adminPanel) {
-    adminPanel.style.display = "block";
-  }
-}
-
-function addGame() {
-  const gameName = document.getElementById("gameInput").value.trim();
-  if (!gameName) return;
-
-  sharedGames.push(gameName);
-
-  Object.values(users).forEach(user => {
-    if (!user.games.includes(gameName)) {
-      user.games.push(gameName);
+    function markValid(input, isValid) {
+        input.style.borderColor = isValid ? 'limegreen' : 'red';
     }
-  });
 
-  renderGames();
-  document.getElementById("gameInput").value = "";
-}
+    function validateUsername() {
+        const val = usernameInput.value.toLowerCase();
+        const isValid = val.length >= 8 && !badWords.some(word => val.includes(word));
+        markValid(usernameInput, isValid);
+    }
 
-function renderGames() {
-  const list = document.getElementById("gameList");
-  list.innerHTML = "";
+    function validateEmail() {
+        const val = emailInput.value.toLowerCase();
+        const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) &&
+            (val.endsWith('@gmail.com') || val.endsWith('@yahoo.com'));
+        markValid(emailInput, isValid);
+    }
 
-  if (!currentUser || !currentUser.games) return;
+    function validatePassword() {
+        const isValid = passwordInput.value.length >= 8;
+        markValid(passwordInput, isValid);
+    }
 
-  currentUser.games.forEach(game => {
-    const li = document.createElement("li");
-    li.textContent = game;
-    list.appendChild(li);
-  });
-}
+    function validateConfirmPassword() {
+        const isValid = confirmPasswordInput.value === passwordInput.value && confirmPasswordInput.value.length > 0;
+        markValid(confirmPasswordInput, isValid);
+    }
 
-function redeemKey() {
-  const key = document.getElementById("redeemKeyInput").value.trim();
-  if (!key) return;
+    usernameInput.addEventListener('input', validateUsername);
+    emailInput.addEventListener('input', validateEmail);
+    passwordInput.addEventListener('input', validatePassword);
+    confirmPasswordInput.addEventListener('input', validateConfirmPassword);
+});
+</script>
 
-  if (currentUser && currentUser.username === key) {
-    alert("You cannot redeem your own key.");
-    return;
-  }
 
-  alert("Redeem logic placeholder");
-}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const usernameInput = document.getElementById('registerUsername');
+    const emailInput = document.getElementById('registerEmail');
+    const passwordInput = document.getElementById('registerPassword');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+
+    const usernameMessage = document.getElementById('usernameMessage');
+    const emailMessage = document.getElementById('emailMessage');
+    const passwordMessage = document.getElementById('passwordMessage');
+    const confirmPasswordMessage = document.getElementById('confirmPasswordMessage');
+
+    const badWords = ['fuck', 'shit', 'bitch', 'nigga', 'ass', 'cunt', 'dick'];
+
+    function markValid(input, messageBox, isValid, message) {
+        input.style.borderColor = isValid ? 'limegreen' : 'red';
+        messageBox.textContent = isValid ? '' : message;
+        messageBox.style.color = 'red';
+        messageBox.style.marginTop = '5px';
+    }
+
+    function validateUsername() {
+        const val = usernameInput.value.toLowerCase();
+        const isValid = val.length >= 8 && !badWords.some(word => val.includes(word));
+        markValid(usernameInput, usernameMessage, isValid, 'Username must be at least 8 characters and not contain bad words');
+    }
+
+    function validateEmail() {
+        const val = emailInput.value.toLowerCase();
+        const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) &&
+            (val.endsWith('@gmail.com') || val.endsWith('@yahoo.com'));
+        markValid(emailInput, emailMessage, isValid, 'Email must be Gmail or Yahoo and valid format');
+    }
+
+    function validatePassword() {
+        const isValid = passwordInput.value.length >= 8;
+        markValid(passwordInput, passwordMessage, isValid, 'Password must be at least 8 characters');
+    }
+
+    function validateConfirmPassword() {
+        const isValid = confirmPasswordInput.value === passwordInput.value && confirmPasswordInput.value.length > 0;
+        markValid(confirmPasswordInput, confirmPasswordMessage, isValid, 'Passwords must match');
+    }
+
+    usernameInput.addEventListener('input', validateUsername);
+    emailInput.addEventListener('input', validateEmail);
+    passwordInput.addEventListener('input', validatePassword);
+    confirmPasswordInput.addEventListener('input', validateConfirmPassword);
+});
 </script>
 
 </body>
+</html>
