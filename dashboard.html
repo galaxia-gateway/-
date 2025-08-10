@@ -1,0 +1,4192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Galaxia Dashboard</title>
+  <style>
+      /* Basic Reset & Body Styles */
+      * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+      }
+
+      body {
+          font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background: linear-gradient(135deg, #000000 0%, #1a0033 25%, #2d1b69 50%, #000000 100%);
+          color: white;
+          min-height: 100vh;
+          height: 100vh;
+          overflow-y: auto;
+          overflow-x: hidden;
+      }
+
+      /* Enhanced Button Animations */
+      .btn, .action-btn, .executor-btn {
+          position: relative;
+          overflow: hidden;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          transform: translateZ(0);
+      }
+
+      .btn::before, .action-btn::before, .executor-btn::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+          transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+          z-index: 1;
+      }
+
+      .btn:hover::before, .action-btn:hover::before, .executor-btn:hover::before {
+          left: 100%;
+      }
+
+      .btn:hover, .action-btn:hover, .executor-btn:hover {
+          transform: translateY(-3px) scale(1.02);
+          box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+      }
+
+      .btn:active, .action-btn:active, .executor-btn:active {
+          transform: translateY(-1px) scale(0.98);
+          transition: all 0.1s;
+      }
+
+      /* Pulse Animation for Important Buttons */
+      @keyframes pulse {
+          0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7); }
+          70% { box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+      }
+
+      .btn-pulse {
+          animation: pulse 2s infinite;
+      }
+
+      /* Dropdown Menu Styles */
+      .menu {
+          font-size: 16px;
+          line-height: 1.6;
+          color: #ffffff;
+          width: fit-content;
+          display: flex;
+          list-style: none;
+          margin-bottom: 20px;
+      }
+
+      .menu a {
+          text-decoration: none;
+          color: inherit;
+          font-family: inherit;
+          font-size: inherit;
+          line-height: inherit;
+      }
+
+      .menu .link {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          padding: 12px 36px;
+          border-radius: 16px;
+          overflow: hidden;
+          transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+          background: rgba(139, 92, 246, 0.1);
+          border: 1px solid rgba(139, 92, 246, 0.3);
+      }
+
+      .menu .link::after {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(45deg, #8b5cf6, #a855f7);
+          z-index: -1;
+          transform: scaleX(0);
+          transform-origin: left;
+          transition: transform 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+      }
+
+      .menu .link svg {
+          width: 14px;
+          height: 14px;
+          fill: #ffffff;
+          transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+      }
+
+      .menu .item {
+          position: relative;
+      }
+
+      .menu .item .submenu {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          position: absolute;
+          top: 100%;
+          border-radius: 0 0 16px 16px;
+          left: 0;
+          width: 100%;
+          overflow: hidden;
+          border: 1px solid rgba(139, 92, 246, 0.4);
+          background: rgba(0, 0, 0, 0.9);
+          backdrop-filter: blur(20px);
+          opacity: 0;
+          visibility: hidden;
+          transform: translateY(-12px);
+          transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+          z-index: 1000;
+          pointer-events: none;
+          list-style: none;
+      }
+
+      .menu .item:hover .submenu {
+          opacity: 1;
+          visibility: visible;
+          transform: translateY(0);
+          pointer-events: auto;
+          border-top: transparent;
+          border-color: #8b5cf6;
+      }
+
+      .menu .item:hover .link {
+          color: #ffffff;
+          border-radius: 16px 16px 0 0;
+      }
+
+      .menu .item:hover .link::after {
+          transform: scaleX(1);
+          transform-origin: right;
+      }
+
+      .menu .item:hover .link svg {
+          fill: #ffffff;
+          transform: rotate(-180deg);
+      }
+
+      .submenu .submenu-item {
+          width: 100%;
+          transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+      }
+
+      .submenu .submenu-link {
+          display: block;
+          padding: 12px 24px;
+          width: 100%;
+          position: relative;
+          text-align: center;
+          transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+          color: rgba(255, 255, 255, 0.8);
+      }
+
+      .submenu .submenu-item:last-child .submenu-link {
+          border-bottom: none;
+      }
+
+      .submenu .submenu-link::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          transform: scaleX(0);
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(45deg, #8b5cf6, #a855f7);
+          z-index: -1;
+          transform-origin: left;
+          transition: transform 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+      }
+
+      .submenu .submenu-link:hover:before {
+          transform: scaleX(1);
+          transform-origin: right;
+      }
+
+      .submenu .submenu-link:hover {
+          color: #ffffff;
+      }
+
+      /* Loading Screen Styles */
+      .loading-screen {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(135deg, #000000 0%, #1a0033 50%, #2d1b69 100%);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 10000;
+          transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+      }
+
+      .loading-screen.hidden {
+          opacity: 0 !important;
+          visibility: hidden !important;
+          pointer-events: none;
+      }
+
+      .loader {
+          display: flex;
+          width: 8rem;
+          height: 8rem;
+          justify-content: center;
+          align-items: center;
+          position: relative;
+          flex-direction: column;
+      }
+
+      .curve {
+          width: 180%;
+          height: 180%;
+          position: absolute;
+          animation: rotate 8s linear infinite;
+          fill: transparent;
+      }
+
+      .curve text {
+          letter-spacing: 20px;
+          text-transform: uppercase;
+          font: 1.5em "Inter", sans-serif;
+          fill: white;
+          filter: drop-shadow(0 2px 8px black);
+      }
+
+      .blackhole {
+          z-index: -1;
+          display: flex;
+          position: absolute;
+          width: 8rem;
+          height: 8rem;
+          align-items: center;
+          justify-content: center;
+      }
+
+      .blackhole-circle {
+          z-index: 0;
+          display: flex;
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          background: radial-gradient(circle at center, #8b5cf6 25%, #1a0033 100%);
+          box-shadow: 0px 0px 2rem #8b5cf6;
+          align-items: center;
+          justify-content: center;
+      }
+
+      .blackhole-circle::after {
+          z-index: 0;
+          position: absolute;
+          content: "";
+          display: flex;
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          border: 4px solid #8b5cf6;
+          background: radial-gradient(circle at center, #8b5cf6 35%, #1a0033 100%);
+          box-shadow: 0px 0px 5rem #8b5cf6;
+          align-items: center;
+          justify-content: center;
+          filter: blur(4px);
+          animation: pulseAnimation linear infinite 2s alternate-reverse;
+      }
+
+      .blackhole-circle::before {
+          z-index: 1;
+          content: "";
+          display: flex;
+          width: 4rem;
+          height: 4rem;
+          border: 2px solid #8b5cf6;
+          box-shadow: 3px 3px 10px #8b5cf6, inset 0 0 1rem #8b5cf6;
+          border-radius: 50%;
+          top: 5rem;
+          filter: blur(0.5px);
+          animation: rotate linear infinite 3s;
+      }
+
+      .blackhole-disc {
+          position: absolute;
+          z-index: 0;
+          display: flex;
+          width: 5rem;
+          height: 10rem;
+          border-radius: 50%;
+          background: radial-gradient(circle at center, #8b5cf6 70%, #1a0033 100%);
+          filter: blur(1rem) brightness(130%);
+          border: 1rem solid #8b5cf6;
+          box-shadow: 0px 0px 3rem #8b5cf6;
+          transform: rotate3d(1, 1, 1, 220deg);
+          animation: pulseAnimation2 linear infinite 2s alternate-reverse;
+          justify-content: center;
+          align-items: center;
+      }
+
+      .blackhole-disc::before {
+          content: "";
+          position: absolute;
+          z-index: 0;
+          display: flex;
+          width: 5rem;
+          height: 10rem;
+          border-radius: 50%;
+          background: radial-gradient(circle at center, #8b5cf6 70%, #1a0033 100%);
+          filter: blur(3rem);
+          border: 1rem solid #8b5cf6;
+          box-shadow: 0px 0px 6rem #8b5cf6;
+          animation: pulseAnimation linear infinite 2s alternate-reverse;
+      }
+
+      .galaxia-text {
+          position: absolute;
+          z-index: 2;
+          font-size: 1.6rem;
+          font-weight: bold;
+          background: linear-gradient(to right, #1a0033, #8b5cf6);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.5));
+          text-align: center;
+          pointer-events: none;
+      }
+
+      @keyframes rotate {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+      }
+
+      @keyframes pulseAnimation {
+          0% {
+              box-shadow: 0px 0px 3rem #8b5cf6;
+              transform: scale(1);
+          }
+          100% {
+              box-shadow: 0px 0px 5rem #8b5cf6;
+              transform: scale(1.09);
+          }
+      }
+
+      @keyframes pulseAnimation2 {
+          0% {
+              box-shadow: 0px 0px 3rem #8b5cf6;
+              transform: rotate3d(1, 1, 1, 220deg) scale(1);
+          }
+          100% {
+              box-shadow: 0px 0px 5rem #8b5cf6;
+              transform: rotate3d(1, 1, 1, 220deg) scale(0.95);
+          }
+      }
+
+      /* Auth Screen Styles */
+      .auth-container {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(135deg, #000000 0%, #1a0033 50%, #2d1b69 100%);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 9999;
+          transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+      }
+
+      .auth-container.hidden {
+          opacity: 0;
+          transform: translateY(-100%);
+          pointer-events: none;
+      }
+
+      .auth-box {
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(139, 92, 246, 0.3);
+          border-radius: 20px;
+          padding: 40px;
+          width: 400px;
+          text-align: center;
+          box-shadow: 0 8px 32px rgba(139, 92, 246, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      }
+
+      .auth-title {
+          font-size: 2rem;
+          margin-bottom: 30px;
+          background: linear-gradient(45deg, #8b5cf6, #a855f7);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.3));
+      }
+
+      .form-group {
+          margin-bottom: 20px;
+          text-align: left;
+      }
+
+      .form-group label {
+          display: block;
+          margin-bottom: 8px;
+          color: rgba(255, 255, 255, 0.9);
+          font-weight: 500;
+      }
+
+      .form-group input, .form-group textarea {
+          width: 100%;
+          padding: 14px 16px;
+          border: 1px solid rgba(139, 92, 246, 0.3);
+          border-radius: 12px;
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(10px);
+          color: white;
+          font-size: 14px;
+          transition: all 0.3s ease;
+      }
+
+      .form-group input:focus, .form-group textarea:focus {
+          outline: none;
+          border-color: #8b5cf6;
+          box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2), 0 0 20px rgba(139, 92, 246, 0.1);
+          background: rgba(255, 255, 255, 0.08);
+      }
+
+      .form-group input::placeholder, .form-group textarea::placeholder {
+          color: rgba(255, 255, 255, 0.5);
+      }
+
+      .btn {
+          background: linear-gradient(45deg, #8b5cf6, #a855f7);
+          color: white;
+          border: none;
+          padding: 14px 24px;
+          border-radius: 12px;
+          cursor: pointer;
+          font-size: 16px;
+          font-weight: 600;
+          transition: all 0.3s ease;
+          width: 100%;
+          margin-bottom: 12px;
+          position: relative;
+          overflow: hidden;
+      }
+
+      .btn-secondary {
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(139, 92, 246, 0.3);
+          backdrop-filter: blur(10px);
+      }
+
+      .btn-secondary:hover {
+          background: rgba(255, 255, 255, 0.1);
+          border-color: #8b5cf6;
+      }
+
+      .error-message {
+          color: #ef4444;
+          font-size: 14px;
+          margin-top: 10px;
+          padding: 8px 12px;
+          background: rgba(239, 68, 68, 0.1);
+          border: 1px solid rgba(239, 68, 68, 0.3);
+          border-radius: 8px;
+          backdrop-filter: blur(10px);
+      }
+
+      /* Main App Layout */
+      .main-app {
+          display: flex;
+          width: 100%;
+          opacity: 0;
+          transform: translateY(20px);
+          transition: all 0.5s ease-out;
+      }
+
+      .main-app.visible {
+          opacity: 1;
+          transform: translateY(0);
+      }
+
+      /* Sidebar Styles - Fixed horizontal scroll */
+      .sidebar {
+          position: fixed;
+          top: 0;
+          left: 0;
+          height: 100vh;
+          width: 280px;
+          background: rgba(0, 0, 0, 0.4);
+          backdrop-filter: blur(20px);
+          border-right: 1px solid rgba(139, 92, 246, 0.2);
+          display: flex;
+          flex-direction: column;
+          overflow-y: auto;
+          overflow-x: hidden;
+          z-index: 1000;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(139, 92, 246, 0.4) transparent;
+      }
+
+      .sidebar::-webkit-scrollbar {
+          width: 6px;
+      }
+
+      .sidebar::-webkit-scrollbar-track {
+          background: transparent;
+      }
+
+      .sidebar::-webkit-scrollbar-thumb {
+          background-color: rgba(139, 92, 246, 0.4);
+          border-radius: 3px;
+      }
+
+      .sidebar::-webkit-scrollbar-thumb:hover {
+          background-color: rgba(139, 92, 246, 0.6);
+      }
+
+      .sidebar-header {
+          padding: 24px 20px;
+          border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+          flex-shrink: 0;
+      }
+
+      .sidebar-logo {
+          font-size: 1.8rem;
+          font-weight: bold;
+          background: linear-gradient(45deg, #8b5cf6, #a855f7);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          margin-bottom: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.3));
+      }
+
+      .menu-toggle {
+          background: none;
+          border: none;
+          color: white;
+          font-size: 1.2rem;
+          cursor: pointer;
+          display: none;
+          padding: 8px;
+          border-radius: 8px;
+          transition: all 0.3s ease;
+      }
+
+      .menu-toggle:hover {
+          background: rgba(139, 92, 246, 0.2);
+      }
+
+      .user-profile {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 16px;
+          background: rgba(139, 92, 246, 0.1);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(139, 92, 246, 0.2);
+          border-radius: 16px;
+          margin-bottom: 16px;
+          transition: all 0.3s ease;
+      }
+
+      .user-profile:hover {
+          background: rgba(139, 92, 246, 0.15);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(139, 92, 246, 0.2);
+      }
+
+      .user-avatar {
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          background: linear-gradient(45deg, #8b5cf6, #a855f7);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: bold;
+          font-size: 16px;
+          box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+          flex-shrink: 0;
+      }
+
+      .user-info {
+          flex: 1;
+          min-width: 0;
+      }
+
+      .user-info h4 {
+          font-size: 14px;
+          margin-bottom: 4px;
+          font-weight: 600;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+      }
+
+      .user-info p {
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.7);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+      }
+
+      .sidebar-nav {
+          padding: 16px 0;
+          flex: 1;
+          overflow-y: auto;
+          overflow-x: hidden;
+      }
+
+      .nav-section {
+          margin-bottom: 20px;
+      }
+
+      .nav-section-title {
+          font-size: 11px;
+          font-weight: 700;
+          color: rgba(255, 255, 255, 0.5);
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          margin-bottom: 16px;
+          padding: 0 20px;
+      }
+
+      .nav-item {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          padding: 14px 20px;
+          color: rgba(255, 255, 255, 0.8);
+          text-decoration: none;
+          transition: all 0.3s ease;
+          cursor: pointer;
+          border: none;
+          background: none;
+          width: 100%;
+          text-align: left;
+          font-size: 14px;
+          font-weight: 500;
+          position: relative;
+          margin: 2px 0;
+          white-space: nowrap;
+          overflow: hidden;
+      }
+
+      .nav-item::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 0;
+          height: 100%;
+          background: linear-gradient(90deg, #8b5cf6, #a855f7);
+          transition: width 0.3s ease;
+          border-radius: 0 8px 8px 0;
+      }
+
+      .nav-item:hover {
+          background: rgba(139, 92, 246, 0.1);
+          color: white;
+          transform: translateX(8px);
+      }
+
+      .nav-item:hover::before {
+          width: 4px;
+      }
+
+      .nav-item.active {
+          background: rgba(139, 92, 246, 0.2);
+          color: #8b5cf6;
+          transform: translateX(8px);
+      }
+
+      .nav-item.active::before {
+          width: 4px;
+      }
+
+      .nav-item-icon {
+          font-size: 18px;
+          width: 24px;
+          text-align: center;
+          transition: all 0.3s ease;
+          flex-shrink: 0;
+      }
+
+      .nav-item:hover .nav-item-icon {
+          transform: scale(1.1);
+      }
+
+      .logout-btn {
+          margin: 20px;
+          margin-top: auto;
+          background: linear-gradient(45deg, #ef4444, #dc2626);
+          color: white;
+          border: none;
+          padding: 14px;
+          border-radius: 12px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          font-weight: 600;
+          font-size: 14px;
+          flex-shrink: 0;
+      }
+
+      .logout-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+      }
+
+      /* Main Content Area */
+      .main-content {
+          margin-left: 280px;
+          height: 100vh;
+          overflow-y: auto;
+          flex: 1;
+          padding: 32px;
+          background: linear-gradient(135deg, #000000 0%, #1a0033 25%, #2d1b69 50%, #000000 100%);
+          transition: all 0.3s ease;
+      }
+
+      .content-header {
+          margin-bottom: 32px;
+      }
+
+      .content-title {
+          font-size: 2.5rem;
+          font-weight: 700;
+          margin-bottom: 12px;
+          background: linear-gradient(45deg, #ffffff, #e5e7eb);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+      }
+
+      .content-subtitle {
+          color: rgba(255, 255, 255, 0.7);
+          font-size: 1.1rem;
+          font-weight: 400;
+      }
+
+      /* Dashboard Cards */
+      .dashboard-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 24px;
+          margin-bottom: 32px;
+      }
+
+      .dashboard-card {
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(139, 92, 246, 0.2);
+          border-radius: 20px;
+          padding: 28px;
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+      }
+
+      .dashboard-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.5), transparent);
+      }
+
+      .dashboard-card:hover {
+          transform: translateY(-8px);
+          box-shadow: 0 20px 40px rgba(139, 92, 246, 0.2);
+          border-color: rgba(139, 92, 246, 0.4);
+      }
+
+      .card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+      }
+
+      .card-title {
+          font-size: 1rem;
+          color: rgba(255, 255, 255, 0.9);
+          margin: 0;
+          font-weight: 600;
+      }
+
+      .card-icon {
+          font-size: 28px;
+          opacity: 0.7;
+          color: #8b5cf6;
+      }
+
+      .card-value {
+          font-size: 2.8rem;
+          font-weight: 700;
+          margin-bottom: 8px;
+          background: linear-gradient(45deg, #8b5cf6, #a855f7);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+      }
+
+      .card-description {
+          color: rgba(255, 255, 255, 0.6);
+          font-size: 14px;
+          font-weight: 500;
+      }
+
+      /* Content Sections */
+      .content-section {
+          display: none;
+          animation: slideIn 0.5s ease-out;
+      }
+
+      .content-section.active {
+          display: block;
+      }
+
+      @keyframes slideIn {
+          from {
+              opacity: 0;
+              transform: translateY(20px);
+          }
+          to {
+              opacity: 1;
+              transform: translateY(0);
+          }
+      }
+
+      .section-card {
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(139, 92, 246, 0.2);
+          border-radius: 20px;
+          padding: 28px;
+          margin-bottom: 24px;
+          transition: all 0.3s ease;
+          min-height: calc(100vh - 200px);
+      }
+
+      .section-card:hover {
+          border-color: rgba(139, 92, 246, 0.3);
+      }
+
+      .section-title {
+          font-size: 1.5rem;
+          margin-bottom: 24px;
+          color: #8b5cf6;
+          font-weight: 600;
+      }
+
+      .search-bar {
+          width: 100%;
+          padding: 16px 20px;
+          border: 1px solid rgba(139, 92, 246, 0.3);
+          border-radius: 16px;
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(10px);
+          color: white;
+          margin-bottom: 24px;
+          font-size: 14px;
+          transition: all 0.3s ease;
+      }
+
+      .search-bar:focus {
+          outline: none;
+          border-color: #8b5cf6;
+          box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2), 0 0 20px rgba(139, 92, 246, 0.1);
+          background: rgba(255, 255, 255, 0.08);
+      }
+
+      .search-bar::placeholder {
+          color: rgba(255, 255, 255, 0.5);
+      }
+
+      /* Enhanced Game Cards - Half Image, Half Description */
+      .item-list {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+          gap: 20px;
+      }
+
+      .list-item {
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(139, 92, 246, 0.2);
+          border-radius: 16px;
+          padding: 0;
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+          min-height: 140px;
+      }
+
+      .list-item::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.5), transparent);
+      }
+
+      .list-item:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 12px 30px rgba(139, 92, 246, 0.2);
+          border-color: rgba(139, 92, 246, 0.4);
+      }
+
+      /* Game Card Layout */
+      .game-card-content {
+          display: flex;
+          height: 140px;
+      }
+
+      .game-image-section {
+          width: 140px;
+          height: 140px;
+          position: relative;
+          overflow: hidden;
+          border-radius: 16px 0 0 16px;
+          flex-shrink: 0;
+      }
+
+      .game-image-section img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.3s ease;
+      }
+
+      .game-image-section:hover img {
+          transform: scale(1.05);
+      }
+
+      .game-info-section {
+          flex: 1;
+          padding: 20px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+      }
+
+      .game-details h3 {
+          margin-bottom: 8px;
+          color: #ffffff;
+          font-size: 1.2rem;
+          font-weight: 600;
+      }
+
+      .game-details .game-stats {
+          color: #8b5cf6;
+          font-size: 14px;
+          margin-bottom: 8px;
+          font-weight: 500;
+      }
+
+      .game-details p {
+          color: rgba(255, 255, 255, 0.7);
+          font-size: 13px;
+          line-height: 1.4;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+      }
+
+      .game-actions {
+          display: flex;
+          gap: 8px;
+          margin-top: 12px;
+      }
+
+      .game-actions .action-btn {
+          flex: 1;
+          padding: 8px 16px;
+          font-size: 13px;
+          border-radius: 8px;
+      }
+
+      /* Script Cards (keep original style) */
+      .script-item {
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(139, 92, 246, 0.2);
+          border-radius: 16px;
+          padding: 24px;
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+      }
+
+      .script-item::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.5), transparent);
+      }
+
+      .script-item:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 12px 30px rgba(139, 92, 246, 0.2);
+          border-color: rgba(139, 92, 246, 0.4);
+      }
+
+      .item-info {
+          margin-bottom: 20px;
+      }
+
+      .item-icon {
+          width: 56px;
+          height: 56px;
+          border-radius: 12px;
+          background: linear-gradient(45deg, rgba(139, 92, 246, 0.2), rgba(168, 85, 247, 0.2));
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #8b5cf6;
+          font-size: 24px;
+          margin-bottom: 16px;
+          border: 1px solid rgba(139, 92, 246, 0.3);
+          transition: all 0.3s ease;
+      }
+
+      .item-icon img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 12px;
+      }
+
+      .script-item:hover .item-icon {
+          transform: scale(1.05);
+          box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+      }
+
+      .item-details h3 {
+          margin-bottom: 8px;
+          color: #ffffff;
+          font-size: 1.1rem;
+          font-weight: 600;
+      }
+
+      .item-details p {
+          color: rgba(255, 255, 255, 0.7);
+          font-size: 14px;
+          line-height: 1.5;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+      }
+
+      .item-actions {
+          display: flex;
+          gap: 12px;
+          flex-wrap: wrap;
+      }
+
+      .action-btn {
+          background: rgba(139, 92, 246, 0.2);
+          border: 1px solid rgba(139, 92, 246, 0.4);
+          color: #8b5cf6;
+          padding: 10px 16px;
+          border-radius: 10px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          font-size: 13px;
+          font-weight: 600;
+          backdrop-filter: blur(10px);
+          position: relative;
+          overflow: hidden;
+      }
+
+      .action-btn:hover {
+          background: rgba(139, 92, 246, 0.3);
+          color: white;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+      }
+
+      .action-btn.danger {
+          background: rgba(239, 68, 68, 0.2);
+          border-color: rgba(239, 68, 68, 0.4);
+          color: #ef4444;
+      }
+
+      .action-btn.danger:hover {
+          background: rgba(239, 68, 68, 0.3);
+          color: white;
+          box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+      }
+
+      /* Wide join button for games */
+      .action-btn.wide {
+          flex: 1;
+          min-width: 100%;
+          justify-content: center;
+          display: flex;
+          align-items: center;
+      }
+
+      /* Executor Restriction Styles */
+      .executor-restricted {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: 400px;
+          text-align: center;
+          background: rgba(239, 68, 68, 0.1);
+          border: 2px dashed rgba(239, 68, 68, 0.3);
+          border-radius: 20px;
+          padding: 40px;
+      }
+
+      .restriction-icon {
+          font-size: 4rem;
+          color: #ef4444;
+          margin-bottom: 20px;
+      }
+
+      .restriction-title {
+          font-size: 1.5rem;
+          color: #ef4444;
+          margin-bottom: 16px;
+          font-weight: 600;
+      }
+
+      .restriction-message {
+          color: rgba(255, 255, 255, 0.8);
+          margin-bottom: 24px;
+          line-height: 1.6;
+      }
+
+      .restriction-btn {
+          background: linear-gradient(45deg, #8b5cf6, #a855f7);
+          color: white;
+          border: none;
+          padding: 12px 24px;
+          border-radius: 12px;
+          cursor: pointer;
+          font-weight: 600;
+          transition: all 0.3s ease;
+      }
+
+      .restriction-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+      }
+
+      /* Executor Styles */
+      .executor-container {
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(139, 92, 246, 0.2);
+          border-radius: 20px;
+          padding: 24px;
+          height: 600px;
+          display: flex;
+          flex-direction: column;
+      }
+
+      .executor-tabs {
+          display: flex;
+          gap: 8px;
+          margin-bottom: 20px;
+      }
+
+      .executor-tab {
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(139, 92, 246, 0.2);
+          color: white;
+          padding: 12px 16px;
+          border-radius: 12px 12px 0 0;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-weight: 500;
+      }
+
+      .executor-tab.active {
+          background: rgba(139, 92, 246, 0.2);
+          border-color: rgba(139, 92, 246, 0.4);
+      }
+
+      .executor-tab:hover {
+          background: rgba(255, 255, 255, 0.1);
+          transform: translateY(-2px);
+      }
+
+      .tab-close {
+          background: none;
+          border: none;
+          color: rgba(255, 255, 255, 0.7);
+          cursor: pointer;
+          padding: 4px;
+          border-radius: 4px;
+          transition: all 0.3s ease;
+          font-size: 16px;
+      }
+
+      .tab-close:hover {
+          background: rgba(255, 255, 255, 0.2);
+          color: white;
+      }
+
+      .add-tab-btn {
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(139, 92, 246, 0.3);
+          color: white;
+          padding: 12px 16px;
+          border-radius: 12px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          font-weight: 500;
+      }
+
+      .add-tab-btn:hover {
+          background: rgba(139, 92, 246, 0.2);
+          transform: translateY(-2px);
+      }
+
+      .code-editor {
+          flex: 1;
+          background: rgba(0, 0, 0, 0.4);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(139, 92, 246, 0.3);
+          border-radius: 12px;
+          padding: 20px;
+          color: #e5e7eb;
+          font-family: 'JetBrains Mono', 'Courier New', monospace;
+          font-size: 14px;
+          resize: none;
+          outline: none;
+          margin-bottom: 20px;
+          transition: all 0.3s ease;
+      }
+
+      .code-editor:focus {
+          border-color: #8b5cf6;
+          box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+      }
+
+      .executor-buttons {
+          display: flex;
+          gap: 12px;
+          flex-wrap: wrap;
+      }
+
+      .executor-btn {
+          background: linear-gradient(45deg, #8b5cf6, #a855f7);
+          color: white;
+          border: none;
+          padding: 12px 20px;
+          border-radius: 10px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          font-weight: 600;
+          font-size: 14px;
+          position: relative;
+          overflow: hidden;
+      }
+
+      .executor-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+      }
+
+      .executor-btn.secondary {
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(139, 92, 246, 0.3);
+          backdrop-filter: blur(10px);
+      }
+
+      .executor-btn.secondary:hover {
+          background: rgba(255, 255, 255, 0.1);
+          border-color: #8b5cf6;
+      }
+
+      /* Activity Feed */
+      .activity-feed {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 24px;
+          margin-top: 32px;
+      }
+
+      .activity-card {
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(139, 92, 246, 0.2);
+          border-radius: 20px;
+          padding: 28px;
+          transition: all 0.3s ease;
+      }
+
+      .activity-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 12px 30px rgba(139, 92, 246, 0.2);
+      }
+
+      .activity-title {
+          font-size: 1.3rem;
+          margin-bottom: 16px;
+          color: #8b5cf6;
+          font-weight: 600;
+      }
+
+      .activity-subtitle {
+          color: rgba(255, 255, 255, 0.7);
+          margin-bottom: 24px;
+          font-size: 14px;
+      }
+
+      .activity-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 0;
+          border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+          transition: all 0.3s ease;
+      }
+
+      .activity-item:last-child {
+          border-bottom: none;
+      }
+
+      .activity-item:hover {
+          transform: translateX(4px);
+      }
+
+      .activity-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: #10b981;
+          box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+      }
+
+      .subscription-feature {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          padding: 16px 0;
+          border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+          transition: all 0.3s ease;
+      }
+
+      .subscription-feature:last-child {
+          border-bottom: none;
+      }
+
+      .subscription-feature:hover {
+          transform: translateX(4px);
+      }
+
+      .feature-icon {
+          color: #8b5cf6;
+          font-size: 20px;
+          width: 24px;
+          text-align: center;
+      }
+
+      .feature-text {
+          flex: 1;
+      }
+
+      .feature-title {
+          font-weight: 600;
+          margin-bottom: 4px;
+          color: rgba(255, 255, 255, 0.9);
+      }
+
+      .feature-description {
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.6);
+          line-height: 1.4;
+      }
+
+      /* No Orders Display */
+      .no-orders-display {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: calc(100vh - 300px);
+          text-align: center;
+          color: rgba(255, 255, 255, 0.6);
+      }
+
+      .no-orders-icon {
+          font-size: 4rem;
+          margin-bottom: 20px;
+          opacity: 0.5;
+      }
+
+      .no-orders-title {
+          font-size: 1.5rem;
+          margin-bottom: 12px;
+          color: rgba(255, 255, 255, 0.8);
+      }
+
+      .no-orders-message {
+          font-size: 1rem;
+          line-height: 1.6;
+      }
+
+      /* Modal Styles */
+      .modal {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.8);
+          backdrop-filter: blur(10px);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 10000;
+          opacity: 0;
+          visibility: hidden;
+          transition: all 0.3s ease;
+      }
+
+      .modal.show {
+          opacity: 1;
+          visibility: visible;
+      }
+
+      .modal-content {
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(139, 92, 246, 0.3);
+          border-radius: 20px;
+          padding: 32px;
+          max-width: 500px;
+          width: 90%;
+          transform: scale(0.8);
+          transition: transform 0.3s ease;
+          position: relative;
+      }
+
+      .modal.show .modal-content {
+          transform: scale(1);
+      }
+
+      .modal-title {
+          font-size: 1.5rem;
+          margin-bottom: 24px;
+          color: #8b5cf6;
+          font-weight: 600;
+      }
+
+      .modal-buttons {
+          display: flex;
+          gap: 12px;
+          justify-content: flex-end;
+          margin-top: 24px;
+      }
+
+      /* Enhanced Order Confirmation Modal */
+      .order-confirmation-modal .modal-content {
+          max-width: 600px;
+          text-align: center;
+      }
+
+      .order-success-icon {
+          font-size: 4rem;
+          color: #10b981;
+          margin-bottom: 20px;
+      }
+
+      .order-details {
+          background: rgba(0, 0, 0, 0.3);
+          border: 1px solid rgba(139, 92, 246, 0.3);
+          border-radius: 12px;
+          padding: 20px;
+          margin: 20px 0;
+          text-align: left;
+          font-family: 'Courier New', monospace;
+          font-size: 14px;
+          line-height: 1.8;
+          color: #e5e7eb;
+      }
+
+      .order-details .order-field {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 8px;
+          padding: 4px 0;
+          border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+      }
+
+      .order-details .order-field:last-child {
+          border-bottom: none;
+          margin-bottom: 0;
+      }
+
+      .order-details .order-label {
+          color: #8b5cf6;
+          font-weight: 600;
+      }
+
+      .order-details .order-value {
+          color: #ffffff;
+      }
+
+      .screenshot-instruction {
+          background: rgba(255, 193, 7, 0.1);
+          border: 1px solid rgba(255, 193, 7, 0.3);
+          border-radius: 12px;
+          padding: 16px;
+          margin: 20px 0;
+          color: #ffc107;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+      }
+
+      .screenshot-instruction-icon {
+          font-size: 1.5rem;
+      }
+
+      /* Discord Invitation Modal */
+      .discord-modal .modal-content {
+          text-align: center;
+          background: linear-gradient(135deg, rgba(88, 101, 242, 0.1), rgba(139, 92, 246, 0.1));
+          border-color: #5865f2;
+      }
+
+      .discord-icon {
+          font-size: 4rem;
+          color: #5865f2;
+          margin-bottom: 20px;
+      }
+
+      .discord-title {
+          color: #5865f2;
+          font-size: 1.8rem;
+          margin-bottom: 16px;
+      }
+
+      .discord-message {
+          color: rgba(255, 255, 255, 0.8);
+          margin-bottom: 24px;
+          line-height: 1.6;
+      }
+
+      .discord-btn {
+          background: #5865f2;
+          color: white;
+          border: none;
+          padding: 14px 28px;
+          border-radius: 12px;
+          cursor: pointer;
+          font-weight: 600;
+          font-size: 16px;
+          margin-right: 12px;
+          transition: all 0.3s ease;
+      }
+
+      .discord-btn:hover {
+          background: #4752c4;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(88, 101, 242, 0.4);
+      }
+
+      /* Roblox Connection Success Modal */
+      .roblox-success-modal .modal-content {
+          text-align: center;
+          background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(139, 92, 246, 0.1));
+          border-color: #10b981;
+      }
+
+      .roblox-success-icon {
+          font-size: 4rem;
+          color: #10b981;
+          margin-bottom: 20px;
+      }
+
+      .roblox-success-title {
+          color: #10b981;
+          font-size: 1.8rem;
+          margin-bottom: 16px;
+      }
+
+      .roblox-success-message {
+          color: rgba(255, 255, 255, 0.8);
+          margin-bottom: 24px;
+          line-height: 1.6;
+      }
+
+      /* Settings Styles */
+      .settings-section {
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(139, 92, 246, 0.2);
+          border-radius: 20px;
+          padding: 28px;
+          margin-bottom: 24px;
+          transition: all 0.3s ease;
+      }
+
+      .settings-section:hover {
+          border-color: rgba(139, 92, 246, 0.3);
+      }
+
+      .settings-title {
+          font-size: 1.3rem;
+          margin-bottom: 24px;
+          color: #8b5cf6;
+          font-weight: 600;
+      }
+
+      .file-input-wrapper {
+          position: relative;
+          display: inline-block;
+          cursor: pointer;
+          background: linear-gradient(45deg, #8b5cf6, #a855f7);
+          color: white;
+          padding: 12px 20px;
+          border-radius: 12px;
+          transition: all 0.3s ease;
+          font-weight: 600;
+          overflow: hidden;
+      }
+
+      .file-input-wrapper:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
+      }
+
+      .file-input-wrapper input[type="file"] {
+          position: absolute;
+          opacity: 0;
+          width: 100%;
+          height: 100%;
+          cursor: pointer;
+      }
+
+      /* Time Editor Styles */
+      .time-editor {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin: 10px 0;
+          padding: 12px;
+          background: rgba(139, 92, 246, 0.1);
+          border-radius: 8px;
+          border: 1px solid rgba(139, 92, 246, 0.3);
+      }
+
+      .time-input {
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(139, 92, 246, 0.3);
+          color: white;
+          padding: 8px 12px;
+          border-radius: 6px;
+          width: 80px;
+          text-align: center;
+      }
+
+      .time-input:focus {
+          outline: none;
+          border-color: #8b5cf6;
+          box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+      }
+
+      /* Blacklist Status Styles */
+      .blacklist-status {
+          display: inline-block;
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 12px;
+          font-weight: 600;
+          text-transform: uppercase;
+      }
+
+      .blacklist-status.active {
+          background: rgba(16, 185, 129, 0.2);
+          color: #10b981;
+          border: 1px solid rgba(16, 185, 129, 0.3);
+      }
+
+      .blacklist-status.blacklisted {
+          background: rgba(239, 68, 68, 0.2);
+          color: #ef4444;
+          border: 1px solid rgba(239, 68, 68, 0.3);
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+          .sidebar {
+              transform: translateX(-100%);
+          }
+
+          .sidebar.open {
+              transform: translateX(0);
+          }
+
+          .main-content {
+              margin-left: 0;
+          }
+
+          .menu-toggle {
+              display: block;
+          }
+
+          .dashboard-grid {
+              grid-template-columns: 1fr;
+          }
+
+          .activity-feed {
+              grid-template-columns: 1fr;
+          }
+
+          .item-list {
+              grid-template-columns: 1fr;
+          }
+
+          .content-title {
+              font-size: 2rem;
+          }
+
+          .game-card-content {
+              flex-direction: column;
+              height: auto;
+          }
+
+          .game-image-section {
+              width: 100%;
+              height: 200px;
+              border-radius: 16px 16px 0 0;
+          }
+      }
+
+      /* Utility Classes */
+      .hidden {
+          display: none !important;
+      }
+
+      .admin-only {
+          display: none;
+      }
+
+      .admin-only.show {
+          display: block;
+      }
+
+      /* Animation Classes */
+      .fade-in {
+          animation: fadeIn 0.5s ease-out;
+      }
+
+      @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+      }
+
+      /* Scrollbar Styling */
+      ::-webkit-scrollbar {
+          width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+          background: rgba(139, 92, 246, 0.3);
+          border-radius: 4px;
+          transition: all 0.3s ease;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+          background: rgba(139, 92, 246, 0.5);
+      }
+
+      /* Selection styling */
+      ::selection {
+          background: rgba(139, 92, 246, 0.3);
+          color: white;
+      }
+
+      /* Focus styles for accessibility */
+      *:focus {
+          outline: 2px solid rgba(139, 92, 246, 0.5);
+          outline-offset: 2px;
+      }
+
+      button:focus,
+      input:focus,
+      textarea:focus {
+          outline: none;
+      }
+
+      /* Custom Icons */
+      .icon-home::before { content: "🏠"; }
+      .icon-gamepad::before { content: "🎮"; }
+      .icon-script::before { content: "📜"; }
+      .icon-document::before { content: "📝"; }
+      .icon-lightning::before { content: "⚡"; }
+      .icon-settings::before { content: "⚙️"; }
+      .icon-ticket::before { content: "🎫"; }
+      .icon-question::before { content: "❓"; }
+      .icon-users::before { content: "👥"; }
+      .icon-clipboard::before { content: "📋"; }
+      .icon-user::before { content: "👤"; }
+      .icon-clock::before { content: "⏰"; }
+      .icon-star::before { content: "⭐"; }
+      .icon-check::before { content: "✅"; }
+      .icon-camera::before { content: "📸"; }
+      .icon-lock::before { content: "🔒"; }
+      .icon-error::before { content: "❌"; }
+
+      /* Featured Game Card */
+      .featured-game-card {
+          background: rgba(255, 255, 255, 0.04);
+          backdrop-filter: blur(20px);
+          border-radius: 20px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          padding: 20px;
+          transition: 0.3s;
+      }
+
+      .featured-game-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+      }
+
+      .button {
+          cursor: pointer;
+          border: none;
+          background: #5865f2;
+          color: #fff;
+          width: 100px;
+          height: 100px;
+          border-radius: 50%;
+          overflow: hidden;
+          position: relative;
+          display: grid;
+          place-content: center;
+          transition: background 300ms, transform 200ms;
+          font-weight: 600;
+      }
+
+      .button__text {
+          position: absolute;
+          inset: 0;
+          animation: text-rotation 8s linear infinite;
+      }
+
+      .button__text > span {
+          position: absolute;
+          transform: rotate(calc(22deg * var(--index)));
+          inset: 7px;
+      }
+
+      .button__circle {
+          position: relative;
+          width: 40px;
+          height: 40px;
+          overflow: hidden;
+          background: #212121;
+          color: #5865f2;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+      }
+
+      .button__icon--copy {
+          position: absolute;
+          transform: translate(-150%, 150%);
+      }
+
+      .button:hover {
+          background: #000;
+          transform: scale(1.05);
+      }
+
+      .button:hover .button__icon {
+          color: #fff;
+      }
+
+      .button:hover .button__icon:first-child {
+          transition: transform 0.3s ease-in-out;
+          transform: translate(150%, -150%);
+      }
+
+      .button:hover .button__icon--copy {
+          transition: transform 0.3s ease-in-out 0.1s;
+          transform: translate(0);
+      }
+
+      @keyframes text-rotation {
+          to {
+              rotate: 360deg;
+          }
+      }
+
+      .button:active {
+          transform: scale(0.95);
+      }
+
+      .icon-home::before,
+      .icon-gamepad::before,
+      .icon-script::before,
+      .icon-document::before,
+      .icon-lightning::before,
+      .icon-settings::before,
+      .icon-ticket::before,
+      .icon-question::before,
+      .icon-users::before,
+      .icon-clipboard::before,
+      .icon-user::before,
+      .icon-clock::before,
+      .icon-star::before,
+      .icon-check::before,
+      .icon-camera::before,
+      .icon-lock::before,
+      .icon-error::before {
+          content: none;
+      }
+  </style>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div class="loading-screen" id="loadingScreen">
+      <div class="loader">
+          <div class="blackhole">
+              <div class="blackhole-circle"></div>
+              <div class="blackhole-disc"></div>
+              <div class="galaxia-text">Galaxia</div>
+          </div>
+          <div class="curve">
+              <svg viewBox="0 0 500 500">
+                  <path id="loading" d="M73.2,148.6c4-6.1,65.5-96.8,178.6-95.6c111.3,1.2,170.8,90.3,175.1,97"></path>
+                  <text width="500">
+                      <textPath xlink:href="#loading">loading...</textPath>
+                  </text>
+              </svg>
+          </div>
+      </div>
+      <button onclick="skipLoading()" style="position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); background: rgba(139, 92, 246, 0.3); border: 1px solid #8b5cf6; color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
+          Skip Loading
+      </button>
+  </div>
+
+  <!-- Auth Container -->
+  <div class="auth-container" id="authContainer">
+      <div class="auth-box">
+          <h1 class="auth-title">Welcome to Galaxia</h1>
+          
+          <!-- Login Form -->
+          <div id="loginForm">
+              <div class="form-group">
+                  <label for="loginEmail">Email</label>
+                  <input type="email" id="loginEmail" required>
+              </div>
+              <div class="form-group">
+                  <label for="loginPassword">Password</label>
+                  <input type="text" id="loginPassword" required>
+              </div>
+              <button class="btn" onclick="login()">Login</button>
+              <button class="btn btn-secondary" onclick="showRegister()">Create Account</button>
+              <div class="error-message" id="loginError"></div>
+          </div>
+
+          <!-- Register Form -->
+          <div id="registerForm" class="hidden">
+              <div class="form-group">
+                  <label for="registerUsername">Username</label>
+                  <input type="text" id="registerUsername" required>
+<div id="usernameMessage" class="error-message"></div>
+              </div>
+              <div class="form-group">
+                  <label for="registerEmail">Email</label>
+                  <input type="email" id="registerEmail" required>
+<div id="emailMessage" class="error-message"></div>
+              </div>
+              <div class="form-group">
+                  <label for="registerPassword">Password</label>
+                  <input type="password" id="registerPassword" required>
+<div id="passwordMessage" class="error-message"></div>
+              </div>
+              <div class="form-group">
+                  <label for="confirmPassword">Confirm Password</label>
+                  <input type="password" id="confirmPassword" required>
+<div id="confirmPasswordMessage" class="error-message"></div>
+              </div>
+              <button class="btn" onclick="register()">Register</button>
+              <button class="btn btn-secondary" onclick="showLogin()">Back to Login</button>
+              <div class="error-message" id="registerError"></div>
+          </div>
+      </div>
+  </div>
+
+  <!-- Main Application -->
+  <div class="main-app" id="mainApp" style="display: none;">
+      <!-- Sidebar -->
+      <div class="sidebar" id="sidebar">
+          <div class="sidebar-header">
+              <div class="sidebar-logo">
+                  Galaxia
+                  <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+              </div>
+              <div class="user-profile">
+                  <div class="user-avatar" id="sidebarAvatar">U</div>
+                  <div class="user-info">
+                      <h4 id="sidebarUsername">Welcome, User</h4>
+                      <p id="sidebarUserType">NaN days left</p>
+                  </div>
+              </div>
+          </div>
+
+          <nav class="sidebar-nav">
+              <div class="nav-section">
+                  <div class="nav-section-title">MAIN</div>
+                  <button class="nav-item active" onclick="switchSection('dashboard')">
+                      <span class="nav-item-icon icon-home"></span>
+                      Dashboard
+                  </button>
+                  <button class="nav-item" onclick="switchSection('games')">
+                      <span class="nav-item-icon icon-gamepad"></span>
+                      Games
+                  </button>
+                  <button class="nav-item" onclick="switchSection('scripthub')">
+                      <span class="nav-item-icon icon-script"></span>
+                      Script Hub
+                  </button>
+                  <button class="nav-item" onclick="switchSection('scripts')">
+                      <span class="nav-item-icon icon-document"></span>
+                      My Scripts
+                  </button>
+                  <button class="nav-item" onclick="switchSection('executor')">
+                      <span class="nav-item-icon icon-lightning"></span>
+                      Executor
+                  </button>
+              </div>
+
+              <div class="nav-section" id="toolsDropdown">
+                  <div class="nav-section-title">TOOLS</div>
+                  <div class="nav-items-container">
+                      <button class="nav-item" onclick="switchSection('settings')">
+                          <span class="nav-item-icon icon-settings"></span>
+                          Settings
+                      </button>
+                      <button class="nav-item" onclick="switchSection('redeem')">
+                          <span class="nav-item-icon icon-ticket"></span>
+                          Redeem Key
+                      </button>
+                      <button class="nav-item" onclick="switchSection('support')">
+                          <span class="nav-item-icon icon-question"></span>
+                          Support
+                      </button>
+                      <button class="nav-item admin-only" onclick="switchSection('whitelist')">
+                          <span class="nav-item-icon icon-users"></span>
+                          User Management
+                      </button>
+                      <button class="nav-item admin-only" onclick="switchSection('orders')">
+                          <span class="nav-item-icon icon-clipboard"></span>
+                          Orders
+                      </button>
+                  </div>
+              </div>
+          </nav>
+
+          <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-content" id="mainContent">
+          <!-- Dashboard Section -->
+          <div class="content-section active" id="dashboardSection">
+              <div class="content-header">
+                  <h1 class="content-title">Dashboard</h1>
+                  <p class="content-subtitle" id="welcomeMessage">Welcome back to Galaxia, User!</p>
+              </div>
+
+              <!-- Dropdown Menu Example -->
+              <div class="menu">
+                  <div class="item">
+                      <a href="#" class="link">
+                          <span>Quick Actions</span>
+                          <svg viewBox="0 0 360 360" xml:space="preserve">
+                              <g id="SVGRepo_iconCarrier">
+                                  <path id="XMLID_225_" d="M325.607,79.393c-5.857-5.857-15.355-5.858-21.213,0.001l-139.39,139.393L25.607,79.393 c-5.857-5.857-15.355-5.858-21.213,0.001c-5.858,5.858-5.858,15.355,0,21.213l150.004,150c2.813,2.813,6.628,4.393,10.606,4.393 s7.794-1.581,10.606-4.394l149.996-150C331.465,94.749,331.465,85.251,325.607,79.393z"></path>
+                              </g>
+                          </svg>
+                      </a>
+                      <div class="submenu">
+                          <div class="submenu-item">
+                              <a href="#" class="submenu-link" onclick="switchSection('executor')">Open Executor</a>
+                          </div>
+                          <div class="submenu-item">
+                              <a href="#" class="submenu-link" onclick="switchSection('scripthub')">Browse Scripts</a>
+                          </div>
+                          <div class="submenu-item">
+                              <a href="#" class="submenu-link" onclick="switchSection('games')">Join Games</a>
+                          </div>
+                          <div class="submenu-item">
+                              <a href="#" class="submenu-link" onclick="switchSection('settings')">Settings</a>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+              <div class="dashboard-grid">
+                  <div class="dashboard-card">
+                      <div class="card-header">
+                          <h3 class="card-title">Available Games</h3>
+                          <span class="card-icon icon-gamepad"></span>
+                      </div>
+                      <div class="card-value" id="gameCount">1</div>
+                      <div class="card-description">Games ready to play</div>
+                  </div>
+
+                  <div class="dashboard-card">
+                      <div class="card-header">
+                          <h3 class="card-title">Script Hub</h3>
+                          <span class="card-icon icon-script"></span>
+                      </div>
+                      <div class="card-value">50+</div>
+                      <div class="card-description">Scripts available</div>
+                  </div>
+
+                  <div class="dashboard-card">
+                      <div class="card-header">
+                          <h3 class="card-title">My Scripts</h3>
+                          <span class="card-icon icon-document"></span>
+                      </div>
+                      <div class="card-value" id="userScriptCount">0</div>
+                      <div class="card-description">Personal scripts</div>
+                  </div>
+
+                  <div class="dashboard-card">
+                      <div class="card-header">
+                          <h3 class="card-title">Account Status</h3>
+                          <span class="card-icon icon-user"></span>
+                      </div>
+                      <div class="card-value" id="accountStatus">User</div>
+                      <div class="card-description" id="timeLeft">NaN days left</div>
+                  </div>
+              </div>
+
+              <div class="activity-feed">
+                  <div class="activity-card">
+                      <h3 class="activity-title">Subscription Details</h3>
+                      <p class="activity-subtitle">Your current plan and benefits</p>
+                      <div class="subscription-feature">
+                          <span class="feature-icon icon-star"></span>
+                          <div class="feature-text">
+                              <div class="feature-title">Premium Access</div>
+                              <div class="feature-description">Full access to all features and scripts</div>
+                          </div>
+                      </div>
+                      <div class="subscription-feature">
+                          <span class="feature-icon icon-lightning"></span>
+                          <div class="feature-text">
+                              <div class="feature-title">Script Executor</div>
+                              <div class="feature-description">Execute unlimited Lua scripts</div>
+                          </div>
+                      </div>
+                      <div class="subscription-feature">
+                          <span class="feature-icon icon-gamepad"></span>
+                          <div class="feature-text">
+                              <div class="feature-title">Game Library</div>
+                              <div class="feature-description">Access to curated game collection</div>
+                          </div>
+                      </div>
+                      <div class="subscription-feature">
+                          <span class="feature-icon icon-document"></span>
+                          <div class="feature-text">
+                              <div class="feature-title">Script Storage</div>
+                              <div class="feature-description">Save and manage your scripts</div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Games Section -->
+          <div class="content-section" id="gamesSection">
+              <div class="content-header">
+                  <h1 class="content-title">Games</h1>
+                  <p class="content-subtitle">Browse and join available games</p>
+              </div>
+
+              <div class="section-card">
+                  <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                      <input type="text" class="search-bar" placeholder="Search games..." id="gameSearch" oninput="searchGames()" style="margin-bottom: 0; flex: 1;">
+                      <button class="btn admin-only" onclick="showAddGameModal()" style="white-space: nowrap;">Add Game</button>
+                  </div>
+                  <div class="item-list" id="gamesList">
+                      <!-- Games will be populated here -->
+                  </div>
+              </div>
+          </div>
+
+          <!-- Script Hub Section -->
+          <div class="content-section" id="scripthubSection">
+              <div class="content-header">
+                  <h1 class="content-title">Script Hub</h1>
+                  <p class="content-subtitle">Discover and use popular Roblox scripts</p>
+              </div>
+
+              <div class="section-card">
+                  <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                      <input type="text" class="search-bar" placeholder="Search scripts..." id="scriptSearch" oninput="searchScripts()" style="margin-bottom: 0; flex: 1;">
+                      <button class="btn admin-only" onclick="showAddHubScriptModal()" style="white-space: nowrap;">Add Script</button>
+                  </div>
+                  
+                  <div class="item-list" id="allScripts">
+                      <!-- All scripts will be populated here -->
+                  </div>
+              </div>
+          </div>
+
+          <!-- My Scripts Section -->
+          <div class="content-section" id="scriptsSection">
+              <div class="content-header">
+                  <h1 class="content-title">My Scripts</h1>
+                  <p class="content-subtitle">Manage your personal script collection</p>
+              </div>
+
+              <div class="section-card">
+                  <input type="text" class="search-bar" placeholder="Search my scripts..." id="myScriptSearch" oninput="searchMyScripts()">
+                  <button class="btn" onclick="showAddScriptModal()" style="margin-bottom: 20px;">Add New Script</button>
+                  <div class="item-list" id="myScriptsList">
+                      <!-- User scripts will be populated here -->
+                  </div>
+              </div>
+          </div>
+
+          <!-- Executor Section -->
+          <div class="content-section" id="executorSection">
+              <!-- The content of this section will be dynamically loaded by JavaScript -->
+          </div>
+
+          <!-- User Management Section -->
+          <div class="content-section" id="whitelistSection">
+              <div class="content-header">
+                  <h1 class="content-title">User Management</h1>
+                  <p class="content-subtitle">Manage user access, time, and blacklist status</p>
+              </div>
+
+              <div class="section-card">
+                  <input type="text" class="search-bar" placeholder="Search users..." id="userSearch" oninput="searchUsers()">
+                  <div class="item-list" id="userList">
+                      <!-- User list will be populated here by JavaScript -->
+                  </div>
+              </div>
+          </div>
+
+          <!-- Orders Section -->
+          <div class="content-section" id="ordersSection">
+              <div class="content-header">
+                  <h1 class="content-title">Pending Orders</h1>
+                  <p class="content-subtitle">Review and fulfill user access key requests</p>
+              </div>
+
+              <div class="section-card">
+                  <div class="item-list" id="ordersList">
+                      <!-- Orders list will be populated here by JavaScript -->
+                  </div>
+              </div>
+          </div>
+
+          <!-- Settings Section -->
+          <div class="content-section" id="settingsSection">
+              <div class="content-header">
+                  <h1 class="content-title">Settings</h1>
+                  <p class="content-subtitle">Manage your account and preferences</p>
+              </div>
+
+              <div class="settings-section">
+                  <h2 class="settings-title">Profile Settings</h2>
+                  <div class="form-group">
+                      <label>Profile Picture</label>
+                      <div class="file-input-wrapper">
+                          <input type="file" id="profilePicInput" accept="image/*" onchange="updateProfilePic()">
+                          Upload Picture
+                      </div>
+                  </div>
+                  <div class="form-group">
+                      <label for="newUsername">Username</label>
+                      <input type="text" id="newUsername" placeholder="Enter new username">
+                  </div>
+                  <div class="form-group">
+                      <label for="newEmail">Email</label>
+                      <input type="email" id="newEmail" placeholder="Enter new email">
+                  </div>
+                  <div class="form-group">
+                      <label for="newPassword">New Password</label>
+                      <input type="password" id="newPassword" placeholder="Enter new password">
+                  </div>
+                  <button class="btn" onclick="updateProfile()">Update Profile</button>
+              </div>
+
+              <div class="settings-section">
+                  <h2 class="settings-title">Roblox Connection</h2>
+                  <p style="margin-bottom: 15px;">Connect your Roblox account to execute scripts.</p>
+                  <div id="robloxConnectionContainer">
+                      <!-- This content will be dynamically updated by JavaScript -->
+                  </div>
+              </div>
+          </div>
+
+          <!-- Redeem Key Section -->
+          <div class="content-section" id="redeemSection">
+              <div class="content-header">
+                  <h1 class="content-title">Redeem Key</h1>
+                  <p class="content-subtitle">Extend your access with a redemption key</p>
+              </div>
+
+              <div class="settings-section">
+                  <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                      <input type="text" class="search-bar" id="keyInput" placeholder="Enter your access key" style="margin-bottom: 0;">
+                      <button class="btn" onclick="redeemKey()">Redeem</button>
+                  </div>
+                  <div id="keyMessage" class="error-message"></div>
+                  
+                  <div class="dashboard-card" style="margin: 20px 0;">
+                      <div class="card-header">
+                          <h3 class="card-title">Remaining Access Time</h3>
+                          <span class="card-icon icon-clock"></span>
+                      </div>
+                      <div class="card-value" id="accessTimeLeft">0d 0h 0m 0s</div>
+                      <div class="card-description">Time until expiration</div>
+                  </div>
+
+                  <!-- Time Editor for Current User -->
+                  <div class="time-editor" id="userTimeEditor">
+                      <label style="color: #8b5cf6; font-weight: 600;">Edit Your Time:</label>
+                      <input type="number" class="time-input" id="editDays" placeholder="Days" min="0">
+                      <span style="color: rgba(255,255,255,0.7);">days</span>
+                      <input type="number" class="time-input" id="editHours" placeholder="Hours" min="0" max="23">
+                      <span style="color: rgba(255,255,255,0.7);">hours</span>
+                      <button class="btn" onclick="updateUserTime()" style="padding: 8px 16px; font-size: 12px;">Update Time</button>
+                  </div>
+
+                  <button class="btn btn-pulse" onclick="showBuyModal()" style="background: linear-gradient(45deg, #10b981, #059669);">Don't have a key? Buy now</button>
+              </div>
+          </div>
+
+          <!-- Support Section -->
+          <div class="content-section" id="supportSection">
+              <div class="content-header">
+                  <h1 class="content-title">Support</h1>
+                  <p class="content-subtitle">Get help and join our community</p>
+              </div>
+
+              <div class="section-card" style="text-align: center; padding: 60px 20px;">
+                  <h2 style="font-size: 1.5rem; margin-bottom: 30px; color: #e5e7eb;">Need Help? Join our support server</h2>
+                  <button class="button" onclick="joinDiscord()">
+                      <p class="button__text">
+                          <span style="--index: 0;">D</span>
+                          <span style="--index: 1;">I</span>
+                          <span style="--index: 2;">S</span>
+                          <span style="--index: 3;">C</span>
+                          <span style="--index: 4;">O</span>
+                          <span style="--index: 5;">R</span>
+                          <span style="--index: 6;">D</span>
+                          <span style="--index: 7;"> </span>
+                          <span style="--index: 8;">D</span>
+                          <span style="--index: 9;">I</span>
+                          <span style="--index: 10;">S</span>
+                          <span style="--index: 11;">C</span>
+                          <span style="--index: 12;">O</span>
+                          <span style="--index: 13;">R</span>
+                          <span style="--index: 14;">D</span>
+                      </p>
+                      <div class="button__circle">
+                          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="button__icon" width="25">
+                              <path d="M13.545 2.907a13.227 13.227 0 0 0-3.257-1.011.05.05 0 0 0-.052.025c-.141.25-.297.577-.406.833a12.19 12.19 0 0 0-3.658 0 8.258 8.258 0 0 0-.412-.833.051.051 0 0 0-.052-.025c-1.125.194-2.22.534-3.257 1.011a.041.041 0 0 0-.021.018C.356 6.024-.213 9.047.066 12.032c.001.014.01.028.021.037a13.276 13.276 0 0 0 3.995 2.02.05.05 0 0 0 .056-.019c.308-.42.582-.863.818-1.329a.05.05 0 0 0-.01-.059.051.051 0 0 0-.018-.011 8.875 8.875 0 0 1-1.248-.595.05.05 0 0 1-.02-.066.051.051 0 0 1 .015-.019c.084-.063.168-.129.248-.195a.05.05 0 0 1 .051-.007c2.619 1.196 5.454 1.196 8.041 0a.052.052 0 0 1 .053.007c.08.066.164.132.248.195a.051.051 0 0 1-.004.085 8.254 8.254 0 0 1-1.249.594.05.05 0 0 0-.03.03.052.052 0 0 0 .003.041c.24.465.515.909.817 1.329a.05.05 0 0 0 .056.019 13.235 13.235 0 0 0 4.001-2.02.049.049 0 0 0 .021-.037c.334-3.451-.559-6.449-2.366-9.106a.034.034 0 0 0-.02-.019Zm-8.198 7.307c-.789 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.45.73 1.438 1.613 0 .888-.637 1.612-1.438 1.612Zm5.316 0c-.788 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.451.73 1.438 1.613 0 .888-.631 1.612-1.438 1.612Z" fill="currentColor"></path>
+                          </svg>
+                          <svg viewBox="0 0 16 16" fill="none" width="25" xmlns="http://www.w3.org/2000/svg" class="button__icon button__icon--copy">
+                              <path d="M13.545 2.907a13.227 13.227 0 0 0-3.257-1.011.05.05 0 0 0-.052.025c-.141.25-.297.577-.406.833a12.19 12.19 0 0 0-3.658 0 8.258 8.258 0 0 0-.412-.833.051.051 0 0 0-.052-.025c-1.125.194-2.22.534-3.257 1.011a.041.041 0 0 0-.021.018C.356 6.024-.213 9.047.066 12.032c.001.014.01.028.021.037a13.276 13.276 0 0 0 3.995 2.02.05.05 0 0 0 .056-.019c.308-.42.582-.863.818-1.329a.05.05 0 0 0-.01-.059.051.051 0 0 0-.018-.011 8.875 8.875 0 0 1-1.248-.595.05.05 0 0 1-.02-.066.051.051 0 0 1 .015-.019c.084-.063.168-.129.248-.195a.05.05 0 0 1 .051-.007c2.619 1.196 5.454 1.196 8.041 0a.052.052 0 0 1 .053.007c.08.066.164.132.248.195a.051.051 0 0 1-.004.085 8.254 8.254 0 0 1-1.249.594.05.05 0 0 0-.03.03.052.052 0 0 0 .003.041c.24.465.515.909.817 1.329a.05.05 0 0 0 .056.019 13.235 13.235 0 0 0 4.001-2.02.049.049 0 0 0 .021-.037c.334-3.451-.559-6.449-2.366-9.106a.034.034 0 0 0-.02-.019Zm-8.198 7.307c-.789 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.45.73 1.438 1.613 0 .888-.637 1.612-1.438 1.612Zm5.316 0c-.788 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.451.73 1.438 1.613 0 .888-.631 1.612-1.438 1.612Z" fill="currentColor"></path>
+                      </svg>
+                  </div>
+              </button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Modals -->
+  <!-- Add Script Modal -->
+  <div class="modal" id="addScriptModal">
+      <div class="modal-content">
+          <h2 class="modal-title">Add New Script</h2>
+          <div class="form-group">
+              <label for="scriptName">Script Name</label>
+              <input type="text" id="scriptName" placeholder="Enter script name">
+          </div>
+          <div class="form-group">
+              <label for="scriptImage">Script Image URL (Optional)</label>
+              <input type="url" id="scriptImage" placeholder="Enter image URL">
+          </div>
+          <div class="form-group">
+              <label for="scriptContent">Script Content</label>
+              <textarea id="scriptContent" rows="10" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3);" placeholder="Enter your script code"></textarea>
+          </div>
+          <div class="modal-buttons">
+              <button class="btn" onclick="addScript()">Add Script</button>
+              <button class="btn btn-secondary" onclick="closeModal('addScriptModal')">Cancel</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Enhanced Add Game Modal -->
+  <div class="modal" id="addGameModal">
+      <div class="modal-content">
+          <h2 class="modal-title">Add New Game</h2>
+          <div class="form-group">
+              <label for="gameName">Game Name</label>
+              <input type="text" id="gameName" placeholder="Enter game name">
+          </div>
+          <div class="form-group">
+              <label for="gameURL">Game URL (for player count)</label>
+              <input type="url" id="gameURL" placeholder="Enter Roblox game URL">
+          </div>
+          <div class="form-group">
+              <label for="gameDescription">Game Description</label>
+              <textarea id="gameDescription" rows="3" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3);" placeholder="Enter game description"></textarea>
+          </div>
+          <div class="form-group">
+              <label for="gameImageURL">Game Image URL</label>
+              <input type="url" id="gameImageURL" placeholder="Enter image URL for the game">
+          </div>
+          <div class="modal-buttons">
+              <button class="btn" onclick="addGame()">Add Game</button>
+              <button class="btn btn-secondary" onclick="closeModal('addGameModal')">Cancel</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Enhanced Buy Key Modal -->
+  <div class="modal" id="buyModal">
+      <div class="modal-content">
+          <h2 class="modal-title">Purchase Access Key</h2>
+          <div class="form-group">
+              <label for="buyEmail">Email Address</label>
+              <input type="email" id="buyEmail" placeholder="Enter your email" required>
+          </div>
+          <div class="form-group">
+              <label for="buyUsername">Username</label>
+              <input type="text" id="buyUsername" placeholder="Enter your username" required>
+          </div>
+          <div class="form-group">
+              <label>Payment Method</label>
+              <div class="menu" style="width: 100%;">
+                  <div class="item" style="width: 100%;">
+                      <a href="#" class="link" style="width: 100%; justify-content: space-between;">
+                          <span id="selectedPaymentMethod">Select Payment Method</span>
+                          <svg viewBox="0 0 360 360" xml:space="preserve" style="width: 14px; height: 14px; fill: #ffffff;">
+                              <g id="SVGRepo_iconCarrier">
+                                  <path id="XMLID_225_" d="M325.607,79.393c-5.857-5.857-15.355-5.858-21.213,0.001l-139.39,139.393L25.607,79.393 c-5.857-5.857-15.355-5.858-21.213,0.001c-5.858,5.858-5.858,15.355,0,21.213l150.004,150c2.813,2.813,6.628,4.393,10.606,4.393 s7.794-1.581,10.606-4.394l149.996-150C331.465,94.749,331.465,85.251,325.607,79.393z"></path>
+                              </g>
+                          </svg>
+                      </a>
+                      <div class="submenu">
+                          <div class="submenu-item"><a href="#" class="submenu-link" data-value="robux" onclick="selectDropdownOption('paymentMethod', 'robux', 'Robux')">Robux</a></div>
+                          <div class="submenu-item"><a href="#" class="submenu-link" data-value="cashapp" onclick="selectDropdownOption('paymentMethod', 'cashapp', 'Cash App')">Cash App</a></div>
+                          <div class="submenu-item"><a href="#" class="submenu-link" data-value="paypal" onclick="selectDropdownOption('paymentMethod', 'paypal', 'PayPal')">PayPal</a></div>
+                      </div>
+                  </div>
+              </div>
+              <input type="hidden" id="paymentMethod" value="">
+          </div>
+          <div class="form-group">
+              <label>Subscription Plan</label>
+              <div class="menu" style="width: 100%;">
+                  <div class="item" style="width: 100%;">
+                      <a href="#" class="link" style="width: 100%; justify-content: space-between;">
+                          <span id="selectedSubscription">Select Plan</span>
+                          <svg viewBox="0 0 360 360" xml:space="preserve" style="width: 14px; height: 14px; fill: #ffffff;">
+                              <g id="SVGRepo_iconCarrier">
+                                  <path id="XMLID_225_" d="M325.607,79.393c-5.857-5.857-15.355-5.858-21.213,0.001l-139.39,139.393L25.607,79.393 c-5.857-5.857-15.355-5.858-21.213,0.001c-5.858,5.858-5.858,15.355,0,21.213l150.004,150c2.813,2.813,6.628,4.393,10.606,4.393 s7.794-1.581,10.606-4.394l149.996-150C331.465,94.749,331.465,85.251,325.607,79.393z"></path>
+                              </g>
+                          </svg>
+                      </a>
+                      <div class="submenu">
+                          <div class="submenu-item"><a href="#" class="submenu-link" data-value="standard" onclick="selectDropdownOption('subscription', 'standard', 'Standard - $20 / 200 Robux')">Standard - $20 / 200 Robux</a></div>
+                          <div class="submenu-item"><a href="#" class="submenu-link" data-value="premium" onclick="selectDropdownOption('subscription', 'premium', 'Premium - $30 / 500 Robux')">Premium - $30 / 500 Robux</a></div>
+                      </div>
+                  </div>
+              </div>
+              <input type="hidden" id="subscription" value="">
+          </div>
+          <div class="modal-buttons">
+              <button class="btn btn-secondary" onclick="closeModal('buyModal')">Close</button>
+              <button class="btn" onclick="generateOrder()">Generate Order</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Enhanced Order Confirmation Modal -->
+  <div class="modal order-confirmation-modal" id="orderConfirmationModal">
+      <div class="modal-content">
+          <div class="order-success-icon">
+              <i class="fa-solid fa-check-circle"></i>
+          </div>
+          <h2 class="modal-title">Order Generated Successfully!</h2>
+          
+          <div class="order-details" id="orderDetailsContent">
+              <!-- Order details will be populated here -->
+          </div>
+          
+          <div class="screenshot-instruction">
+              <span class="screenshot-instruction-icon">
+                  <i class="fa-solid fa-camera"></i>
+              </span>
+              <span>Screenshot this information and send it to our support team to complete your purchase!</span>
+          </div>
+          
+          <div class="modal-buttons">
+              <button class="btn" onclick="showDiscordModal()">Continue to Support</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Discord Invitation Modal -->
+  <div class="modal discord-modal" id="discordModal">
+      <div class="modal-content">
+          <div class="discord-icon">
+              <i class="fa-brands fa-discord"></i>
+          </div>
+          <h2 class="discord-title">Join Our Discord Server!</h2>
+          <p class="discord-message">
+              Connect with our community, get support for your order, and stay updated with the latest features and announcements.
+          </p>
+          <div class="modal-buttons">
+              <button class="button" onclick="joinDiscord()">
+                  <p class="button__text">
+                      <span style="--index: 0;">D</span>
+                      <span style="--index: 1;">I</span>
+                      <span style="--index: 2;">S</span>
+                      <span style="--index: 3;">C</span>
+                      <span style="--index: 4;">O</span>
+                      <span style="--index: 5;">R</span>
+                      <span style="--index: 6;">D</span>
+                      <span style="--index: 7;"> </span>
+                      <span style="--index: 8;">D</span>
+                      <span style="--index: 9;">I</span>
+                      <span style="--index: 10;">S</span>
+                      <span style="--index: 11;">C</span>
+                      <span style="--index: 12;">O</span>
+                      <span style="--index: 13;">R</span>
+                      <span style="--index: 14;">D</span>
+                  </p>
+                  <div class="button__circle">
+                      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="button__icon" width="25">
+                          <path d="M13.545 2.907a13.227 13.227 0 0 0-3.257-1.011.05.05 0 0 0-.052.025c-.141.25-.297.577-.406.833a12.19 12.19 0 0 0-3.658 0 8.258 8.258 0 0 0-.412-.833.051.051 0 0 0-.052-.025c-1.125.194-2.22.534-3.257 1.011a.041.041 0 0 0-.021.018C.356 6.024-.213 9.047.066 12.032c.001.014.01.028.021.037a13.276 13.276 0 0 0 3.995 2.02.05.05 0 0 0 .056-.019c.308-.42.582-.863.818-1.329a.05.05 0 0 0-.01-.059.051.051 0 0 0-.018-.011 8.875 8.875 0 0 1-1.248-.595.05.05 0 0 1-.02-.066.051.051 0 0 1 .015-.019c.084-.063.168-.129.248-.195a.05.05 0 0 1 .051-.007c2.619 1.196 5.454 1.196 8.041 0a.052.052 0 0 1 .053.007c.08.066.164.132.248.195a.051.051 0 0 1-.004.085 8.254 8.254 0 0 1-1.249.594.05.05 0 0 0-.03.03.052.052 0 0 0 .003.041c.24.465.515.909.817 1.329a.05.05 0 0 0 .056.019 13.235 13.235 0 0 0 4.001-2.02.049.049 0 0 0 .021-.037c.334-3.451-.559-6.449-2.366-9.106a.034.034 0 0 0-.02-.019Zm-8.198 7.307c-.789 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.45.73 1.438 1.613 0 .888-.637 1.612-1.438 1.612Zm5.316 0c-.788 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.451.73 1.438 1.613 0 .888-.631 1.612-1.438 1.612Z" fill="currentColor"></path>
+                      </svg>
+                      <svg viewBox="0 0 16 16" fill="none" width="25" xmlns="http://www.w3.org/2000/svg" class="button__icon button__icon--copy">
+                          <path d="M13.545 2.907a13.227 13.227 0 0 0-3.257-1.011.05.05 0 0 0-.052.025c-.141.25-.297.577-.406.833a12.19 12.19 0 0 0-3.658 0 8.258 8.258 0 0 0-.412-.833.051.051 0 0 0-.052-.025c-1.125.194-2.22.534-3.257 1.011a.041.041 0 0 0-.021.018C.356 6.024-.213 9.047.066 12.032c.001.014.01.028.021.037a13.276 13.276 0 0 0 3.995 2.02.05.05 0 0 0 .056-.019c.308-.42.582-.863.818-1.329a.05.05 0 0 0-.01-.059.051.051 0 0 0-.018-.011 8.875 8.875 0 0 1-1.248-.595.05.05 0 0 1-.02-.066.051.051 0 0 1 .015-.019c.084-.063.168-.129.248-.195a.05.05 0 0 1 .051-.007c2.619 1.196 5.454 1.196 8.041 0a.052.052 0 0 1 .053.007c.08.066.164.132.248.195a.051.051 0 0 1-.004.085 8.254 8.254 0 0 1-1.249.594.05.05 0 0 0-.03.03.052.052 0 0 0 .003.041c.24.465.515.909.817 1.329a.05.05 0 0 0 .056.019 13.235 13.235 0 0 0 4.001-2.02.049.049 0 0 0 .021-.037c.334-3.451-.559-6.449-2.366-9.106a.034.034 0 0 0-.02-.019Zm-8.198 7.307c-.789 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.45.73 1.438 1.613 0 .888-.637 1.612-1.438 1.612Zm5.316 0c-.788 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.451.73 1.438 1.613 0 .888-.631 1.612-1.438 1.612Z" fill="currentColor"></path>
+                      </svg>
+                  </div>
+              </button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Roblox Connection Success Modal -->
+  <div class="modal roblox-success-modal" id="robloxSuccessModal">
+      <div class="modal-content">
+          <div class="roblox-success-icon">
+              <i class="fa-solid fa-check-circle"></i>
+          </div>
+          <h2 class="roblox-success-title">Account Connected!</h2>
+          <p class="roblox-success-message">
+              Your Roblox account has been successfully connected. You can now access the script executor and all premium features.
+          </p>
+          <div class="modal-buttons">
+              <button class="btn" onclick="closeModal('robloxSuccessModal')">Continue</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Connection Required Modal -->
+  <div class="modal" id="connectModal">
+      <div class="modal-content">
+          <div class="modal-title">Connection Required</div>
+          <p class="discord-message">You need to connect your Roblox account to access the Executor.</p>
+          <div class="modal-buttons">
+              <button class="btn" onclick="document.getElementById('connectModal').classList.remove('show')">Okay</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Order Error Modal -->
+  <div class="modal" id="orderModal">
+      <div class="modal-content">
+          <div class="modal-title">Missing Information</div>
+          <p class="discord-message">Please fill in all the fields before generating an order.</p>
+          <div class="modal-buttons">
+              <button class="btn btn-secondary" onclick="document.getElementById('orderModal').classList.remove('show')">Close</button>
+          </div>
+      </div>
+  </div>
+
+  <script>
+
+function login() {
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value.trim();
+
+  if (email === adminEmail && password === adminPass) {
+    currentUser = {
+      username: "Admin",
+      email: adminEmail,
+      password: adminPass,
+      expiry: Date.now() + 99999999999 * 24 * 60 * 60 * 1000,
+      isAdmin: true,
+      games: [...sharedGames]
+    };
+    users[email] = currentUser;
+    showMainApp();
+    showAdminPanel();
+    return;
+  }
+
+  if (!users[email] || users[email].password !== password) {
+    alert("Invalid email or password.");
+    return;
+  }
+
+  currentUser = users[email];
+  showMainApp();
+}
+function showMainApp() {
+          document.getElementById('authContainer').classList.add('hidden');
+          document.getElementById('mainApp').classList.add('visible');
+
+          // Update UI with user info
+          updateUserInterface();
+          loadUserData();
+
+          // Show admin elements if admin
+          if (isAdmin) {
+              document.querySelectorAll('.admin-only').forEach(el => el.classList.add('show'));
+          }
+      }
+
+      function updateUserInterface() {
+          const sidebarAvatar = document.getElementById('sidebarAvatar');
+          const sidebarUsername = document.getElementById('sidebarUsername');
+          const sidebarUserType = document.getElementById('sidebarUserType');
+          const welcomeMessage = document.getElementById('welcomeMessage');
+          const accountStatus = document.getElementById('accountStatus');
+          const timeLeftDisplay = document.getElementById('timeLeft');
+
+          if (currentUser.profilePic) {
+              sidebarAvatar.innerHTML = `<img src="${currentUser.profilePic}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+          } else {
+              sidebarAvatar.textContent = currentUser.username.charAt(0).toUpperCase();
+          }
+
+          sidebarUsername.textContent = `Welcome, ${currentUser.username}`;
+          welcomeMessage.textContent = `Welcome back to Galaxia, ${currentUser.username}!`;
+
+          if (isAdmin) {
+              accountStatus.textContent = 'Admin';
+              sidebarUserType.textContent = 'Unlimited Access';
+              timeLeftDisplay.textContent = 'Unlimited Access';
+          } else {
+              const daysLeft = Math.ceil((currentUser.accessExpiration - Date.now()) / (1000 * 60 * 60 * 24));
+
+              if (daysLeft >= 91) {
+                  accountStatus.textContent = 'Premium Lifetime User';
+                  sidebarUserType.textContent = 'Lifetime Access';
+                  timeLeftDisplay.textContent = 'Lifetime Access';
+              } else {
+                  accountStatus.textContent = 'Standard User';
+                  sidebarUserType.textContent = `${daysLeft} days left`;
+                  timeLeftDisplay.textContent = `${daysLeft} days left`;
+              }
+          }
+
+          // Update access expiration
+          accessExpiration = currentUser.accessExpiration;
+
+          // Update time editor in redeem section
+          updateTimeEditor();
+      }
+
+      function updateTimeEditor() {
+          if (!currentUser || isAdmin) return;
+
+          const timeLeft = currentUser.accessExpiration - Date.now();
+          const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+          const editDaysInput = document.getElementById('editDays');
+          const editHoursInput = document.getElementById('editHours');
+
+          if (editDaysInput && editHoursInput) {
+              editDaysInput.value = Math.max(0, days);
+              editHoursInput.value = Math.max(0, hours);
+          }
+      }
+
+      function updateUserTime() {
+          if (isAdmin) return;
+
+          const days = parseInt(document.getElementById('editDays').value) || 0;
+          const hours = parseInt(document.getElementById('editHours').value) || 0;
+
+          if (days < 0 || hours < 0 || hours > 23) {
+              alert('Please enter valid time values (days >= 0, hours 0-23)');
+              return;
+          }
+
+          const newExpiration = Date.now() + (days * 24 * 60 * 60 * 1000) + (hours * 60 * 60 * 1000);
+          currentUser.accessExpiration = newExpiration;
+          accessExpiration = newExpiration;
+
+          updateUserInStorage();
+          updateUserInterface();
+          trackUserActivity(currentUser.id, 'time_edited', { days, hours });
+
+          alert('Your access time has been updated successfully!');
+      }
+
+      function logout() {
+          if (currentUser) {
+              trackUserActivity(currentUser.id, 'user_logout', { email: currentUser.email });
+          }
+          localStorage.removeItem('galaxiaUser');
+          currentUser = null;
+          isAdmin = false;
+          location.reload();
+      }
+
+      // Navigation Functions
+      function switchSection(section) {
+          // Remove active class from all nav items
+          document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+
+          // Find and activate the correct nav item
+          const navItems = document.querySelectorAll('.nav-item');
+          navItems.forEach(item => {
+              // Check for text content or specific section ID
+              if (item.textContent.trim().toLowerCase().includes(section.toLowerCase()) ||
+                  (section === 'dashboard' && item.querySelector('.icon-home')) ||
+                  (section === 'games' && item.textContent.trim() === 'Games') ||
+                  (section === 'scripthub' && item.querySelector('.icon-script')) ||
+                  (section === 'scripts' && item.querySelector('.icon-document')) ||
+                  (section === 'executor' && item.querySelector('.icon-lightning')) ||
+                  (section === 'settings' && item.querySelector('.icon-settings')) ||
+                  (section === 'redeem' && item.querySelector('.icon-ticket')) ||
+                  (section === 'support' && item.querySelector('.icon-question')) ||
+                  (section === 'whitelist' && item.querySelector('.icon-users')) ||
+                  (section === 'orders' && item.querySelector('.icon-clipboard'))) {
+                  item.classList.add('active');
+              }
+          });
+
+          // Hide all sections
+          document.querySelectorAll('.content-section').forEach(sec => {
+              sec.classList.remove('active');
+              sec.style.display = 'none';
+          });
+
+          // Show selected section
+          const targetSection = document.getElementById(section + 'Section');
+          if (targetSection) {
+              targetSection.classList.add('active');
+              targetSection.style.display = 'block';
+          }
+
+          currentSection = section;
+
+          // Load specific data when switching to certain sections
+          if (section === 'whitelist' && isAdmin) {
+              loadUserList();
+          } else if (section === 'orders' && isAdmin) {
+              loadOrdersList();
+          } else if (section === 'scripthub') {
+              loadScriptHub();
+          } else if (section === 'executor') {
+              loadExecutorContent();
+          } else if (section === 'games') {
+              loadGames();
+          } else if (section === 'settings') {
+              updateRobloxConnectionUI();
+          } else if (section === 'redeem') {
+              updateTimeEditor();
+          }
+
+          // Close mobile sidebar
+          if (window.innerWidth <= 768) {
+              document.getElementById('sidebar').classList.remove('open');
+          }
+      }
+
+      function toggleSidebar() {
+          document.getElementById('sidebar').classList.toggle('open');
+      }
+
+      // Executor Content Loading
+      function loadExecutorContent() {
+          const executorSection = document.getElementById('executorSection');
+
+          if (!currentUser.robloxConnected && !isAdmin) {
+              // Show restriction message
+              executorSection.innerHTML = `
+                  <div class="content-header">
+                      <h1 class="content-title">Executor</h1>
+                      <p class="content-subtitle">Script execution environment</p>
+                  </div>
+                  <div class="section-card">
+                      <div class="executor-restricted">
+                          <div class="restriction-icon icon-lock"></div>
+                          <h3 class="restriction-title">Executor Access Restricted</h3>
+                          <p class="restriction-message">
+                              You need to connect your Roblox account before you can use the script executor.
+                              This helps us ensure secure script execution and account safety.
+                          </p>
+                          <button class="restriction-btn" onclick="switchSection('settings')">
+                              Connect Roblox Account
+                          </button>
+                      </div>
+                  </div>
+              `;
+          } else {
+              // Show executor interface
+              executorSection.innerHTML = `
+                  <div class="content-header">
+                      <h1 class="content-title">Executor</h1>
+                      <p class="content-subtitle">Execute Lua scripts safely</p>
+                  </div>
+                  <div class="section-card">
+                      <div class="executor-container">
+                          <div class="executor-tabs">
+                              <div class="executor-tab active" data-tab="0">
+                                  <span>Script 1</span>
+                                  <button class="tab-close" onclick="closeExecutorTab(0)">×</button>
+                              </div>
+                              <button class="add-tab-btn" onclick="addExecutorTab()">+</button>
+                          </div>
+                          <textarea class="code-editor" id="codeEditor0" placeholder="-- Enter your Lua script here"></textarea>
+                          <div class="executor-buttons">
+                              <button class="executor-btn" onclick="executeScript()">Execute</button>
+                              <button class="executor-btn secondary" onclick="saveScript()">Save</button>
+                              <button class="executor-btn secondary" onclick="loadScript()">Load</button>
+                              <button class="executor-btn secondary" onclick="resetCharacter()">Reset Character</button>
+                              <button class="executor-btn secondary" onclick="clearEditor()">Clear</button>
+                          </div>
+                      </div>
+                  </div>
+              `;
+
+              // Initialize executor tabs
+              setTimeout(() => {
+                  renderExecutorTabs();
+                  updateCodeEditor();
+                  // Add event listeners for tabs
+                  document.querySelectorAll('.executor-tab').forEach(tab => {
+                      tab.addEventListener('click', (e) => {
+                          if (!e.target.classList.contains('tab-close')) {
+                              switchExecutorTab(parseInt(tab.dataset.tab));
+                          }
+                      });
+                  });
+              }, 100);
+          }
+      }
+
+      // Data Loading Functions
+      function loadUserData() {
+          loadGames();
+          loadScriptHub();
+          loadMyScripts();
+          updateDashboardCounts();
+      }
+
+      async function loadGames() {
+          const gamesList = document.getElementById('gamesList');
+          const storedGames = JSON.parse(localStorage.getItem(DATABASE.games) || '[]');
+
+          // Always include default game
+          const defaultGame = {
+              id: 'baseplate',
+              name: 'Roblox Baseplate',
+              players: 1234,
+              description: 'The classic Roblox baseplate experience. Perfect for testing scripts and building your creations.',
+              image: 'https://via.placeholder.com/150/8b5cf6/FFFFFF?text=Baseplate'
+          };
+
+          // Filter out default game if it exists in storedGames to avoid duplicates, then add it
+          const allGames = [defaultGame, ...storedGames.filter(game => game.id !== defaultGame.id)];
+
+          gamesList.innerHTML = '';
+          
+          for (const game of allGames) {
+              const gameElement = document.createElement('div');
+              gameElement.className = 'list-item';
+              
+              // Fetch real player count if URL is provided
+              let playerCount = game.players;
+              if (game.gameUrl) {
+                  try {
+                      playerCount = await fetchPlayerCount(game.gameUrl);
+                  } catch (error) {
+                      console.error('Failed to fetch player count:', error);
+                  }
+              }
+
+              gameElement.innerHTML = `
+                  <div class="game-card-content">
+                      <div class="game-image-section">
+                          <img src="${game.image || 'https://via.placeholder.com/140/8b5cf6/FFFFFF?text=' + encodeURIComponent(game.name)}" alt="${game.name}">
+                      </div>
+                      <div class="game-info-section">
+                          <div class="game-details">
+                              <h3>${game.name}</h3>
+                              <div class="game-stats">👥 ${playerCount.toLocaleString()} players</div>
+                              <p>${game.description || 'A fun Roblox game experience.'}</p>
+                          </div>
+                          <div class="game-actions">
+                              <button class="action-btn" onclick="joinGame('${game.id}')">Join Game</button>
+                              ${isAdmin ? `<button class="action-btn danger" onclick="deleteGame('${game.id}')">Delete</button>` : ''}
+                          </div>
+                      </div>
+                  </div>
+              `;
+              gamesList.appendChild(gameElement);
+          }
+      }
+
+      function loadScriptHub() {
+          const allScriptsContainer = document.getElementById('allScripts');
+          allScriptsContainer.innerHTML = '';
+
+          // Load hub scripts from localStorage
+          const hubScripts = JSON.parse(localStorage.getItem(DATABASE.hubScripts) || '[]');
+          const allScripts = [...scriptDatabase, ...hubScripts];
+
+          allScripts.forEach(script => {
+              const scriptElement = createScriptElement(script, true);
+              allScriptsContainer.appendChild(scriptElement);
+          });
+      }
+
+      function createScriptElement(script, isHubScript = false) {
+          const scriptElement = document.createElement('div');
+          scriptElement.className = 'script-item';
+
+          const adminDeleteBtn = isHubScript && isAdmin && !scriptDatabase.find(s => s.id === script.id)
+              ? `<button class="action-btn danger" onclick="deleteHubScript('${script.id}')">Delete</button>`
+              : '';
+
+          scriptElement.innerHTML = `
+              <div class="item-info">
+                  <div class="item-details">
+                      <h3>${script.name}</h3>
+                      <p>${script.description || 'A powerful Roblox script for enhanced gameplay.'}</p>
+                  </div>
+              </div>
+              <div class="item-actions">
+                  <button class="action-btn" onclick="copyScript('${script.id}')">Copy Script</button>
+                  <button class="action-btn" onclick="loadToEditor('${script.id}')">Load to Editor</button>
+                  ${adminDeleteBtn}
+              </div>
+          `;
+          return scriptElement;
+      }
+
+      function loadMyScripts() {
+          const scriptsList = document.getElementById('myScriptsList');
+          scriptsList.innerHTML = '';
+
+          if (!currentUser.scripts || currentUser.scripts.length === 0) {
+              scriptsList.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.7); padding: 40px;">No scripts yet. Add your first script!</p>';
+              return;
+          }
+
+          currentUser.scripts.forEach(script => {
+              const scriptElement = document.createElement('div');
+              scriptElement.className = 'script-item';
+              scriptElement.innerHTML = `
+                  <div class="item-info">
+                      <div class="item-icon icon-document"></div>
+                      <div class="item-details">
+                          <h3>${script.name}</h3>
+                          <p>Created: ${new Date(script.created).toLocaleDateString()}</p>
+                      </div>
+                  </div>
+                  <div class="item-actions">
+                      <button class="action-btn" onclick="editScript(${script.id})">Edit</button>
+                      <button class="action-btn danger" onclick="deleteScript(${script.id})">Delete</button>
+                  </div>
+              `;
+              scriptsList.appendChild(scriptElement);
+          });
+      }
+
+      function updateDashboardCounts() {
+          const games = JSON.parse(localStorage.getItem(DATABASE.games) || '[]');
+          document.getElementById('gameCount').textContent = games.length + 1; // +1 for default game
+          document.getElementById('userScriptCount').textContent = currentUser.scripts ? currentUser.scripts.length : 0;
+      }
+
+      // Enhanced User Management Functions
+      function loadUserList() {
+          const userList = document.getElementById('userList');
+          const storedUsers = JSON.parse(localStorage.getItem(DATABASE.users) || '[]');
+
+          userList.innerHTML = '';
+
+          if (storedUsers.length === 0) {
+              userList.innerHTML = `
+                  <div class="no-orders-display">
+                      <div class="no-orders-icon icon-users"></div>
+                      <h3 class="no-orders-title">No users found</h3>
+                      <p class="no-orders-message">User accounts will appear here after registration.</p>
+                  </div>
+              `;
+              return;
+          }
+
+          storedUsers.forEach(user => {
+              const userCard = document.createElement('div');
+              userCard.className = 'script-item';
+              const daysLeft = Math.ceil((user.accessExpiration - Date.now()) / (1000 * 60 * 60 * 24));
+              const statusClass = user.blacklisted ? 'blacklisted' : 'active';
+              const statusText = user.blacklisted ? 'Blacklisted' : 'Active';
+
+              userCard.innerHTML = `
+                  <div class="item-info">
+                      <div class="item-icon icon-user"></div>
+                      <div class="item-details">
+                          <h3>${user.username} <span class="blacklist-status ${statusClass}">${statusText}</span></h3>
+                          <p>Email: ${user.email}<br>
+                             Expires: ${new Date(user.accessExpiration).toLocaleDateString()}<br>
+                             Days Left: ${Math.max(0, daysLeft)} days<br>
+                             Roblox: ${user.robloxConnected ? user.robloxUsername : 'Not Connected'}
+                          </p>
+                      </div>
+                  </div>
+                  <div class="item-actions">
+                      <button class="action-btn" onclick="showEditUserTimeModal('${user.id}')">Edit Time</button>
+                      <button class="action-btn ${user.blacklisted ? '' : 'danger'}" onclick="toggleUserBlacklist('${user.id}')">
+                          ${user.blacklisted ? 'Unblacklist' : 'Blacklist'}
+                      </button>
+                      <button class="action-btn danger" onclick="blacklistUserEmail('${user.email}')">Blacklist Email</button>
+                  </div>
+              `;
+              userList.appendChild(userCard);
+          });
+      }
+
+      function showEditUserTimeModal(userId) {
+          const users = JSON.parse(localStorage.getItem(DATABASE.users) || '[]');
+          const user = users.find(u => u.id == userId);
+          if (!user) return;
+
+          const timeLeft = user.accessExpiration - Date.now();
+          const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+          const newDays = prompt(`Edit time for ${user.username}\nCurrent: ${Math.max(0, days)} days, ${Math.max(0, hours)} hours\n\nEnter new days:`, Math.max(0, days));
+          if (newDays === null) return;
+
+          const newHours = prompt(`Enter new hours (0-23):`, Math.max(0, hours));
+          if (newHours === null) return;
+
+          const daysNum = parseInt(newDays) || 0;
+          const hoursNum = parseInt(newHours) || 0;
+
+          if (daysNum < 0 || hoursNum < 0 || hoursNum > 23) {
+              alert('Please enter valid time values (days >= 0, hours 0-23)');
+              return;
+          }
+
+          const newExpiration = Date.now() + (daysNum * 24 * 60 * 60 * 1000) + (hoursNum * 60 * 60 * 1000);
+          user.accessExpiration = newExpiration;
+
+          const userIndex = users.findIndex(u => u.id == userId);
+          users[userIndex] = user;
+          localStorage.setItem(DATABASE.users, JSON.stringify(users));
+
+          trackUserActivity(userId, 'time_edited_by_admin', { 
+              adminId: currentUser.id, 
+              newDays: daysNum, 
+              newHours: hoursNum,
+              targetUser: user.username
+          });
+
+          loadUserList();
+          alert(`Updated ${user.username}'s time to ${daysNum} days and ${hoursNum} hours.`);
+      }
+
+      function toggleUserBlacklist(userId) {
+          const users = JSON.parse(localStorage.getItem(DATABASE.users) || '[]');
+          const userIndex = users.findIndex(u => u.id == userId);
+
+          if (userIndex !== -1) {
+              const wasBlacklisted = users[userIndex].blacklisted;
+              users[userIndex].blacklisted = !users[userIndex].blacklisted;
+              localStorage.setItem(DATABASE.users, JSON.stringify(users));
+
+              trackUserActivity(userId, wasBlacklisted ? 'user_unblacklisted' : 'user_blacklisted', {
+                  adminId: currentUser.id,
+                  targetUser: users[userIndex].username,
+                  targetEmail: users[userIndex].email
+              });
+
+              loadUserList();
+              alert(`User ${users[userIndex].blacklisted ? 'blacklisted' : 'unblacklisted'} successfully.`);
+          }
+      }
+
+      function blacklistUserEmail(email) {
+          if (confirm(`Are you sure you want to permanently blacklist the email "${email}"? This will prevent any future registrations or logins with this email.`)) {
+              blacklistEmail(email);
+              
+              // Also blacklist the user account
+              const users = JSON.parse(localStorage.getItem(DATABASE.users) || '[]');
+              const userIndex = users.findIndex(u => u.email === email);
+              if (userIndex !== -1) {
+                  users[userIndex].blacklisted = true;
+                  localStorage.setItem(DATABASE.users, JSON.stringify(users));
+              }
+
+              trackUserActivity('system', 'email_blacklisted', {
+                  adminId: currentUser.id,
+                  blacklistedEmail: email
+              });
+
+              loadUserList();
+              alert(`Email "${email}" has been permanently blacklisted.`);
+          }
+      }
+
+      // Orders Display Function
+      function loadOrdersList() {
+          const ordersList = document.getElementById('ordersList');
+          const orders = JSON.parse(localStorage.getItem(DATABASE.orders) || '[]');
+
+          if (orders.length === 0) {
+              ordersList.innerHTML = `
+                  <div class="no-orders-display">
+                      <div class="no-orders-icon icon-clipboard"></div>
+                      <h3 class="no-orders-title">No orders to display</h3>
+                      <p class="no-orders-message">When users generate orders, they will appear here for management.</p>
+                  </div>
+              `;
+              return;
+          }
+
+          ordersList.innerHTML = '';
+          orders.forEach(order => {
+              const orderElement = document.createElement('div');
+              orderElement.className = 'script-item';
+              orderElement.innerHTML = `
+                  <div class="item-info">
+                      <div class="item-icon icon-clipboard"></div>
+                      <div class="item-details">
+                          <h3>Order #${order.id}</h3>
+                          <p>Email: ${order.email}<br>Username: ${order.username}<br>Plan: ${order.subscription}<br>Payment: ${order.paymentMethod}<br>Status: ${order.status || 'Pending'}</p>
+                      </div>
+                  </div>
+                  <div class="item-actions">
+                      <button class="action-btn" onclick="fulfillOrder('${order.id}')">Fulfill</button>
+                      <button class="action-btn danger" onclick="cancelOrder('${order.id}')">Cancel</button>
+                  </div>
+              `;
+              ordersList.appendChild(orderElement);
+          });
+      }
+
+      // Search Functions
+      function searchGames() {
+          const searchTerm = document.getElementById('gameSearch').value.toLowerCase();
+          const gameItems = document.querySelectorAll('#gamesList .list-item');
+
+          gameItems.forEach(item => {
+              const title = item.querySelector('h3').textContent.toLowerCase();
+              const description = item.querySelector('p').textContent.toLowerCase();
+
+              if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                  item.style.display = 'block';
+              } else {
+                  item.style.display = 'none';
+              }
+          });
+      }
+
+      function searchScripts() {
+          const searchTerm = document.getElementById('scriptSearch').value.toLowerCase();
+          const scriptItems = document.querySelectorAll('#scripthubSection .script-item');
+
+          scriptItems.forEach(item => {
+              const title = item.querySelector('h3').textContent.toLowerCase();
+              const description = item.querySelector('p').textContent.toLowerCase();
+
+              if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                  item.style.display = 'block';
+              } else {
+                  item.style.display = 'none';
+              }
+          });
+      }
+
+      function searchMyScripts() {
+          const searchTerm = document.getElementById('myScriptSearch').value.toLowerCase();
+          const scriptItems = document.querySelectorAll('#myScriptsList .script-item');
+
+          scriptItems.forEach(item => {
+              const title = item.querySelector('h3').textContent.toLowerCase();
+
+              if (title.includes(searchTerm)) {
+                  item.style.display = 'block';
+              } else {
+                  item.style.display = 'none';
+              }
+          });
+      }
+
+      function searchUsers() {
+          const searchTerm = document.getElementById('userSearch').value.toLowerCase();
+          const userItems = document.querySelectorAll('#userList .script-item');
+
+          userItems.forEach(item => {
+              const title = item.querySelector('h3').textContent.toLowerCase();
+              const description = item.querySelector('p').textContent.toLowerCase();
+
+              if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                  item.style.display = 'block';
+              } else {
+                  item.style.display = 'none';
+              }
+          });
+      }
+
+      // Script Functions
+      function copyScript(scriptId) {
+          let scriptCode = '';
+
+          // Find script in database
+          const hubScripts = JSON.parse(localStorage.getItem(DATABASE.hubScripts) || '[]');
+          const allScripts = [...scriptDatabase, ...hubScripts];
+          const script = allScripts.find(s => s.id === scriptId);
+
+          if (!script) {
+              alert('Script not found!');
+              return;
+          }
+
+          scriptCode = script.code;
+
+          // Copy to clipboard
+          navigator.clipboard.writeText(scriptCode).then(() => {
+              alert('Script copied to clipboard!');
+              trackUserActivity(currentUser.id, 'script_copied', { scriptId, scriptName: script.name });
+          }).catch(() => {
+              // Fallback for older browsers
+              const textArea = document.createElement('textarea');
+              textArea.value = scriptCode;
+              document.body.appendChild(textArea);
+              textArea.select();
+              document.execCommand('copy');
+              document.body.removeChild(textArea);
+              alert('Script copied to clipboard!');
+              trackUserActivity(currentUser.id, 'script_copied', { scriptId, scriptName: script.name });
+          });
+      }
+
+      function loadToEditor(scriptId) {
+          // Find script in database or hub scripts
+          const hubScripts = JSON.parse(localStorage.getItem(DATABASE.hubScripts) || '[]');
+          const allScripts = [...scriptDatabase, ...hubScripts];
+          const script = allScripts.find(s => s.id === scriptId);
+
+          if (!script) {
+              alert('Script not found!');
+              return;
+          }
+
+          // Check if Roblox is connected (unless admin)
+          if (!currentUser.robloxConnected && !isAdmin) {
+              alert('Please connect your Roblox account in Settings before using the executor.');
+              return;
+          }
+
+          // Switch to executor section
+          switchSection('executor');
+
+          // Load script into active editor tab
+          setTimeout(() => {
+              const editor = document.getElementById(`codeEditor${activeExecutorTab}`);
+              if (editor) {
+                  editor.value = script.code;
+                  executorTabs[activeExecutorTab].content = script.code;
+                  trackUserActivity(currentUser.id, 'script_loaded_to_editor', { scriptId, scriptName: script.name });
+              }
+          }, 200);
+      }
+
+      function showAddScriptModal() {
+          document.getElementById('addScriptModal').classList.add('show');
+      }
+
+      function addScript() {
+          const name = document.getElementById('scriptName').value.trim();
+          const image = document.getElementById('scriptImage').value.trim();
+          const content = document.getElementById('scriptContent').value.trim();
+
+          if (!name || !content) {
+              alert('Please enter both script name and content.');
+              return;
+          }
+
+          if (isAdmin && currentSection === 'scripthub') {
+              // Add to hub scripts
+              const hubScripts = JSON.parse(localStorage.getItem(DATABASE.hubScripts) || '[]');
+
+              if (hubScripts.some(script => script.name === name)) {
+                  alert('A script with this name already exists in the hub.');
+                  return;
+              }
+
+              const newScript = {
+                  id: 'hub_' + Date.now(),
+                  name,
+                  code: content,
+                  description: 'Custom admin script',
+                  created: Date.now()
+              };
+
+              hubScripts.push(newScript);
+              localStorage.setItem(DATABASE.hubScripts, JSON.stringify(hubScripts));
+              trackUserActivity(currentUser.id, 'hub_script_added', { scriptId: newScript.id, scriptName: name });
+              loadScriptHub();
+          } else {
+              // Add to user scripts
+              if (currentUser.scripts.some(script => script.name === name)) {
+                  alert('A script with this name already exists.');
+                  return;
+              }
+
+              const newScript = {
+                  id: Date.now(),
+                  name,
+                  image,
+                  content,
+                  created: Date.now()
+              };
+
+              currentUser.scripts.push(newScript);
+              updateUserInStorage();
+              trackUserActivity(currentUser.id, 'user_script_added', { scriptId: newScript.id, scriptName: name });
+              loadMyScripts();
+              updateDashboardCounts();
+          }
+
+          closeModal('addScriptModal');
+
+          // Clear form
+          document.getElementById('scriptName').value = '';
+          document.getElementById('scriptImage').value = '';
+          document.getElementById('scriptContent').value = '';
+      }
+
+      function editScript(scriptId) {
+          const script = currentUser.scripts.find(s => s.id === scriptId);
+          if (!script) return;
+
+          editingScriptId = scriptId;
+          document.getElementById('scriptName').value = script.name;
+          document.getElementById('scriptContent').value = script.content;
+          document.getElementById('addScriptModal').classList.add('show');
+      }
+
+      function deleteScript(scriptId) {
+          if (confirm('Are you sure you want to delete this script?')) {
+              const script = currentUser.scripts.find(s => s.id === scriptId);
+              currentUser.scripts = currentUser.scripts.filter(s => s.id !== scriptId);
+              updateUserInStorage();
+              trackUserActivity(currentUser.id, 'user_script_deleted', { scriptId, scriptName: script?.name });
+              loadMyScripts();
+              updateDashboardCounts();
+          }
+      }
+
+      function deleteHubScript(scriptId) {
+          if (confirm('Are you sure you want to delete this script from the hub?')) {
+              let hubScripts = JSON.parse(localStorage.getItem(DATABASE.hubScripts) || '[]');
+              const script = hubScripts.find(s => s.id === scriptId);
+              hubScripts = hubScripts.filter(s => s.id !== scriptId);
+              localStorage.setItem(DATABASE.hubScripts, JSON.stringify(hubScripts));
+              trackUserActivity(currentUser.id, 'hub_script_deleted', { scriptId, scriptName: script?.name });
+              loadScriptHub();
+          }
+      }
+
+      function updateUserInStorage() {
+          localStorage.setItem('galaxiaUser', JSON.stringify(currentUser));
+
+          // Also update in users array if not admin
+          if (!isAdmin) {
+              const users = JSON.parse(localStorage.getItem(DATABASE.users) || '[]');
+              const userIndex = users.findIndex(u => u.id === currentUser.id);
+              if (userIndex !== -1) {
+                  users[userIndex] = currentUser;
+                  localStorage.setItem(DATABASE.users, JSON.stringify(users));
+              }
+          }
+      }
+
+      // Enhanced Game Functions
+      function showAddGameModal() {
+          document.getElementById('addGameModal').classList.add('show');
+      }
+
+      async function addGame() {
+          const name = document.getElementById('gameName').value.trim();
+          const gameURL = document.getElementById('gameURL').value.trim();
+          const description = document.getElementById('gameDescription').value.trim();
+          const imageURL = document.getElementById('gameImageURL').value.trim();
+
+          if (!name || !description) {
+              alert('Please enter game name and description.');
+              return;
+          }
+
+          const games = JSON.parse(localStorage.getItem(DATABASE.games) || '[]');
+          if (games.some(game => game.name === name)) {
+              alert('A game with this name already exists.');
+              return;
+          }
+
+          // Fetch player count if URL provided
+          let playerCount = Math.floor(Math.random() * 5000) + 100;
+          if (gameURL) {
+              try {
+                  playerCount = await fetchPlayerCount(gameURL);
+              } catch (error) {
+                  console.error('Failed to fetch player count:', error);
+              }
+          }
+
+          const newGame = {
+              id: 'game_' + Date.now(),
+              name,
+              gameUrl: gameURL,
+              players: playerCount,
+              description,
+              image: imageURL || null,
+              addedBy: currentUser.id,
+              dateAdded: Date.now()
+          };
+
+          games.push(newGame);
+          localStorage.setItem(DATABASE.games, JSON.stringify(games));
+
+          // Distribute game to all existing users
+          distributeGameToAllUsers(newGame);
+
+          trackUserActivity(currentUser.id, 'game_added', { gameId: newGame.id, gameName: name });
+          loadGames();
+          updateDashboardCounts();
+          closeModal('addGameModal');
+
+          // Clear form
+          document.getElementById('gameName').value = '';
+          document.getElementById('gameURL').value = '';
+          document.getElementById('gameDescription').value = '';
+          document.getElementById('gameImageURL').value = '';
+
+          alert(`Game "${name}" has been added with ${playerCount.toLocaleString()} active players!`);
+      }
+
+      function deleteGame(gameId) {
+          if (gameId === 'baseplate') {
+              alert('Cannot delete the default baseplate game.');
+              return;
+          }
+
+          if (confirm('Are you sure you want to delete this game?')) {
+              let games = JSON.parse(localStorage.getItem(DATABASE.games) || '[]');
+              const game = games.find(g => g.id === gameId);
+              games = games.filter(game => game.id !== gameId);
+              localStorage.setItem(DATABASE.games, JSON.stringify(games));
+
+              // Remove game from all users
+              const users = JSON.parse(localStorage.getItem(DATABASE.users) || '[]');
+              users.forEach(user => {
+                  if (user.availableGames) {
+                      user.availableGames = user.availableGames.filter(g => g.id !== gameId);
+                  }
+              });
+              localStorage.setItem(DATABASE.users, JSON.stringify(users));
+
+              trackUserActivity(currentUser.id, 'game_deleted', { gameId, gameName: game?.name });
+              loadGames();
+              updateDashboardCounts();
+          }
+      }
+
+      function joinGame(gameId) {
+          trackUserActivity(currentUser.id, 'game_joined', { gameId });
+          alert(`Joining game: ${gameId} (This is a simulation)`);
+      }
+
+      // Executor Functions
+      function addExecutorTab() {
+          const tabCount = executorTabs.length + 1;
+          executorTabs.push({ name: `Script ${tabCount}`, content: '' });
+          renderExecutorTabs();
+          switchExecutorTab(executorTabs.length - 1);
+      }
+
+      function closeExecutorTab(index) {
+          if (executorTabs.length === 1) return; // Don't close last tab
+
+          executorTabs.splice(index, 1);
+          if (activeExecutorTab >= executorTabs.length) {
+              activeExecutorTab = executorTabs.length - 1;
+          }
+          renderExecutorTabs();
+          switchExecutorTab(activeExecutorTab);
+      }
+
+      function renderExecutorTabs() {
+          const tabsContainer = document.querySelector('.executor-tabs');
+          if (!tabsContainer) return;
+
+          const addButton = tabsContainer.querySelector('.add-tab-btn');
+
+          // Remove all tab elements except add button
+          tabsContainer.querySelectorAll('.executor-tab').forEach(tab => tab.remove());
+
+          // Add tabs
+          executorTabs.forEach((tab, index) => {
+              const tabElement = document.createElement('div');
+              tabElement.className = `executor-tab ${index === activeExecutorTab ? 'active' : ''}`;
+              tabElement.setAttribute('data-tab', index);
+              tabElement.innerHTML = `
+                  <span>${tab.name}</span>
+                  <button class="tab-close" onclick="closeExecutorTab(${index})">×</button>
+              `;
+              tabElement.addEventListener('click', (e) => {
+                  if (!e.target.classList.contains('tab-close')) {
+                      switchExecutorTab(index);
+                  }
+              });
+              tabsContainer.insertBefore(tabElement, addButton);
+          });
+      }
+
+      function switchExecutorTab(index) {
+          // Save current tab content
+          if (activeExecutorTab < executorTabs.length) {
+              const currentEditor = document.getElementById(`codeEditor${activeExecutorTab}`);
+              if (currentEditor) {
+                  executorTabs[activeExecutorTab].content = currentEditor.value;
+              }
+          }
+
+          activeExecutorTab = index;
+
+          // Update tab appearance
+          document.querySelectorAll('.executor-tab').forEach((tab, i) => {
+              tab.classList.toggle('active', i === index);
+          });
+
+          // Update editor content
+          updateCodeEditor();
+      }
+
+      function updateCodeEditor() {
+          // Remove existing editors
+          document.querySelectorAll('.code-editor').forEach(editor => editor.remove());
+
+          // Create new editor for active tab
+          const editorContainer = document.querySelector('.executor-container');
+          const buttonsContainer = document.querySelector('.executor-buttons');
+
+          if (!editorContainer || !buttonsContainer) return;
+
+          const editor = document.createElement('textarea');
+          editor.className = 'code-editor';
+          editor.id = `codeEditor${activeExecutorTab}`;
+          editor.placeholder = '-- Enter your Lua script here';
+          editor.value = executorTabs[activeExecutorTab].content;
+
+          editorContainer.insertBefore(editor, buttonsContainer);
+      }
+
+      function executeScript() {
+          if (!currentUser.robloxConnected && !isAdmin) {
+              alert('Please connect your Roblox account in Settings before executing scripts.');
+              return;
+          }
+
+          const editor = document.getElementById(`codeEditor${activeExecutorTab}`);
+          const code = editor.value.trim();
+
+          if (!code) {
+              alert('Please enter some code to execute.');
+              return;
+          }
+
+          // Simulate script execution
+          trackUserActivity(currentUser.id, 'script_executed', { 
+              codeLength: code.length,
+              robloxAccount: currentUser.robloxUsername 
+          });
+          alert('Script executed successfully! (This is a simulation)');
+      }
+
+      function saveScript() {
+          const editor = document.getElementById(`codeEditor${activeExecutorTab}`);
+          const code = editor.value.trim();
+
+          if (!code) {
+              alert('No code to save.');
+              return;
+          }
+
+          const scriptName = prompt('Enter script name:');
+          if (!scriptName) return;
+
+          // Check for duplicate names
+          if (currentUser.scripts.some(script => script.name === scriptName)) {
+              alert('A script with this name already exists.');
+              return;
+          }
+
+          const newScript = {
+              id: Date.now(),
+              name: scriptName,
+              content: code,
+              created: Date.now()
+          };
+
+          currentUser.scripts.push(newScript);
+          updateUserInStorage();
+          trackUserActivity(currentUser.id, 'script_saved', { scriptId: newScript.id, scriptName });
+          loadMyScripts();
+          updateDashboardCounts();
+          alert('Script saved successfully!');
+      }
+
+      function loadScript() {
+          if (!currentUser.scripts || currentUser.scripts.length === 0) {
+              alert('No saved scripts found.');
+              return;
+          }
+
+          const scriptNames = currentUser.scripts.map(s => s.name);
+          const selectedName = prompt(`Select script to load:\n${scriptNames.join('\n')}`);
+
+          if (!selectedName) return;
+
+          const script = currentUser.scripts.find(s => s.name === selectedName);
+          if (script) {
+              const editor = document.getElementById(`codeEditor${activeExecutorTab}`);
+              editor.value = script.content;
+              executorTabs[activeExecutorTab].content = script.content;
+              trackUserActivity(currentUser.id, 'script_loaded', { scriptId: script.id, scriptName: selectedName });
+          }
+      }
+
+      function resetCharacter() {
+          if (!currentUser.robloxConnected && !isAdmin) {
+              alert('Please connect your Roblox account in Settings first.');
+              return;
+          }
+          trackUserActivity(currentUser.id, 'character_reset', { robloxAccount: currentUser.robloxUsername });
+          alert('Character reset! (This is a simulation)');
+      }
+
+      function clearEditor() {
+          const editor = document.getElementById(`codeEditor${activeExecutorTab}`);
+          if (editor) {
+              editor.value = '';
+              executorTabs[activeExecutorTab].content = '';
+          }
+      }
+
+      // Settings Functions
+      function updateProfile() {
+          const newUsername = document.getElementById('newUsername').value.trim();
+          const newEmail = document.getElementById('newEmail').value.trim();
+          const newPassword = document.getElementById('newPassword').value;
+
+          if (newUsername && newUsername !== currentUser.username) {
+              currentUser.username = newUsername;
+          }
+
+          if (newEmail && newEmail !== currentUser.email) {
+              if (!validateEmail(newEmail)) {
+                  alert('Please enter a valid email address.');
+                  return;
+              }
+
+              if (isEmailBlacklisted(newEmail)) {
+                  alert('This email address has been blacklisted.');
+                  return;
+              }
+
+              currentUser.email = newEmail;
+          }
+
+          if (newPassword) {
+              if (!validatePassword(newPassword)) {
+                  alert('Password must contain at least 1 uppercase letter and 1 number.');
+                  return;
+              }
+              currentUser.password = newPassword;
+          }
+
+          updateUserInStorage();
+          updateUserInterface();
+          trackUserActivity(currentUser.id, 'profile_updated', { 
+              updatedFields: { username: !!newUsername, email: !!newEmail, password: !!newPassword }
+          });
+          alert('Profile updated successfully!');
+
+          // Clear form
+          document.getElementById('newUsername').value = '';
+          document.getElementById('newEmail').value = '';
+          document.getElementById('newPassword').value = '';
+      }
+
+      function updateProfilePic() {
+          const file = document.getElementById('profilePicInput').files[0];
+          if (file) {
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                  currentUser.profilePic = e.target.result;
+                  updateUserInStorage();
+                  updateUserInterface();
+                  trackUserActivity(currentUser.id, 'profile_picture_updated');
+                  alert('Profile picture updated successfully!');
+              };
+              reader.readAsDataURL(file);
+          }
+      }
+
+      function connectRoblox() {
+          const robloxUsernameInput = document.getElementById('robloxUsername');
+          const robloxUsername = robloxUsernameInput.value.trim();
+
+          if (!robloxUsername) {
+              alert('Please enter your Roblox username.');
+              return;
+          }
+
+          currentUser.robloxUsername = robloxUsername;
+          currentUser.robloxConnected = true;
+          updateUserInStorage();
+
+          trackUserActivity(currentUser.id, 'roblox_connected', { robloxUsername });
+          
+          // Show success modal
+          document.getElementById('robloxSuccessModal').classList.add('show');
+          
+          updateRobloxConnectionUI();
+          if (currentSection === 'executor') {
+              loadExecutorContent();
+          }
+      }
+
+      function disconnectRoblox() {
+          const oldUsername = currentUser.robloxUsername;
+          currentUser.robloxUsername = '';
+          currentUser.robloxConnected = false;
+          updateUserInStorage();
+          trackUserActivity(currentUser.id, 'roblox_disconnected', { oldRobloxUsername: oldUsername });
+          alert('Roblox account disconnected.');
+          updateRobloxConnectionUI();
+          if (currentSection === 'executor') {
+              loadExecutorContent();
+          }
+      }
+
+      function updateRobloxConnectionUI() {
+          const robloxConnectionContainer = document.getElementById('robloxConnectionContainer');
+          if (!robloxConnectionContainer) return;
+
+          if (currentUser.robloxConnected) {
+              robloxConnectionContainer.innerHTML = `
+                  <p style="margin-bottom: 10px;">Currently Connected: <b>${currentUser.robloxUsername}</b></p>
+                  <button class="btn btn-secondary" onclick="disconnectRoblox()">Change Account</button>
+              `;
+          } else {
+              robloxConnectionContainer.innerHTML = `
+                  <div class="form-group">
+                      <label for="robloxUsername">Roblox Username</label>
+                      <input type="text" id="robloxUsername" placeholder="Enter your Roblox username">
+                  </div>
+                  <button class="btn" onclick="connectRoblox()">Connect Account</button>
+              `;
+          }
+      }
+
+      // Key Redemption Functions
+      function redeemKey() {
+          const keyInput = document.getElementById('keyInput');
+          const key = keyInput.value.trim().toUpperCase();
+          const messageElement = document.getElementById('keyMessage');
+
+          if (!key) {
+              messageElement.textContent = 'Please enter a key.';
+              messageElement.style.color = '#ef4444';
+              return;
+          }
+
+          if (validKeys.includes(key)) {
+              // Add 30 days to current expiration
+              const currentExpiration = currentUser.accessExpiration || Date.now();
+              const newExpiration = Math.max(currentExpiration, Date.now()) + (30 * 24 * 60 * 60 * 1000);
+
+              currentUser.accessExpiration = newExpiration;
+              accessExpiration = newExpiration;
+              updateUserInStorage();
+              updateUserInterface();
+              updateTimeEditor();
+
+              trackUserActivity(currentUser.id, 'key_redeemed', { key, daysAdded: 30 });
+
+              messageElement.textContent = 'Key redeemed successfully! 30 days added to your account.';
+              messageElement.style.color = '#10b981';
+              keyInput.value = '';
+
+              // Remove used key
+              const keyIndex = validKeys.indexOf(key);
+              if (keyIndex > -1) {
+                  validKeys.splice(keyIndex, 1);
+              }
+          } else {
+              messageElement.textContent = 'Invalid or expired key.';
+              messageElement.style.color = '#ef4444';
+          }
+      }
+
+      function showBuyModal() {
+          document.getElementById('buyModal').classList.add('show');
+          // Reset dropdowns when showing modal
+          document.getElementById('selectedPaymentMethod').textContent = 'Select Payment Method';
+          document.getElementById('paymentMethod').value = '';
+          document.getElementById('selectedSubscription').textContent = 'Select Plan';
+          document.getElementById('subscription').value = '';
+      }
+
+      function selectDropdownOption(dropdownId, value, text) {
+          document.getElementById(dropdownId).value = value;
+          document.getElementById(`selected${dropdownId.charAt(0).toUpperCase() + dropdownId.slice(1)}`).textContent = text;
+      }
+
+      function generateOrder() {
+          const email = document.getElementById('buyEmail').value.trim();
+          const username = document.getElementById('buyUsername').value.trim();
+          const paymentMethod = document.getElementById('paymentMethod').value;
+          const subscription = document.getElementById('subscription').value;
+
+          if (!email || !username || !paymentMethod || !subscription) {
+              showOrderError();
+              return;
+          }
+
+          if (isEmailBlacklisted(email)) {
+              alert('This email address has been blacklisted and cannot be used for orders.');
+              return;
+          }
+
+          const orderId = `GX-${Date.now()}`;
+          const orderDetails = {
+              id: orderId,
+              email: email,
+              username: username,
+              paymentMethod: paymentMethod,
+              subscription: subscription,
+              timestamp: new Date().toLocaleString(),
+              status: 'pending',
+              createdBy: currentUser.id,
+              dateCreated: Date.now()
+          };
+
+          // Save order to localStorage
+          const orders = JSON.parse(localStorage.getItem(DATABASE.orders) || '[]');
+          orders.push(orderDetails);
+          localStorage.setItem(DATABASE.orders, JSON.stringify(orders));
+
+          trackUserActivity(currentUser.id, 'order_generated', { 
+              orderId, 
+              email, 
+              username, 
+              paymentMethod, 
+              subscription 
+          });
+
+          // Show order confirmation modal
+          showOrderConfirmation(orderDetails);
+          closeModal('buyModal');
+      }
+
+      function showOrderConfirmation(orderDetails) {
+          const modal = document.getElementById('orderConfirmationModal');
+          const detailsContent = document.getElementById('orderDetailsContent');
+
+          detailsContent.innerHTML = `
+              <div class="order-field">
+                  <span class="order-label">Order ID:</span>
+                  <span class="order-value">${orderDetails.id}</span>
+              </div>
+              <div class="order-field">
+                  <span class="order-label">Email:</span>
+                  <span class="order-value">${orderDetails.email}</span>
+              </div>
+              <div class="order-field">
+                  <span class="order-label">Username:</span>
+                  <span class="order-value">${orderDetails.username}</span>
+              </div>
+              <div class="order-field">
+                  <span class="order-label">Payment Method:</span>
+                  <span class="order-value">${orderDetails.paymentMethod}</span>
+              </div>
+              <div class="order-field">
+                  <span class="order-label">Plan:</span>
+                  <span class="order-value">${orderDetails.subscription}</span>
+              </div>
+              <div class="order-field">
+                  <span class="order-label">Generated:</span>
+                  <span class="order-value">${orderDetails.timestamp}</span>
+              </div>
+              <div class="order-field">
+                  <span class="order-label">Status:</span>
+                  <span class="order-value">Pending Payment</span>
+              </div>
+          `;
+
+          modal.classList.add('show');
+      }
+
+      function showDiscordModal() {
+          closeModal('orderConfirmationModal');
+          document.getElementById('discordModal').classList.add('show');
+      }
+
+      function showOrderError() {
+          document.getElementById('orderModal').classList.add('show');
+      }
+
+      // Support Functions
+      function joinDiscord() {
+          trackUserActivity(currentUser.id, 'discord_join_attempted');
+          alert('Discord invite would open here. (https://discord.gg/galaxia)');
+      }
+
+      // Admin Functions
+      function fulfillOrder(orderId) {
+          const orders = JSON.parse(localStorage.getItem(DATABASE.orders) || '[]');
+          const orderIndex = orders.findIndex(o => o.id === orderId);
+
+          if (orderIndex !== -1) {
+              orders[orderIndex].status = 'fulfilled';
+              orders[orderIndex].fulfilledBy = currentUser.id;
+              orders[orderIndex].fulfilledDate = Date.now();
+              localStorage.setItem(DATABASE.orders, JSON.stringify(orders));
+              
+              trackUserActivity(currentUser.id, 'order_fulfilled', { 
+                  orderId, 
+                  customerEmail: orders[orderIndex].email 
+              });
+              
+              loadOrdersList();
+              alert('Order fulfilled successfully!');
+          }
+      }
+
+      function cancelOrder(orderId) {
+          if (confirm('Are you sure you want to cancel this order?')) {
+              let orders = JSON.parse(localStorage.getItem(DATABASE.orders) || '[]');
+              const order = orders.find(o => o.id === orderId);
+              orders = orders.filter(o => o.id !== orderId);
+              localStorage.setItem(DATABASE.orders, JSON.stringify(orders));
+              
+              trackUserActivity(currentUser.id, 'order_cancelled', { 
+                  orderId, 
+                  customerEmail: order?.email 
+              });
+              
+              loadOrdersList();
+              alert('Order cancelled successfully!');
+          }
+      }
+
+      function showAddHubScriptModal() {
+          document.getElementById('addScriptModal').classList.add('show');
+      }
+
+      // Countdown Functions
+      function startCountdown() {
+          if (countdownInterval) {
+              clearInterval(countdownInterval);
+          }
+
+          countdownInterval = setInterval(updateCountdown, 1000);
+          updateCountdown(); // Initial update
+      }
+
+      function updateCountdown() {
+          const accessTimeLeftElement = document.getElementById('accessTimeLeft');
+          if (!accessTimeLeftElement) return;
+
+          if (!currentUser || !accessExpiration) {
+              accessTimeLeftElement.textContent = '0d 0h 0m 0s';
+              return;
+          }
+
+          const now = Date.now();
+          const timeLeft = accessExpiration - now;
+
+          if (timeLeft <= 0) {
+              accessTimeLeftElement.textContent = 'EXPIRED';
+              return;
+          }
+
+          const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+          const timeString = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+          accessTimeLeftElement.textContent = timeString;
+      }
+
+      // Modal Functions
+      function closeModal(modalId) {
+          document.getElementById(modalId).classList.remove('show');
+      }
+
+      // Close modals when clicking outside
+      document.addEventListener('click', function(e) {
+          if (e.target.classList.contains('modal')) {
+              e.target.classList.remove('show');
+          }
+      });
+
+      // Handle window resize for mobile
+      window.addEventListener('resize', function() {
+          if (window.innerWidth > 768) {
+              document.getElementById('sidebar').classList.remove('open');
+          }
+      });
+  </script>
+
+  <script>
+
+function login() {
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value.trim();
+
+  if (email === adminEmail && password === adminPass) {
+    currentUser = {
+      username: "Admin",
+      email: adminEmail,
+      password: adminPass,
+      expiry: Date.now() + 99999999999 * 24 * 60 * 60 * 1000,
+      isAdmin: true,
+      games: [...sharedGames]
+    };
+    users[email] = currentUser;
+    showMainApp();
+    showAdminPanel();
+    return;
+  }
+
+  if (!users[email] || users[email].password !== password) {
+    alert("Invalid email or password.");
+    return;
+  }
+
+  currentUser = users[email];
+  showMainApp();
+}
+function showMainApp() {
+  document.getElementById("authContainer").classList.add("hidden");
+  const app = document.getElementById("mainApp");
+  app.classList.add("visible");
+  app.style.display = "flex";
+  renderGames();
+}
+
+function showAdminPanel() {
+  const adminPanel = document.getElementById("adminPanel");
+  if (adminPanel) {
+    adminPanel.style.display = "block";
+  }
+}
+
+function addGame() {
+  const gameName = document.getElementById("gameInput").value.trim();
+  if (!gameName) return;
+
+  sharedGames.push(gameName);
+
+  Object.values(users).forEach(user => {
+    if (!user.games.includes(gameName)) {
+      user.games.push(gameName);
+    }
+  });
+
+  renderGames();
+  document.getElementById("gameInput").value = "";
+}
+
+function renderGames() {
+  const list = document.getElementById("gameList");
+  list.innerHTML = "";
+
+  if (!currentUser || !currentUser.games) return;
+
+  currentUser.games.forEach(game => {
+    const li = document.createElement("li");
+    li.textContent = game;
+    list.appendChild(li);
+  });
+}
+
+function redeemKey() {
+  const key = document.getElementById("redeemKeyInput").value.trim();
+  if (!key) return;
+
+  if (currentUser && currentUser.username === key) {
+    alert("You cannot redeem your own key.");
+    return;
+  }
+
+  alert("Redeem logic placeholder");
+}
+</script>
+
+</body>
