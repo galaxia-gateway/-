@@ -834,7 +834,6 @@
       .card-value {
           font-size: 2.8rem;
           font-weight: 700;
-          margin-bottom: 8px;
           background: linear-gradient(45deg, #8b5cf6, #a855f7);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
@@ -961,13 +960,6 @@
           overflow: hidden;
           border-radius: 16px 0 0 16px;
           flex-shrink: 0;
-      }
-
-      .game-image-section img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          transition: transform 0.3s ease;
       }
 
       .game-image-section:hover img {
@@ -2072,19 +2064,19 @@
                       <span class="nav-item-icon icon-home"></span>
                       Dashboard
                   </button>
-                  <button class="nav-item" onclick="switchSection('games')">
+                  <button class="nav-item" onclick="checkAccessAndSwitchSection('games')">
                       <span class="nav-item-icon icon-gamepad"></span>
                       Games
                   </button>
-                  <button class="nav-item" onclick="switchSection('scripthub')">
+                  <button class="nav-item" onclick="checkAccessAndSwitchSection('scripthub')">
                       <span class="nav-item-icon icon-script"></span>
                       Script Hub
                   </button>
-                  <button class="nav-item" onclick="switchSection('scripts')">
+                  <button class="nav-item hidden" id="myScriptsNavItem" onclick="checkAccessAndSwitchSection('scripts')">
                       <span class="nav-item-icon icon-document"></span>
                       My Scripts
                   </button>
-                  <button class="nav-item" onclick="switchSection('executor')">
+                  <button class="nav-item" onclick="checkAccessAndSwitchSection('executor')">
                       <span class="nav-item-icon icon-lightning"></span>
                       Executor
                   </button>
@@ -2136,19 +2128,19 @@
                           <span>Quick Actions</span>
                           <svg viewBox="0 0 360 360" xml:space="preserve">
                               <g id="SVGRepo_iconCarrier">
-                                  <path id="XMLID_225_" d="M325.607,79.393c-5.857-5.857-15.355-5.858-21.213,0.001l-139.39,139.393L25.607,79.393 c-5.857-5.857-15.355-5.858-21.213,0.001c-5.858,5.858-5.858,15.355,0,21.213l150.004,150c2.813,2.813,6.628,4.393,10.606,4.393 s7.794-1.581,10.606-4.394l149.996-150C331.465,94.749,331.465,85.251,325.607,79.393z"></path>
+                                  <path id="XMLID_225_" d="M325.607,79.393c-5.857-5.857-15.355-5.858-21.213,0.001l-139.39,139.393L25.607,79.393 c-5.857-5.857-15.355-5.858-21.213,0.001c-5.858,5.858-5.858,15.355,0,21.213l150.004,150c2.813,2.813,6.628,4.393,10.606,4.393 S7.794-1.581,10.606-4.394l149.996-150C331.465,94.749,331.465,85.251,325.607,79.393z"></path>
                               </g>
                           </svg>
                       </a>
                       <div class="submenu">
                           <div class="submenu-item">
-                              <a href="#" class="submenu-link" onclick="switchSection('executor')">Open Executor</a>
+                              <a href="#" class="submenu-link" onclick="checkAccessAndSwitchSection('executor')">Open Executor</a>
                           </div>
                           <div class="submenu-item">
-                              <a href="#" class="submenu-link" onclick="switchSection('scripthub')">Browse Scripts</a>
+                              <a href="#" class="submenu-link" onclick="checkAccessAndSwitchSection('scripthub')">Browse Scripts</a>
                           </div>
                           <div class="submenu-item">
-                              <a href="#" class="submenu-link" onclick="switchSection('games')">Join Games</a>
+                              <a href="#" class="submenu-link" onclick="checkAccessAndSwitchSection('games')">Join Games</a>
                           </div>
                           <div class="submenu-item">
                               <a href="#" class="submenu-link" onclick="switchSection('settings')">Settings</a>
@@ -2176,14 +2168,15 @@
                       <div class="card-description">Scripts available</div>
                   </div>
 
-                  <div class="dashboard-card">
+                  <!-- Removed My Scripts Dashboard Card -->
+                  <!-- <div class="dashboard-card" id="myScriptsDashboardCard">
                       <div class="card-header">
                           <h3 class="card-title">My Scripts</h3>
                           <span class="card-icon icon-document"></span>
                       </div>
                       <div class="card-value" id="userScriptCount">0</div>
                       <div class="card-description">Personal scripts</div>
-                  </div>
+                  </div> -->
 
                   <div class="dashboard-card">
                       <div class="card-header">
@@ -2381,15 +2374,15 @@
                       <div class="card-description">Time until expiration</div>
                   </div>
 
-                  <!-- Time Editor for Current User -->
-                  <div class="time-editor" id="userTimeEditor">
+                  <!-- Time Editor for Current User - REMOVED -->
+                  <!-- <div class="time-editor" id="userTimeEditor">
                       <label style="color: #8b5cf6; font-weight: 600;">Edit Your Time:</label>
                       <input type="number" class="time-input" id="editDays" placeholder="Days" min="0">
                       <span style="color: rgba(255,255,255,0.7);">days</span>
                       <input type="number" class="time-input" id="editHours" placeholder="Hours" min="0" max="23">
                       <span style="color: rgba(255,255,255,0.7);">hours</span>
                       <button class="btn" onclick="updateUserTime()" style="padding: 8px 16px; font-size: 12px;">Update Time</button>
-                  </div>
+                  </div> -->
 
                   <button class="btn btn-pulse" onclick="showBuyModal()" style="background: linear-gradient(45deg, #10b981, #059669);">Don't have a key? Buy now</button>
               </div>
@@ -2428,190 +2421,12 @@
                           </svg>
                           <svg viewBox="0 0 16 16" fill="none" width="25" xmlns="http://www.w3.org/2000/svg" class="button__icon button__icon--copy">
                               <path d="M13.545 2.907a13.227 13.227 0 0 0-3.257-1.011.05.05 0 0 0-.052.025c-.141.25-.297.577-.406.833a12.19 12.19 0 0 0-3.658 0 8.258 8.258 0 0 0-.412-.833.051.051 0 0 0-.052-.025c-1.125.194-2.22.534-3.257 1.011a.041.041 0 0 0-.021.018C.356 6.024-.213 9.047.066 12.032c.001.014.01.028.021.037a13.276 13.276 0 0 0 3.995 2.02.05.05 0 0 0 .056-.019c.308-.42.582-.863.818-1.329a.05.05 0 0 0-.01-.059.051.051 0 0 0-.018-.011 8.875 8.875 0 0 1-1.248-.595.05.05 0 0 1-.02-.066.051.051 0 0 1 .015-.019c.084-.063.168-.129.248-.195a.05.05 0 0 1 .051-.007c2.619 1.196 5.454 1.196 8.041 0a.052.052 0 0 1 .053.007c.08.066.164.132.248.195a.051.051 0 0 1-.004.085 8.254 8.254 0 0 1-1.249.594.05.05 0 0 0-.03.03.052.052 0 0 0 .003.041c.24.465.515.909.817 1.329a.05.05 0 0 0 .056.019 13.235 13.235 0 0 0 4.001-2.02.049.049 0 0 0 .021-.037c.334-3.451-.559-6.449-2.366-9.106a.034.034 0 0 0-.02-.019Zm-8.198 7.307c-.789 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.45.73 1.438 1.613 0 .888-.637 1.612-1.438 1.612Zm5.316 0c-.788 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.451.73 1.438 1.613 0 .888-.631 1.612-1.438 1.612Z" fill="currentColor"></path>
-                      </svg>
-                  </div>
-              </button>
-          </div>
-      </div>
-  </div>
-
-  <!-- Modals -->
-  <!-- Add Script Modal -->
-  <div class="modal" id="addScriptModal">
-      <div class="modal-content">
-          <h2 class="modal-title">Add New Script</h2>
-          <div class="form-group">
-              <label for="scriptName">Script Name</label>
-              <input type="text" id="scriptName" placeholder="Enter script name">
-          </div>
-          <div class="form-group">
-              <label for="scriptImage">Script Image URL (Optional)</label>
-              <input type="url" id="scriptImage" placeholder="Enter image URL">
-          </div>
-          <div class="form-group">
-              <label for="scriptContent">Script Content</label>
-              <textarea id="scriptContent" rows="10" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3);" placeholder="Enter your script code"></textarea>
-          </div>
-          <div class="modal-buttons">
-              <button class="btn" onclick="addScript()">Add Script</button>
-              <button class="btn btn-secondary" onclick="closeModal('addScriptModal')">Cancel</button>
-          </div>
-      </div>
-  </div>
-
-  <!-- Enhanced Add Game Modal -->
-  <div class="modal" id="addGameModal">
-      <div class="modal-content">
-          <h2 class="modal-title">Add New Game</h2>
-          <div class="form-group">
-              <label for="gameName">Game Name</label>
-              <input type="text" id="gameName" placeholder="Enter game name">
-          </div>
-          <div class="form-group">
-              <label for="gameURL">Game URL (for player count)</label>
-              <input type="url" id="gameURL" placeholder="Enter Roblox game URL">
-          </div>
-          <div class="form-group">
-              <label for="gameDescription">Game Description</label>
-              <textarea id="gameDescription" rows="3" style="width: 100%; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3);" placeholder="Enter game description"></textarea>
-          </div>
-          <div class="form-group">
-              <label for="gameImageURL">Game Image URL</label>
-              <input type="url" id="gameImageURL" placeholder="Enter image URL for the game">
-          </div>
-          <div class="modal-buttons">
-              <button class="btn" onclick="addGame()">Add Game</button>
-              <button class="btn btn-secondary" onclick="closeModal('addGameModal')">Cancel</button>
-          </div>
-      </div>
-  </div>
-
-  <!-- Enhanced Buy Key Modal -->
-  <div class="modal" id="buyModal">
-      <div class="modal-content">
-          <h2 class="modal-title">Purchase Access Key</h2>
-          <div class="form-group">
-              <label for="buyEmail">Email Address</label>
-              <input type="email" id="buyEmail" placeholder="Enter your email" required>
-          </div>
-          <div class="form-group">
-              <label for="buyUsername">Username</label>
-              <input type="text" id="buyUsername" placeholder="Enter your username" required>
-          </div>
-          <div class="form-group">
-              <label>Payment Method</label>
-              <div class="menu" style="width: 100%;">
-                  <div class="item" style="width: 100%;">
-                      <a href="#" class="link" style="width: 100%; justify-content: space-between;">
-                          <span id="selectedPaymentMethod">Select Payment Method</span>
-                          <svg viewBox="0 0 360 360" xml:space="preserve" style="width: 14px; height: 14px; fill: #ffffff;">
-                              <g id="SVGRepo_iconCarrier">
-                                  <path id="XMLID_225_" d="M325.607,79.393c-5.857-5.857-15.355-5.858-21.213,0.001l-139.39,139.393L25.607,79.393 c-5.857-5.857-15.355-5.858-21.213,0.001c-5.858,5.858-5.858,15.355,0,21.213l150.004,150c2.813,2.813,6.628,4.393,10.606,4.393 s7.794-1.581,10.606-4.394l149.996-150C331.465,94.749,331.465,85.251,325.607,79.393z"></path>
-                              </g>
                           </svg>
-                      </a>
-                      <div class="submenu">
-                          <div class="submenu-item"><a href="#" class="submenu-link" data-value="robux" onclick="selectDropdownOption('paymentMethod', 'robux', 'Robux')">Robux</a></div>
-                          <div class="submenu-item"><a href="#" class="submenu-link" data-value="cashapp" onclick="selectDropdownOption('paymentMethod', 'cashapp', 'Cash App')">Cash App</a></div>
-                          <div class="submenu-item"><a href="#" class="submenu-link" data-value="paypal" onclick="selectDropdownOption('paymentMethod', 'paypal', 'PayPal')">PayPal</a></div>
                       </div>
-                  </div>
+                  </button>
               </div>
-              <input type="hidden" id="paymentMethod" value="">
-          </div>
-          <div class="form-group">
-              <label>Subscription Plan</label>
-              <div class="menu" style="width: 100%;">
-                  <div class="item" style="width: 100%;">
-                      <a href="#" class="link" style="width: 100%; justify-content: space-between;">
-                          <span id="selectedSubscription">Select Plan</span>
-                          <svg viewBox="0 0 360 360" xml:space="preserve" style="width: 14px; height: 14px; fill: #ffffff;">
-                              <g id="SVGRepo_iconCarrier">
-                                  <path id="XMLID_225_" d="M325.607,79.393c-5.857-5.857-15.355-5.858-21.213,0.001l-139.39,139.393L25.607,79.393 c-5.857-5.857-15.355-5.858-21.213,0.001c-5.858,5.858-5.858,15.355,0,21.213l150.004,150c2.813,2.813,6.628,4.393,10.606,4.393 s7.794-1.581,10.606-4.394l149.996-150C331.465,94.749,331.465,85.251,325.607,79.393z"></path>
-                              </g>
-                          </svg>
-                      </a>
-                      <div class="submenu">
-                          <div class="submenu-item"><a href="#" class="submenu-link" data-value="standard" onclick="selectDropdownOption('subscription', 'standard', 'Standard - $20 / 200 Robux')">Standard - $20 / 200 Robux</a></div>
-                          <div class="submenu-item"><a href="#" class="submenu-link" data-value="premium" onclick="selectDropdownOption('subscription', 'premium', 'Premium - $30 / 500 Robux')">Premium - $30 / 500 Robux</a></div>
-                      </div>
-                  </div>
-              </div>
-              <input type="hidden" id="subscription" value="">
-          </div>
-          <div class="modal-buttons">
-              <button class="btn btn-secondary" onclick="closeModal('buyModal')">Close</button>
-              <button class="btn" onclick="generateOrder()">Generate Order</button>
           </div>
       </div>
-  </div>
-
-  <!-- Enhanced Order Confirmation Modal -->
-  <div class="modal order-confirmation-modal" id="orderConfirmationModal">
-      <div class="modal-content">
-          <div class="order-success-icon">
-              <i class="fa-solid fa-check-circle"></i>
-          </div>
-          <h2 class="modal-title">Order Generated Successfully!</h2>
-          
-          <div class="order-details" id="orderDetailsContent">
-              <!-- Order details will be populated here -->
-          </div>
-          
-          <div class="screenshot-instruction">
-              <span class="screenshot-instruction-icon">
-                  <i class="fa-solid fa-camera"></i>
-              </span>
-              <span>Screenshot this information and send it to our support team to complete your purchase!</span>
-          </div>
-          
-          <div class="modal-buttons">
-              <button class="btn" onclick="showDiscordModal()">Continue to Support</button>
-          </div>
-      </div>
-  </div>
-
-  <!-- Discord Invitation Modal -->
-  <div class="modal discord-modal" id="discordModal">
-      <div class="modal-content">
-          <div class="discord-icon">
-              <i class="fa-brands fa-discord"></i>
-          </div>
-          <h2 class="discord-title">Join Our Discord Server!</h2>
-          <p class="discord-message">
-              Connect with our community, get support for your order, and stay updated with the latest features and announcements.
-          </p>
-          <div class="modal-buttons">
-              <button class="button" onclick="joinDiscord()">
-                  <p class="button__text">
-                      <span style="--index: 0;">D</span>
-                      <span style="--index: 1;">I</span>
-                      <span style="--index: 2;">S</span>
-                      <span style="--index: 3;">C</span>
-                      <span style="--index: 4;">O</span>
-                      <span style="--index: 5;">R</span>
-                      <span style="--index: 6;">D</span>
-                      <span style="--index: 7;"> </span>
-                      <span style="--index: 8;">D</span>
-                      <span style="--index: 9;">I</span>
-                      <span style="--index: 10;">S</span>
-                      <span style="--index: 11;">C</span>
-                      <span style="--index: 12;">O</span>
-                      <span style="--index: 13;">R</span>
-                      <span style="--index: 14;">D</span>
-                  </p>
-                  <div class="button__circle">
-                      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="button__icon" width="25">
-                          <path d="M13.545 2.907a13.227 13.227 0 0 0-3.257-1.011.05.05 0 0 0-.052.025c-.141.25-.297.577-.406.833a12.19 12.19 0 0 0-3.658 0 8.258 8.258 0 0 0-.412-.833.051.051 0 0 0-.052-.025c-1.125.194-2.22.534-3.257 1.011a.041.041 0 0 0-.021.018C.356 6.024-.213 9.047.066 12.032c.001.014.01.028.021.037a13.276 13.276 0 0 0 3.995 2.02.05.05 0 0 0 .056-.019c.308-.42.582-.863.818-1.329a.05.05 0 0 0-.01-.059.051.051 0 0 0-.018-.011 8.875 8.875 0 0 1-1.248-.595.05.05 0 0 1-.02-.066.051.051 0 0 1 .015-.019c.084-.063.168-.129.248-.195a.05.05 0 0 1 .051-.007c2.619 1.196 5.454 1.196 8.041 0a.052.052 0 0 1 .053.007c.08.066.164.132.248.195a.051.051 0 0 1-.004.085 8.254 8.254 0 0 1-1.249.594.05.05 0 0 0-.03.03.052.052 0 0 0 .003.041c.24.465.515.909.817 1.329a.05.05 0 0 0 .056.019 13.235 13.235 0 0 0 4.001-2.02.049.049 0 0 0 .021-.037c.334-3.451-.559-6.449-2.366-9.106a.034.034 0 0 0-.02-.019Zm-8.198 7.307c-.789 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.45.73 1.438 1.613 0 .888-.637 1.612-1.438 1.612Zm5.316 0c-.788 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.451.73 1.438 1.613 0 .888-.631 1.612-1.438 1.612Z" fill="currentColor"></path>
-                      </svg>
-                      <svg viewBox="0 0 16 16" fill="none" width="25" xmlns="http://www.w3.org/2000/svg" class="button__icon button__icon--copy">
-                          <path d="M13.545 2.907a13.227 13.227 0 0 0-3.257-1.011.05.05 0 0 0-.052.025c-.141.25-.297.577-.406.833a12.19 12.19 0 0 0-3.658 0 8.258 8.258 0 0 0-.412-.833.051.051 0 0 0-.052-.025c-1.125.194-2.22.534-3.257 1.011a.041.041 0 0 0-.021.018C.356 6.024-.213 9.047.066 12.032c.001.014.01.028.021.037a13.276 13.276 0 0 0 3.995 2.02.05.05 0 0 0 .056-.019c.308-.42.582-.863.818-1.329a.05.05 0 0 0-.01-.059.051.051 0 0 0-.018-.011 8.875 8.875 0 0 1-1.248-.595.05.05 0 0 1-.02-.066.051.051 0 0 1 .015-.019c.084-.063.168-.129.248-.195a.05.05 0 0 1 .051-.007c2.619 1.196 5.454 1.196 8.041 0a.052.052 0 0 1 .053.007c.08.066.164.132.248.195a.051.051 0 0 1-.004.085 8.254 8.254 0 0 1-1.249.594.05.05 0 0 0-.03.03.052.052 0 0 0 .003.041c.24.465.515.909.817 1.329a.05.05 0 0 0 .056.019 13.235 13.235 0 0 0 4.001-2.02.049.049 0 0 0 .021-.037c.334-3.451-.559-6.449-2.366-9.106a.034.034 0 0 0-.02-.019Zm-8.198 7.307c-.789 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.45.73 1.438 1.613 0 .888-.637 1.612-1.438 1.612Zm5.316 0c-.788 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.451.73 1.438 1.613 0 .888-.631 1.612-1.438 1.612Z" fill="currentColor"></path>
-                      </svg>
-                  </div>
-              </button>
-          </div>
-      </div>
-  </div>
 
   <!-- Roblox Connection Success Modal -->
   <div class="modal roblox-success-modal" id="robloxSuccessModal">
@@ -2651,6 +2466,56 @@
       </div>
   </div>
 
+  <!-- Free User Modal -->
+  <div class="modal" id="freeUserModal">
+      <div class="modal-content">
+          <div class="modal-title">Free User Access</div>
+          <p class="discord-message">You are a free user, to access the rest of the features redeem a key!</p>
+          <p style="text-align: center; font-size: 1.2rem; margin-bottom: 20px;">
+              Closing in: <span id="freeUserCountdown">10</span>s
+          </p>
+          <div class="modal-buttons">
+              <button class="btn" onclick="closeModal('freeUserModal')" id="freeUserCloseBtn" disabled>Close</button>
+              <button class="btn btn-secondary" onclick="redirectToRedeemKey()">Don't have a key yet?</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- New Free User Pop-up Modal -->
+  <div class="modal" id="freeUserPopupModal">
+      <div class="modal-content">
+          <div class="modal-title">Limited Access</div>
+          <p class="discord-message">You are a free user, buy a key to gain full access!</p>
+          <div class="modal-buttons">
+              <button class="btn" onclick="closeModal('freeUserPopupModal')">OK</button>
+              <button class="btn btn-secondary" onclick="redirectToRedeemKey()">Buy Key</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Add/Edit Script Modal -->
+  <div class="modal" id="addScriptModal">
+      <div class="modal-content">
+          <h2 class="modal-title" id="addScriptModalTitle">Add New Script</h2>
+          <div class="form-group">
+              <label for="scriptName">Script Name</label>
+              <input type="text" id="scriptName" placeholder="Enter script name" required>
+          </div>
+          <div class="form-group">
+              <label for="scriptImage">Image URL (Optional)</label>
+              <input type="text" id="scriptImage" placeholder="Enter image URL">
+          </div>
+          <div class="form-group">
+              <label for="scriptContent">Script Content (Lua)</label>
+              <textarea id="scriptContent" rows="10" placeholder="Enter your Lua script here" required></textarea>
+          </div>
+          <div class="modal-buttons">
+              <button class="btn btn-secondary" onclick="closeModal('addScriptModal')">Cancel</button>
+              <button class="btn" onclick="addScript()">Save Script</button>
+          </div>
+      </div>
+  </div>
+
   <script>
       // Global Variables
       let currentUser = null;
@@ -2662,6 +2527,8 @@
       let deletingScriptId = null;
       let accessExpiration = null;
       let countdownInterval = null;
+      let freeUserCountdownTimer = null; // New variable for free user modal countdown
+      let hasShownFreeUserPopup = false; // Track if the free user popup has been shown for the current dashboard visit
 
       // Enhanced Database System
       const DATABASE = {
@@ -2675,11 +2542,25 @@
 
       // Predefined keys (each worth 30 days)
       const validKeys = [
-          'GALAXIA-SIGMAALPHA',
-          'GALAXIA-CLAIR',
-          'GALAXIA-NOVA',
-          'GALAXIA-UZI',
-          'GALAXIA-KITKAT'
+          'GALAXIA-2024-ALPHA',
+          'GALAXIA-2024-BETA',
+          'GALAXIA-2024-GAMMA',
+          'GALAXIA-2024-DELTA',
+          'GALAXIA-2024-EPSILON'
+      ];
+
+      // Lifetime keys
+      const lifetimeKeys = [
+          'GALAXIALF-RELEASE',
+          'GALAXIALF-LENNY',
+          'GALAXIALF-EXOW',
+          'GALAXIALF-STAFF',
+          'GALAXIALF-NOVA',
+          'GALAXIALF-CHOOSENS',
+          'GALAXIALF-UZI',
+          'GALAXIALF-CLAIR',
+          'GALAXIALF-NOTEPAD',
+          'GALAXIALF-KITKAT' // Changed from GALAXIA-KITKAT to match pattern
       ];
 
       // Profanity filter
@@ -2929,7 +2810,7 @@
               profilePic: null,
               robloxConnected: false,
               robloxUsername: '',
-              accessExpiration: Date.now() + (7 * 24 * 60 * 60 * 1000), // 7 days trial
+              accessExpiration: Date.now(), // Set to now for "Free" status
               blacklisted: false,
               scripts: [],
               availableGames: [],
@@ -3001,11 +2882,6 @@
               return;
           }
 
-          if (user.accessExpiration < Date.now()) {
-              errorElement.textContent = 'Your access has expired. Please redeem a new key.';
-              return;
-          }
-
           // Update last login
           user.lastLogin = Date.now();
           const userIndex = existingUsers.findIndex(u => u.id === user.id);
@@ -3040,6 +2916,8 @@
           const welcomeMessage = document.getElementById('welcomeMessage');
           const accountStatus = document.getElementById('accountStatus');
           const timeLeftDisplay = document.getElementById('timeLeft');
+          const myScriptsNavItem = document.getElementById('myScriptsNavItem');
+          // const myScriptsDashboardCard = document.getElementById('myScriptsDashboardCard'); // Removed from dashboard
 
           if (currentUser.profilePic) {
               sidebarAvatar.innerHTML = `<img src="${currentUser.profilePic}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
@@ -3054,63 +2932,34 @@
               accountStatus.textContent = 'Admin';
               sidebarUserType.textContent = 'Unlimited Access';
               timeLeftDisplay.textContent = 'Unlimited Access';
+              myScriptsNavItem.classList.remove('hidden');
+              // myScriptsDashboardCard.classList.remove('hidden'); // Removed from dashboard
           } else {
               const daysLeft = Math.ceil((currentUser.accessExpiration - Date.now()) / (1000 * 60 * 60 * 24));
 
-              if (daysLeft >= 91) {
+              if (daysLeft >= 91) { // Assuming 91 days or more for lifetime
                   accountStatus.textContent = 'Premium Lifetime User';
                   sidebarUserType.textContent = 'Lifetime Access';
                   timeLeftDisplay.textContent = 'Lifetime Access';
-              } else {
+                  myScriptsNavItem.classList.remove('hidden');
+                  // myScriptsDashboardCard.classList.remove('hidden'); // Removed from dashboard
+              } else if (daysLeft > 0) {
                   accountStatus.textContent = 'Standard User';
                   sidebarUserType.textContent = `${daysLeft} days left`;
                   timeLeftDisplay.textContent = `${daysLeft} days left`;
+                  myScriptsNavItem.classList.remove('hidden');
+                  // myScriptsDashboardCard.classList.remove('hidden'); // Removed from dashboard
+              } else {
+                  accountStatus.textContent = 'Free User'; // Set to Free User if access is 0 or less
+                  sidebarUserType.textContent = `0 days left`;
+                  timeLeftDisplay.textContent = `0 days left`;
+                  myScriptsNavItem.classList.add('hidden'); // Hide My Scripts for Free users
+                  // myScriptsDashboardCard.classList.add('hidden'); // Removed from dashboard
               }
           }
 
           // Update access expiration
           accessExpiration = currentUser.accessExpiration;
-
-          // Update time editor in redeem section
-          updateTimeEditor();
-      }
-
-      function updateTimeEditor() {
-          if (!currentUser || isAdmin) return;
-
-          const timeLeft = currentUser.accessExpiration - Date.now();
-          const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-          const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-
-          const editDaysInput = document.getElementById('editDays');
-          const editHoursInput = document.getElementById('editHours');
-
-          if (editDaysInput && editHoursInput) {
-              editDaysInput.value = Math.max(0, days);
-              editHoursInput.value = Math.max(0, hours);
-          }
-      }
-
-      function updateUserTime() {
-          if (isAdmin) return;
-
-          const days = parseInt(document.getElementById('editDays').value) || 0;
-          const hours = parseInt(document.getElementById('editHours').value) || 0;
-
-          if (days < 0 || hours < 0 || hours > 23) {
-              alert('Please enter valid time values (days >= 0, hours 0-23)');
-              return;
-          }
-
-          const newExpiration = Date.now() + (days * 24 * 60 * 60 * 1000) + (hours * 60 * 60 * 1000);
-          currentUser.accessExpiration = newExpiration;
-          accessExpiration = newExpiration;
-
-          updateUserInStorage();
-          updateUserInterface();
-          trackUserActivity(currentUser.id, 'time_edited', { days, hours });
-
-          alert('Your access time has been updated successfully!');
       }
 
       function logout() {
@@ -3121,6 +2970,22 @@
           currentUser = null;
           isAdmin = false;
           location.reload();
+      }
+
+      // New function to check access before switching sections
+      function checkAccessAndSwitchSection(section) {
+          // Admins always have full access
+          if (isAdmin) {
+              switchSection(section);
+              return;
+          }
+
+          // Check if user's access has expired
+          if (currentUser && currentUser.accessExpiration < Date.now()) {
+              showFreeUserModal(section);
+          } else {
+              switchSection(section);
+          }
       }
 
       // Navigation Functions
@@ -3136,7 +3001,7 @@
                   (section === 'dashboard' && item.querySelector('.icon-home')) ||
                   (section === 'games' && item.textContent.trim() === 'Games') ||
                   (section === 'scripthub' && item.querySelector('.icon-script')) ||
-                  (section === 'scripts' && item.querySelector('.icon-document')) ||
+                  (section === 'scripts' && item.id === 'myScriptsNavItem') || // Specific check for My Scripts
                   (section === 'executor' && item.querySelector('.icon-lightning')) ||
                   (section === 'settings' && item.querySelector('.icon-settings')) ||
                   (section === 'redeem' && item.querySelector('.icon-ticket')) ||
@@ -3160,6 +3025,11 @@
               targetSection.style.display = 'block';
           }
 
+          // Reset free user popup flag if navigating away from dashboard
+          if (currentSection === 'dashboard' && section !== 'dashboard') {
+              hasShownFreeUserPopup = false;
+          }
+
           currentSection = section;
 
           // Load specific data when switching to certain sections
@@ -3175,8 +3045,14 @@
               loadGames();
           } else if (section === 'settings') {
               updateRobloxConnectionUI();
-          } else if (section === 'redeem') {
-              updateTimeEditor();
+          } else if (section === 'scripts') { // Load my scripts when navigating to this section
+              loadMyScripts();
+          } else if (section === 'dashboard') {
+              // Show free user popup if applicable and not already shown for this dashboard visit
+              if (!isAdmin && currentUser && currentUser.accessExpiration < Date.now() + (91 * 24 * 60 * 60 * 1000) && !hasShownFreeUserPopup) {
+                  showFreeUserPopup();
+                  hasShownFreeUserPopup = true;
+              }
           }
 
           // Close mobile sidebar
@@ -3262,7 +3138,7 @@
       function loadUserData() {
           loadGames();
           loadScriptHub();
-          loadMyScripts();
+          loadMyScripts(); // Ensure this is called to update the count and potentially display the tab
           updateDashboardCounts();
       }
 
@@ -3274,9 +3150,10 @@
           const defaultGame = {
               id: 'baseplate',
               name: 'Roblox Baseplate',
-              players: 1234,
+              players: 4/5,
               description: 'The classic Roblox baseplate experience. Perfect for testing scripts and building your creations.',
-              image: 'https://via.placeholder.com/150/8b5cf6/FFFFFF?text=Baseplate'
+              image: 'https://tr.rbxcdn.com/180DAY-08a0d68ad3934983001733becdc4e938/768/432/Image/Webp/noFilter',
+              gameUrl: 'https://www.roblox.com/games/4835383112/FREE-ADMIN-a-literal-baseplate' // Added Roblox URL
           };
 
           // Filter out default game if it exists in storedGames to avoid duplicates, then add it
@@ -3310,7 +3187,7 @@
                               <p>${game.description || 'A fun Roblox game experience.'}</p>
                           </div>
                           <div class="game-actions">
-                              <button class="action-btn" onclick="joinGame('${game.id}')">Join Game</button>
+                              <button class="action-btn" onclick="joinGame('${game.gameUrl}')">Join Game</button>
                               ${isAdmin ? `<button class="action-btn danger" onclick="deleteGame('${game.id}')">Delete</button>` : ''}
                           </div>
                       </div>
@@ -3351,7 +3228,7 @@
               </div>
               <div class="item-actions">
                   <button class="action-btn" onclick="copyScript('${script.id}')">Copy Script</button>
-                  <button class="action-btn" onclick="loadToEditor('${script.id}')">Load to Editor</button>
+                  <button class="action-btn" onclick="loadToEditor('${script.id}', 'hub')">Load to Editor</button>
                   ${adminDeleteBtn}
               </div>
           `;
@@ -3362,7 +3239,12 @@
           const scriptsList = document.getElementById('myScriptsList');
           scriptsList.innerHTML = '';
 
-          if (!currentUser.scripts || currentUser.scripts.length === 0) {
+          // Ensure currentUser.scripts is initialized
+          if (!currentUser.scripts) {
+              currentUser.scripts = [];
+          }
+
+          if (currentUser.scripts.length === 0) {
               scriptsList.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.7); padding: 40px;">No scripts yet. Add your first script!</p>';
               return;
           }
@@ -3381,6 +3263,7 @@
                   <div class="item-actions">
                       <button class="action-btn" onclick="editScript(${script.id})">Edit</button>
                       <button class="action-btn danger" onclick="deleteScript(${script.id})">Delete</button>
+                      <button class="action-btn" onclick="loadToEditor(${script.id}, 'user')">Load to Editor</button>
                   </div>
               `;
               scriptsList.appendChild(scriptElement);
@@ -3390,7 +3273,7 @@
       function updateDashboardCounts() {
           const games = JSON.parse(localStorage.getItem(DATABASE.games) || '[]');
           document.getElementById('gameCount').textContent = games.length + 1; // +1 for default game
-          document.getElementById('userScriptCount').textContent = currentUser.scripts ? currentUser.scripts.length : 0;
+          // document.getElementById('userScriptCount').textContent = currentUser.scripts ? currentUser.scripts.length : 0; // Removed from dashboard
       }
 
       // Enhanced User Management Functions
@@ -3659,11 +3542,15 @@
           });
       }
 
-      function loadToEditor(scriptId) {
-          // Find script in database or hub scripts
-          const hubScripts = JSON.parse(localStorage.getItem(DATABASE.hubScripts) || '[]');
-          const allScripts = [...scriptDatabase, ...hubScripts];
-          const script = allScripts.find(s => s.id === scriptId);
+      function loadToEditor(scriptId, type) {
+          let script = null;
+          if (type === 'hub') {
+              const hubScripts = JSON.parse(localStorage.getItem(DATABASE.hubScripts) || '[]');
+              const allScripts = [...scriptDatabase, ...hubScripts];
+              script = allScripts.find(s => s.id === scriptId);
+          } else if (type === 'user') {
+              script = currentUser.scripts.find(s => s.id === scriptId);
+          }
 
           if (!script) {
               alert('Script not found!');
@@ -3683,14 +3570,21 @@
           setTimeout(() => {
               const editor = document.getElementById(`codeEditor${activeExecutorTab}`);
               if (editor) {
-                  editor.value = script.code;
-                  executorTabs[activeExecutorTab].content = script.code;
-                  trackUserActivity(currentUser.id, 'script_loaded_to_editor', { scriptId, scriptName: script.name });
+                  editor.value = script.content || script.code; // Use 'content' for user scripts, 'code' for hub scripts
+                  executorTabs[activeExecutorTab].content = script.content || script.code;
+                  trackUserActivity(currentUser.id, 'script_loaded_to_editor', { scriptId, scriptName: script.name, type: type });
               }
           }, 200);
       }
 
       function showAddScriptModal() {
+          // Reset form for new script
+          document.getElementById('addScriptModalTitle').textContent = 'Add New Script';
+          document.getElementById('scriptName').value = '';
+          document.getElementById('scriptImage').value = '';
+          document.getElementById('scriptContent').value = '';
+          editingScriptId = null; // Clear editing state
+
           document.getElementById('addScriptModal').classList.add('show');
       }
 
@@ -3704,8 +3598,20 @@
               return;
           }
 
-          if (isAdmin && currentSection === 'scripthub') {
-              // Add to hub scripts
+          if (editingScriptId) {
+              // Editing existing script
+              const scriptIndex = currentUser.scripts.findIndex(s => s.id === editingScriptId);
+              if (scriptIndex !== -1) {
+                  currentUser.scripts[scriptIndex].name = name;
+                  currentUser.scripts[scriptIndex].image = image;
+                  currentUser.scripts[scriptIndex].content = content;
+                  updateUserInStorage();
+                  trackUserActivity(currentUser.id, 'user_script_edited', { scriptId: editingScriptId, scriptName: name });
+                  alert('Script updated successfully!');
+              }
+              editingScriptId = null; // Clear editing state
+          } else if (isAdmin && currentSection === 'scripthub') {
+              // Add to hub scripts (Admin only)
               const hubScripts = JSON.parse(localStorage.getItem(DATABASE.hubScripts) || '[]');
 
               if (hubScripts.some(script => script.name === name)) {
@@ -3725,10 +3631,14 @@
               localStorage.setItem(DATABASE.hubScripts, JSON.stringify(hubScripts));
               trackUserActivity(currentUser.id, 'hub_script_added', { scriptId: newScript.id, scriptName: name });
               loadScriptHub();
+              alert('Script added to hub successfully!');
           } else {
               // Add to user scripts
+              if (!currentUser.scripts) {
+                  currentUser.scripts = [];
+              }
               if (currentUser.scripts.some(script => script.name === name)) {
-                  alert('A script with this name already exists.');
+                  alert('A script with this name already exists in your personal scripts.');
                   return;
               }
 
@@ -3743,16 +3653,12 @@
               currentUser.scripts.push(newScript);
               updateUserInStorage();
               trackUserActivity(currentUser.id, 'user_script_added', { scriptId: newScript.id, scriptName: name });
-              loadMyScripts();
-              updateDashboardCounts();
+              alert('Script added to your personal scripts successfully!');
           }
 
           closeModal('addScriptModal');
-
-          // Clear form
-          document.getElementById('scriptName').value = '';
-          document.getElementById('scriptImage').value = '';
-          document.getElementById('scriptContent').value = '';
+          loadMyScripts(); // Reload my scripts list
+          updateDashboardCounts();
       }
 
       function editScript(scriptId) {
@@ -3760,7 +3666,9 @@
           if (!script) return;
 
           editingScriptId = scriptId;
+          document.getElementById('addScriptModalTitle').textContent = 'Edit Script';
           document.getElementById('scriptName').value = script.name;
+          document.getElementById('scriptImage').value = script.image || ''; // Populate image if exists
           document.getElementById('scriptContent').value = script.content;
           document.getElementById('addScriptModal').classList.add('show');
       }
@@ -3891,9 +3799,10 @@
           }
       }
 
-      function joinGame(gameId) {
-          trackUserActivity(currentUser.id, 'game_joined', { gameId });
-          alert(`Joining game: ${gameId} (This is a simulation)`);
+      function joinGame(gameUrl) {
+          // Open the Roblox game URL in a new tab
+          window.open(gameUrl, '_blank');
+          trackUserActivity(currentUser.id, 'game_joined', { gameUrl });
       }
 
       // Executor Functions
@@ -4016,6 +3925,9 @@
           if (!scriptName) return;
 
           // Check for duplicate names
+          if (!currentUser.scripts) {
+              currentUser.scripts = [];
+          }
           if (currentUser.scripts.some(script => script.name === scriptName)) {
               alert('A script with this name already exists.');
               return;
@@ -4210,8 +4122,7 @@
               currentUser.accessExpiration = newExpiration;
               accessExpiration = newExpiration;
               updateUserInStorage();
-              updateUserInterface();
-              updateTimeEditor();
+              updateUserInterface(); // Update UI to show My Scripts tab and status
 
               trackUserActivity(currentUser.id, 'key_redeemed', { key, daysAdded: 30 });
 
@@ -4219,12 +4130,33 @@
               messageElement.style.color = '#10b981';
               keyInput.value = '';
 
-              // Remove used key
+              // Remove used key (optional, depending on if keys are single-use)
               const keyIndex = validKeys.indexOf(key);
               if (keyIndex > -1) {
                   validKeys.splice(keyIndex, 1);
               }
-          } else {
+          } else if (lifetimeKeys.includes(key)) {
+              // Set lifetime access
+              const newExpiration = Date.now() + (99999999 * 24 * 60 * 60 * 1000); // Very large number for lifetime
+
+              currentUser.accessExpiration = newExpiration;
+              accessExpiration = newExpiration;
+              updateUserInStorage();
+              updateUserInterface(); // Update UI to show My Scripts tab and status
+
+              trackUserActivity(currentUser.id, 'lifetime_key_redeemed', { key });
+
+              messageElement.textContent = 'Lifetime key redeemed successfully! You now have unlimited access.';
+              messageElement.style.color = '#10b981';
+              keyInput.value = '';
+
+              // Remove used lifetime key (optional)
+              const keyIndex = lifetimeKeys.indexOf(key);
+              if (keyIndex > -1) {
+                  lifetimeKeys.splice(keyIndex, 1);
+              }
+          }
+          else {
               messageElement.textContent = 'Invalid or expired key.';
               messageElement.style.color = '#ef4444';
           }
@@ -4383,6 +4315,11 @@
       }
 
       function showAddHubScriptModal() {
+          document.getElementById('addScriptModalTitle').textContent = 'Add New Hub Script';
+          document.getElementById('scriptName').value = '';
+          document.getElementById('scriptImage').value = '';
+          document.getElementById('scriptContent').value = '';
+          editingScriptId = null; // Clear editing state
           document.getElementById('addScriptModal').classList.add('show');
       }
 
@@ -4425,12 +4362,64 @@
       // Modal Functions
       function closeModal(modalId) {
           document.getElementById(modalId).classList.remove('show');
+          // Clear free user countdown if that modal is closed
+          if (modalId === 'freeUserModal' && freeUserCountdownTimer) {
+              clearInterval(freeUserCountdownTimer);
+              freeUserCountdownTimer = null;
+          }
+      }
+
+      // New Free User Modal Functions
+      function showFreeUserModal(targetSection) {
+          const modal = document.getElementById('freeUserModal');
+          const countdownElement = document.getElementById('freeUserCountdown');
+          const closeBtn = document.getElementById('freeUserCloseBtn');
+          let timeLeft = 10; // 10 seconds
+
+          countdownElement.textContent = timeLeft;
+          closeBtn.disabled = true; // Disable close button initially
+
+          modal.classList.add('show');
+
+          // Clear any existing timer
+          if (freeUserCountdownTimer) {
+              clearInterval(freeUserCountdownTimer);
+          }
+
+          freeUserCountdownTimer = setInterval(() => {
+              timeLeft--;
+              countdownElement.textContent = timeLeft;
+
+              if (timeLeft <= 0) {
+                  clearInterval(freeUserCountdownTimer);
+                  freeUserCountdownTimer = null;
+                  closeBtn.disabled = false; // Enable close button
+                  countdownElement.textContent = '0';
+              }
+          }, 1000);
+      }
+
+      function showFreeUserPopup() {
+          document.getElementById('freeUserPopupModal').classList.add('show');
+      }
+
+      function redirectToRedeemKey() {
+          closeModal('freeUserModal');
+          closeModal('freeUserPopupModal'); // Close the new popup too
+          switchSection('redeem');
       }
 
       // Close modals when clicking outside
       document.addEventListener('click', function(e) {
           if (e.target.classList.contains('modal')) {
-              e.target.classList.remove('show');
+              // Only close if it's not the freeUserModal or if the freeUserModal's timer has expired
+              if (e.target.id !== 'freeUserModal' && e.target.id !== 'freeUserPopupModal') { // Added freeUserPopupModal
+                  e.target.classList.remove('show');
+              } else if (e.target.id === 'freeUserModal' && document.getElementById('freeUserCloseBtn').disabled === false) {
+                  e.target.classList.remove('show');
+              } else if (e.target.id === 'freeUserPopupModal') { // Allow closing the new popup by clicking outside
+                  e.target.classList.remove('show');
+              }
           }
       });
 
