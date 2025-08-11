@@ -962,6 +962,13 @@
           flex-shrink: 0;
       }
 
+      .game-image-section img { /* Modified */
+          width: 100%;
+          height: 100%;
+          object-fit: cover; /* Ensures the image covers the area without distortion */
+          transition: transform 0.3s ease;
+      }
+
       .game-image-section:hover img {
           transform: scale(1.05);
       }
@@ -2083,7 +2090,6 @@
               </div>
 
               <div class="nav-section" id="toolsDropdown">
-                  <div class="nav-section-title">TOOLS</div>
                   <div class="nav-items-container">
                       <button class="nav-item" onclick="switchSection('settings')">
                           <span class="nav-item-icon icon-settings"></span>
@@ -2444,6 +2450,17 @@
       </div>
   </div>
 
+  <!-- Blacklist Message Modal -->
+  <div class="modal" id="blacklistMessageModal">
+      <div class="modal-content">
+          <div class="modal-title">Script Blacklisted!</div>
+          <p class="discord-message">This script is blacklisted. You cannot execute any scripts for <span id="blacklistCountdown"></span>.</p>
+          <div class="modal-buttons">
+              <button class="btn" onclick="closeModal('blacklistMessageModal')">OK</button>
+          </div>
+      </div>
+  </div>
+
   <!-- Connection Required Modal -->
   <div class="modal" id="connectModal">
       <div class="modal-content">
@@ -2530,6 +2547,11 @@
       let freeUserCountdownTimer = null; // New variable for free user modal countdown
       let hasShownFreeUserPopup = false; // Track if the free user popup has been shown for the current dashboard visit
 
+      // Blacklist variables
+      let blacklistCooldownEndTime = 0;
+      let blacklistCountdownInterval = null;
+      let blacklistMessageModal = null; // To store the modal instance
+
       // Enhanced Database System
       const DATABASE = {
           users: 'galaxiaUsers',
@@ -2555,11 +2577,6 @@
           'GALAXIALF-LENNY',
           'GALAXIALF-EXOW',
           'GALAXIALF-STAFF',
-          'GALAXIALF-NOVA',
-          'GALAXIALF-CHOOSENS',
-          'GALAXIALF-UZI',
-          'GALAXIALF-CLAIR',
-          'GALAXIALF-NOTEPAD',
           'GALAXIALF-KITKAT' // Changed from GALAXIA-KITKAT to match pattern
       ];
 
@@ -2570,7 +2587,7 @@
       const scriptDatabase = [
           { id: 'iy', name: 'Infinite Yield', code: "loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()" },
           { id: 'dex', name: 'Dark Dex', code: "loadstring(game:HttpGet('https://raw.githubusercontent.com/Babyhamsta/RBLX_Scripts/main/Universal/BypassedDarkDexV3.lua', true))()" },
-          { id: 'spy', name: 'Simple Spy', code: "loadstring(game:HttpGet('https://github.com/exxtremestuffs/SimpleSpySource/raw/master/SimpleSpy.lua'))()" },
+          { id: 'spy', name: 'Simple Spy', code: "loadstring(game:HttpGet('https://raw.githubusercontent.com/exxtremestuffs/SimpleSpySource/raw/master/SimpleSpy.lua'))()" },
           { id: 'hydroxide', name: 'Hydroxide', code: "loadstring(game:HttpGet('https://raw.githubusercontent.com/Upbolt/Hydroxide/revision/init.lua'))()" },
           { id: 'esp', name: 'Unnamed ESP', code: "loadstring(game:HttpGet('https://raw.githubusercontent.com/ic3w0lf22/Unnamed-ESP/master/UnnamedESP.lua'))()" },
           { id: 'aimbot', name: 'Aimbot GUI', code: "loadstring(game:HttpGet('https://raw.githubusercontent.com/Exunys/Aimbot-V3/main/src/Aimbot.lua'))()" },
@@ -2656,6 +2673,14 @@
 
       // Enhanced Player Count Fetching
       async function fetchPlayerCount(gameUrl) {
+          // Static player counts for specific games
+          if (gameUrl.includes('FREE-ADMIN-a-literal-baseplate')) {
+              return 10; // Roblox Baseplate
+          }
+          if (gameUrl.includes('The-Strongest-Battlegrounds')) {
+              return 15; // The Strongest Battlegrounds
+          }
+
           try {
               // Extract game ID from Roblox URL
               const gameIdMatch = gameUrl.match(/\/games\/(\d+)/);
@@ -3150,14 +3175,28 @@
           const defaultGame = {
               id: 'baseplate',
               name: 'Roblox Baseplate',
-              players: 4/5,
+              players: 10, // Static value
               description: 'The classic Roblox baseplate experience. Perfect for testing scripts and building your creations.',
               image: 'https://tr.rbxcdn.com/180DAY-08a0d68ad3934983001733becdc4e938/768/432/Image/Webp/noFilter',
               gameUrl: 'https://www.roblox.com/games/4835383112/FREE-ADMIN-a-literal-baseplate' // Added Roblox URL
           };
 
-          // Filter out default game if it exists in storedGames to avoid duplicates, then add it
-          const allGames = [defaultGame, ...storedGames.filter(game => game.id !== defaultGame.id)];
+          // New game to add
+          const newGame = {
+              id: 'thestrongestbattlegrounds',
+              name: 'The Strongest Battlegrounds',
+              players: 15, // Static value
+              description: 'A popular fighting game on Roblox.',
+              image: 'https://tr.rbxcdn.com/180DAY-ccd8bcf9f66dc37834534d2cb3cfd1b9/768/432/Image/Webp/noFilter',
+              gameUrl: 'https://www.roblox.com/games/10449761463/The-Strongest-Battlegrounds'
+          };
+
+          // Filter out default game and new game if they exist in storedGames to avoid duplicates, then add them
+          const allGames = [
+              defaultGame,
+              newGame,
+              ...storedGames.filter(game => game.id !== defaultGame.id && game.id !== newGame.id)
+          ];
 
           gamesList.innerHTML = '';
           
@@ -3167,11 +3206,12 @@
               
               // Fetch real player count if URL is provided
               let playerCount = game.players;
-              if (game.gameUrl) {
+              // Only fetch if not one of the static games
+              if (game.gameUrl && game.id !== 'baseplate' && game.id !== 'thestrongestbattlegrounds') {
                   try {
                       playerCount = await fetchPlayerCount(game.gameUrl);
                   } catch (error) {
-                      console.error('Failed to fetch player count:', error);
+                      console.error('Failed to fetch player count for', game.name, ':', error);
                   }
               }
 
@@ -3272,7 +3312,7 @@
 
       function updateDashboardCounts() {
           const games = JSON.parse(localStorage.getItem(DATABASE.games) || '[]');
-          document.getElementById('gameCount').textContent = games.length + 1; // +1 for default game
+          document.getElementById('gameCount').textContent = games.length + 2; // +2 for default game and new game
           // document.getElementById('userScriptCount').textContent = currentUser.scripts ? currentUser.scripts.length : 0; // Removed from dashboard
       }
 
@@ -3777,6 +3817,10 @@
               alert('Cannot delete the default baseplate game.');
               return;
           }
+          if (gameId === 'thestrongestbattlegrounds') { // Prevent deletion of the new hardcoded game
+              alert('Cannot delete this featured game.');
+              return;
+          }
 
           if (confirm('Are you sure you want to delete this game?')) {
               let games = JSON.parse(localStorage.getItem(DATABASE.games) || '[]');
@@ -3904,6 +3948,25 @@
               return;
           }
 
+          // Blacklist check
+          if (code.includes('print("ninja")')) {
+              const now = Date.now();
+              if (blacklistCooldownEndTime === 0 || now >= blacklistCooldownEndTime) {
+                  // Set cooldown for 59 seconds and 999 milliseconds
+                  blacklistCooldownEndTime = now + (59 * 1000) + 999;
+                  startBlacklistCountdown();
+              }
+              showBlacklistMessage();
+              trackUserActivity(currentUser.id, 'blacklisted_script_attempt', { scriptContent: code.substring(0, 100) }); // Log first 100 chars
+              return; // Prevent execution
+          }
+
+          // Check if currently under cooldown
+          if (Date.now() < blacklistCooldownEndTime) {
+              showBlacklistMessage();
+              return; // Prevent execution
+          }
+
           // Simulate script execution
           trackUserActivity(currentUser.id, 'script_executed', { 
               codeLength: code.length,
@@ -3982,6 +4045,53 @@
           if (editor) {
               editor.value = '';
               executorTabs[activeExecutorTab].content = '';
+          }
+      }
+
+      // Blacklist Cooldown Functions
+      function startBlacklistCountdown() {
+          if (blacklistCountdownInterval) {
+              clearInterval(blacklistCountdownInterval);
+          }
+          blacklistCountdownInterval = setInterval(updateBlacklistCountdown, 10); // Update every 10ms for smoother milliseconds
+          updateBlacklistCountdown(); // Initial call
+      }
+
+      function updateBlacklistCountdown() {
+          const now = Date.now();
+          const timeLeft = blacklistCooldownEndTime - now;
+          const countdownElement = document.getElementById('blacklistCountdown');
+
+          if (timeLeft <= 0) {
+              clearInterval(blacklistCountdownInterval);
+              blacklistCountdownInterval = null;
+              blacklistCooldownEndTime = 0; // Reset cooldown
+              if (countdownElement) {
+                  countdownElement.textContent = '0s 0ms';
+              }
+              // Optionally close the modal if it's open and cooldown ends
+              if (blacklistMessageModal && blacklistMessageModal.classList.contains('show')) {
+                  closeModal('blacklistMessageModal');
+              }
+              return;
+          }
+
+          const totalSeconds = Math.floor(timeLeft / 1000);
+          const milliseconds = Math.floor(timeLeft % 1000);
+
+          const seconds = totalSeconds; // No need to calculate minutes/hours for 59s
+          const ms = milliseconds;
+
+          if (countdownElement) {
+              countdownElement.textContent = `${seconds}s ${ms}ms`;
+          }
+      }
+
+      function showBlacklistMessage() {
+          blacklistMessageModal = document.getElementById('blacklistMessageModal');
+          if (blacklistMessageModal) {
+              blacklistMessageModal.classList.add('show');
+              updateBlacklistCountdown(); // Ensure countdown is updated immediately when modal shows
           }
       }
 
