@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaxia 3D Interactive Card</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
+            overflow: hidden;
+        }
+
+        .card-container {
+            position: relative;
+            width: 350px;
+            height: 500px;
+            transform-style: preserve-3d;
+            transition: transform 0.8s ease-in-out;
+            cursor: pointer;
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-front {
+            background: linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 100%);
+            border: 2px solid #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 40px 30px;
+            color: white;
+        }
+
+        .galaxia-logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .galaxia-title {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #8b5cf6, #a855f7, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 5px;
+        }
+
+        .galaxia-subtitle {
+            font-size: 1.2rem;
+            color: #ccc;
+            letter-spacing: 3px;
+            font-weight: 300;
+        }
+
+        .galaxy-spiral {
+            width: 120px;
+            height: 120px;
+            margin: 20px 0;
+            position: relative;
+            animation: rotate 4s linear infinite;
+        }
+
+        .spiral-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top: 3px solid #8b5cf6;
+            border-right: 3px solid #a855f7;
+        }
+
+        .ring-1 {
+            width: 120px;
+            height: 120px;
+            animation: rotate 2s linear infinite;
+        }
+
+        .ring-2 {
+            width: 80px;
+            height: 80px;
+            top: 20px;
+            left: 20px;
+            animation: rotate 3s linear infinite reverse;
+        }
+
+        .ring-3 {
+            width: 40px;
+            height: 40px;
+            top: 40px;
+            left: 40px;
+            animation: rotate 1.5s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .features-list {
+            list-style: none;
+            text-align: left;
+            width: 100%;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .feature-icon {
+            width: 30px;
+            height: 30px;
+            margin-right: 15px;
+            background: linear-gradient(45deg, #8b5cf6, #a855f7);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .feature-icon svg {
+            width: 16px;
+            height: 16px;
+            fill: white;
+        }
+
+        .click-hint {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #8b5cf6;
+            font-size: 0.9rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        /* Pricing card styles */
+        .header {
+            position: relative;
+            margin: 0;
+            margin-bottom: 2rem;
+            overflow: hidden;
+            border-radius: 0;
+            border-bottom: 1px solid #fff;
+            background: transparent;
+            padding-bottom: 1rem;
+            text-align: center;
+        }
+
+        .title {
+            display: block;
+            font-family: sans-serif;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            text-transform: uppercase;
+            color: #fff;
+        }
+
+        .price-container {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 4px;
+            font-family: sans-serif;
+            font-size: 4.5rem;
+            line-height: 1;
+        }
+
+        .price-container span:first-child {
+            margin-top: 10px;
+            font-size: 2.25rem;
+            line-height: 2.5rem;
+        }
+
+        .price-container span:last-child {
+            align-self: flex-end;
+            font-size: 2.25rem;
+            line-height: 2.5rem;
+        }
+
+        .lists {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .list {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .list span {
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.24);
+            background-color: rgba(255, 255, 255, 0.185);
+            height: 30px;
+            width: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .list span svg {
+            height: 12px;
+            width: 12px;
+        }
+
+        .list p {
+            display: block;
+            font-family: sans-serif;
+        }
+
+        .button-container {
+            margin-top: 20px;
+            padding: 0;
+        }
+
+        .button-container button {
+            display: block;
+            width: 100%;
+            background-color: #fff;
+            padding: 10px 20px;
+            text-transform: uppercase;
+            color: #000;
+            outline: 0;
+            border: 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .button-container button:hover {
+            background-color: #f0f0f0;
+        }
+
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* Popup modal styles */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .popup-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .popup-content {
+            background: #212121;
+            border: 1px solid #fff;
+            border-radius: 20px;
+            padding: 2rem;
+            color: #fff;
+            width: 350px;
+            max-width: 90vw;
+            position: relative;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+
+        .popup-overlay.show .popup-content {
+            transform: scale(1);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Product selection tabs */
+        .product-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .product-tab {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .product-tab.active {
+            background: #8b5cf6;
+            border-color: #8b5cf6;
+        }
+
+        .product-tab:hover {
+            background: rgba(139, 92, 246, 0.3);
+        }
+
+        /* Checkout popup styles */
+        .checkout-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .checkout-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Added order confirmation popup styles */
+        .order-confirmation-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .order-confirmation-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .order-confirmation-popup {
+            background: #1c1c1c;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid #333;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+
+        .order-confirmation-overlay.show .order-confirmation-popup {
+            transform: scale(1);
+        }
+
+        .order-confirmation-title {
+            color: #8b5cf6;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .order-confirmation-text {
+            color: #ffffff;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .order-details-format {
+            background: #2a2a2a;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+            border-left: 4px solid #8b5cf6;
+        }
+
+        .order-details-format h4 {
+            color: #8b5cf6;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .order-details-format p {
+            color: #ffffff;
+            margin: 8px 0;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        .confirm-order-btn {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .confirm-order-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);
+        }
+
+        .cancel-order-btn {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .cancel-order-btn:hover {
+            background: #444;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: auto;
+            gap: 0px;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+
+        .checkout-overlay.show .container {
+            transform: scale(1);
+        }
+
+        hr {
+            height: 1px;
+            background-color: #2e2e2e;
+            border: none;
+        }
+
+        .card {
+            width: 400px;
+            background: #1c1c1c;
+            box-shadow:
+                0px 187px 75px rgba(0, 0, 0, 0.01),
+                0px 105px 63px rgba(0, 0, 0, 0.05),
+                0px 47px 47px rgba(0, 0, 0, 0.09),
+                0px 12px 26px rgba(0, 0, 0, 0.1),
+                0px 0px 0px rgba(0, 0, 0, 0.1);
+        }
+
+        .checkout-title {
+            width: 100%;
+            height: 40px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding-left: 20px;
+            border-bottom: 1px solid #2e2e2e;
+            font-weight: 700;
+            font-size: 11px;
+            color: #ffffff;
+        }
+
+        .cart {
+            border-radius: 19px 19px 0px 0px;
+        }
+
+        .cart .steps {
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .step span {
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            color: #ffffff !important;
+            margin-bottom: 5px !important;
+            display: block;
+        }
+
+        .input_field {
+            width: 100%;
+            height: 40px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background-color: #2a2a2a;
+            padding: 0 15px;
+            font-size: 14px;
+            color: #ffffff;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .input_field:focus {
+            border-color: #6366f1;
+        }
+
+        .input_field::placeholder {
+            color: #888;
+        }
+
+        .promo {
+            margin: 0;
+        }
+
+        .promo .form {
+            padding: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .promo .form .input_field {
+            flex: 1;
+        }
+
+        .promo .form button {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s;
+            height: 40px;
+        }
+
+        .promo .form button:hover {
+            background: #5855eb;
+        }
+
+        .promo-message {
+            padding: 0 20px 15px 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .promo-message.success {
+            color: #10b981;
+        }
+
+        .promo-message.error {
+            color: #ef4444;
+        }
+
+        .checkout .details {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px 20px;
+            align-items: center;
+        }
+
+        .checkout .details span:nth-child(odd) {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ffffff;
+            text-align: left;
+        }
+
+        .checkout .details span:nth-child(even) {
+            font-size: 14px;
+            font-weight: 600;
+            color: #bbbbbb;
+            text-align: right;
+        }
+
+        .checkout .footer,
+        .checkout--footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background-color: #2e2e2e;
+            border-radius: 0 0 19px 19px;
+        }
+
+        .price {
+            font-size: 22px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .checkout-btn {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .checkout-btn:hover:not(:disabled) {
+            background: #5855eb;
+        }
+
+        .order-id-section {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #444;
+        }
+
+        .order-id-section span {
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            color: #ffffff !important;
+            margin-bottom: 8px !important;
+            display: block;
+        }
+
+        .order-id-section p {
+            font-size: 11px;
+            color: #888;
+            margin: 8px 0 0 0;
+        }
+
+        .order-id-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .order-id-text {
+            background: #333;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            color: #fff;
+            border: 1px solid #555;
+            flex: 1;
+        }
+
+        .copy-btn {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: #5855eb;
+        }
+
+        .copy-btn.copied {
+            background: #10b981;
+        }
+
+        .checkout-btn:disabled {
+            background: #444 !important;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .payments .details {
+            display: grid;
+            grid-template-columns: 10fr 1fr;
+            padding: 0px;
+            gap: 5px;
+        }
+
+        .payments .details span:nth-child(odd) {
+            font-size: 12px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .payments .details span:nth-child(even) {
+            font-size: 13px;
+            font-weight: 600;
+            color: #bbbbbb;
+        }
+
+        /* Dropdown menu styles */
+        .menu {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #ffffff;
+            width: fit-content;
+            display: flex;
+            list-style: none;
+        }
+
+        .menu a {
+            text-decoration: none;
+            color: inherit;
+            font-family: inherit;
+            font-size: inherit;
+            line-height: inherit;
+        }
+
+        .menu .link {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 12px 36px;
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+            background-color: #333333;
+            border: 1px solid #2e2e2e;
+            width: 100%;
+        }
+
+        .menu .link::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #8b5cf6;
+            z-index: -1;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .menu .link svg {
+            width: 14px;
+            height: 14px;
+            fill: #ffffff;
+            transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .menu .item {
+            position: relative;
+            width: 100%;
+        }
+
+        .menu .item .submenu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: absolute;
+            top: 100%;
+            border-radius: 0 0 16px 16px;
+            left: 0;
+            width: 100%;
+            overflow: hidden;
+            border: 1px solid #2e2e2e;
+            background-color: #333333;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-12px);
+            transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+            z-index: 1;
+            pointer-events: none;
+            list-style: none;
+        }
+
+        .menu .item:hover .submenu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            pointer-events: auto;
+            border-top: transparent;
+            border-color: #8b5cf6;
+        }
+
+        .menu .item:hover .link {
+            color: #ffffff;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .menu .item:hover .link::after {
+            transform: scaleX(1);
+            transform-origin: right;
+        }
+
+        .menu .item:hover .link svg {
+            fill: #ffffff;
+            transform: rotate(-180deg);
+        }
+
+        .submenu .submenu-item {
+            width: 100%;
+            transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .submenu .submenu-link {
+            display: block;
+            padding: 12px 24px;
+            width: 100%;
+            position: relative;
+            text-align: center;
+            transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+            cursor: pointer;
+        }
+
+        .submenu .submenu-item:last-child .submenu-link {
+            border-bottom: none;
+        }
+
+        .submenu .submenu-link::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: scaleX(0);
+            width: 100%;
+            height: 100%;
+            background-color: #8b5cf6;
+            z-index: -1;
+            transform-origin: left;
+            transition: transform 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .submenu .submenu-link:hover:before {
+            transform: scaleX(1);
+            transform-origin: right;
+        }
+
+        .submenu .submenu-link:hover {
+            color: #ffffff;
+        }
+
+        /* Added Discord join popup styles */
+        .discord-join-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 3100;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .discord-join-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .discord-join-popup {
+            background: #1c1c1c;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid #333;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+
+        .discord-join-overlay.show .discord-join-popup {
+            transform: scale(1);
+        }
+
+        .discord-join-title {
+            color: #8b5cf6;
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .discord-join-text {
+            color: #ffffff;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .discord-join-btn {
+            background: #5865f2;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .discord-join-btn:hover {
+            background: #4752c4;
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    
+    <div class="card-container" id="cardContainer">
+        <!-- Front face (Galaxia design) -->
+        <div class="card-face card-front">
+            <div class="galaxia-logo">
+                <h1 class="galaxia-title">Galaxia</h1>
+                <p class="galaxia-subtitle">SERVERSIDE</p>
+            </div>
+            
+            <div class="galaxy-spiral">
+                <div class="spiral-ring ring-1"></div>
+                <div class="spiral-ring ring-2"></div>
+                <div class="spiral-ring ring-3"></div>
+            </div>
+            
+            <ul class="features-list">
+                <li class="feature-item">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 1C7.03 1 3 5.03 3 10v4c0 1.66 1.34 3 3 3h1v-6H6c-0.55 0-1 0.45-1 1v2c0 0.55 0.45 1 1 1h1v2c0 1.66 1.34 3 3 3h4c1.66 0 3-1.3 1.66 1.34 3 3 3h4c1.66 0 3-1.34 3-3v-2h1c0.55 0 1-0.45 1-1v-2c0-0.55-0.45-1-1-1h-1v-6h1c1.66 0 3 1.34 3 3v4c0 4.97-4.03 9-9 9s-9-4.03-9-9v-4c0-4.97 4.03-9 9-9s9 4.03 9 9z"/>
+                        </svg>
+                    </div>
+                    <span>24/7 support</span>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.24 0-2.13.62-2.13 1.61 0 .96.68 1.54 2.67 2.06 2.52.69 4.18 1.63 4.18 3.74 0 1.48-1.05 2.81-2.85 3.35z"/>
+                        </svg>
+                    </div>
+                    <span>Cheap prices</span>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M21.58 16.09l-1.09-7.66C20.21 6.46 18.52 5 16.53 5H7.47C5.48 5 3.79 6.46 3.51 8.43l-1.09 7.66C2.2 17.63 3.39 19 4.94 19h0c0.68 0 1.32-0.27 1.8-0.75L9 16h6l2.26 2.25c0.48 0.48 1.12 0.75 1.8 0.75h0C20.61 19 21.8 17.63 21.58 16.09zM7.47 7h9.06c0.33 0 0.61 0.28 0.64 0.62l0.83 5.83c0.02 0.17-0.13 0.32-0.3 0.32H6.3c-0.17 0-0.32-0.15-0.3-0.32l0.83-5.83C6.86 7.28 7.14 7 7.47 7z"/>
+                        </svg>
+                    </div>
+                    <span>Good games</span>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0L19.2 12l-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
+                        </svg>
+                    </div>
+                    <span>1000+ scripts</span>
+                </li>
+                <li class="feature-item">
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1L13.5 2.5L16.17 5.17C15.24 5.06 14.32 5 13.38 5C10.38 5.01 7.7 6.27 5.75 8.25C5.19 8.81 5.19 9.69 5.75 10.25L7.5 12L5.75 13.75C5.19 14.31 5.19 15.19 5.75 15.75C7.7 17.73 10.38 18.99 13.38 19C14.32 19 15.24 18.94 16.17 18.83L13.5 21.5L15 23L21 17V15H19L17.83 16.17C16.74 16.06 15.56 16 14.38 16C12.15 16 10.13 15.08 8.67 13.67L10.33 12L8.67 10.33C10.13 8.92 12.15 8 14.38 8C15.56 8 16.74 7.94 17.83 7.83L19 9H21Z"/>
+                        </svg>
+                    </div>
+                    <span>User friendly interface</span>
+                </li>
+            </ul>
+            
+            <div class="click-hint">Click to view pricing</div>
+        </div>
+    </div>
+
+    <!-- Product Selection Popup -->
+    <div class="popup-overlay" id="productPopup">
+        <div class="popup-content">
+            <button class="close-btn" onclick="closeProductPopup()">&times;</button>
+            
+            <div class="product-tabs">
+                <div class="product-tab active" onclick="switchProduct('standard')">STANDARD</div>
+                <div class="product-tab" onclick="switchProduct('premium')">PREMIUM</div>
+                <div class="product-tab" onclick="switchProduct('exclusive')">GG EXCLUSIVE</div>
+            </div>
+
+            <div id="productContent">
+                <!-- Product content will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Popup -->
+    <div class="checkout-overlay" id="checkoutPopup">
+        <div class="container">
+            <div class="card cart">
+                <label class="checkout-title">Checkout</label>
+                <div class="steps">
+                    <div class="step">
+                        <span>Discord Username</span>
+                        <input type="text" id="discordUsername" class="input_field" placeholder="Enter your Discord username">
+                    </div>
+                    
+                    <div class="step">
+                        <span>Payment Method</span>
+                        <ul class="menu">
+                            <li class="item">
+                                <a href="#" class="link" id="paymentMethodDisplay">
+                                    <span>Select Payment Method</span>
+                                    <svg viewBox="0 0 360 360" xml:space="preserve">
+                                        <g id="SVGRepo_iconCarrier">
+                                            <path id="XMLID_225_" d="M325.607,79.393c-5.857-5.857-15.355-5.858-21.213,0.001l-139.39,139.393L25.607,79.393 c-5.857-5.857-15.355-5.858-21.213,0.001c-5.858,5.858-5.858,15.355,0,21.213l150.004,150c2.813,2.813,6.628,4.393,10.606,4.393 s7.794-1.581,10.606-4.394l149.996-150C331.465,94.749,331.465,85.251,325.607,79.393z"></path>
+                                        </g>
+                                    </svg>
+                                </a>
+                                <ul class="submenu">
+                                    <li class="submenu-item"><a href="#" class="submenu-link" onclick="selectPaymentMethod('PayPal')">PayPal</a></li>
+                                    <li class="submenu-item"><a href="#" class="submenu-link" onclick="selectPaymentMethod('Cash App')">Cash App</a></li>
+                                    <li class="submenu-item"><a href="#" class="submenu-link" onclick="selectPaymentMethod('Crypto')">Crypto</a></li>
+                                    <li class="submenu-item"><a href="#" class="submenu-link" onclick="selectPaymentMethod('Gcash')">Gcash</a></li>
+                                    <li class="submenu-item"><a href="#" class="submenu-link" onclick="selectPaymentMethod('Robux')">Robux</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="order-id-section">
+                        <span>Order ID</span>
+                        <div class="order-id-display">
+                            <div class="order-id-text" id="orderIdDisplay"></div>
+                            <button class="copy-btn" id="copyOrderIdBtn" onclick="copyOrderId()">Copy</button>
+                        </div>
+                        <p>You must copy the Order ID before proceeding</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card promo">
+                <label class="checkout-title">Have A Promo Code?</label>
+                <div class="form">
+                    <input type="text" id="promoCode" class="input_field" placeholder="Enter promo code">
+                    <button onclick="applyPromoCode()">Apply</button>
+                </div>
+                <div class="promo-message" id="promoMessage"></div>
+            </div>
+
+            <div class="card checkout">
+                <label class="checkout-title">Checkout</label>
+                <div class="details">
+                    <span>Subscription:</span>
+                    <span id="checkoutSubscription">STANDARD</span>
+                    <span>Duration:</span>
+                    <span id="checkoutDuration">30D KEY</span>
+                    <span>Price:</span>
+                    <span id="checkoutPrice">$15</span>
+                    <span>Discount:</span>
+                    <span id="checkoutDiscount">$0</span>
+                </div>
+                <div class="checkout--footer">
+                    <label class="price" id="checkoutTotal">$15</label>
+                    <button class="checkout-btn" id="checkoutBtn" onclick="proceedToOrderConfirmation()" disabled>Checkout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Confirmation Popup -->
+    <div class="order-confirmation-overlay" id="orderConfirmationPopup">
+        <div class="order-confirmation-popup">
+            <h2 class="order-confirmation-title">Order Confirmation</h2>
+            <p class="order-confirmation-text">
+                Be sure you are on our Discord server as you will need to send us a screenshot of your order details in the following format:
+            </p>
+            
+            <div class="order-details-format">
+                <h4>Required Format:</h4>
+                <p>Discord Username: <span id="confirmDiscordUsername"></span></p>
+                <p>MOP: <span id="confirmPaymentMethod"></span></p>
+                <p>Subscription: <span id="confirmSubscription"></span></p>
+                <p>Order ID: <span id="confirmOrderId"></span></p>
+            </div>
+            
+            <div>
+                <button class="confirm-order-btn" onclick="confirmOrder()">Confirm Order</button>
+                <button class="cancel-order-btn" onclick="cancelOrder()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Added Discord Join Popup -->
+    <div class="discord-join-overlay" id="discordJoinPopup">
+        <div class="discord-join-popup">
+            <h2 class="discord-join-title">Order Logged Successfully!</h2>
+            <p class="discord-join-text">
+                Don't worry, we know about your order as all orders are being logged automatically. 
+                The screenshot is just for backup purposes.
+            </p>
+            <a href="https://discord.gg/EUfjeZ65HP" target="_blank" class="discord-join-btn">
+                Join Discord Server
+            </a>
+        </div>
+    </div>
+
+    <script>
+        let currentProduct = 'standard';
+        let selectedPaymentMethod = '';
+        let currentOrderId = '';
+        let orderIdCopied = false;
+        let appliedDiscount = 0;
+
+        const products = {
+            standard: {
+                name: 'STANDARD',
+                duration: '30D KEY',
+                price: 15,
+                robux: '1800 RBX',
+                gcash: '₱856.4526',
+                features: [
+                    'Basic script access',
+                    'Community support',
+                    '30-day access',
+                    'Standard updates'
+                ]
+            },
+            premium: {
+                name: 'PREMIUM',
+                duration: '90D KEY',
+                price: 30,
+                robux: '3200 RBX',
+                gcash: '₱1,712.9051',
+                features: [
+                    'Premium script library',
+                    'Priority support',
+                    '90-day access',
+                    'Weekly updates',
+                    'Advanced features'
+                ]
+            },
+            exclusive: {
+                name: 'GG EXCLUSIVE',
+                duration: 'LIFETIME',
+                price: 50,
+                robux: '7000 RBX',
+                gcash: '₱3,996.7786',
+                features: [
+                    'Full script collection',
+                    'VIP support 24/7',
+                    'Lifetime access',
+                    'Daily updates',
+                    'Exclusive content',
+                    'Beta features'
+                ]
+            }
+        };
+
+        const promoCodes = {
+            'SuutashW': 0.3,
+            'LennySpecial': 0.3,
+            'UziDoozi': 0.3,
+            'DoxyToxy': 0.3,
+            'NotepadBotfrag': 0.3
+        };
+
+        // Generate stars
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Cursor tilt effect
+        function handleMouseMove(e) {
+            const card = document.getElementById('cardContainer');
+            const rect = card.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            const rotateX = (e.clientY - centerY) / 8;
+            const rotateY = (centerX - e.clientX) / 8;
+            
+            card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        }
+
+        function handleMouseLeave() {
+            const card = document.getElementById('cardContainer');
+            card.style.transform = 'rotateX(0deg) rotateY(0deg)';
+        }
+
+        // Product popup functions
+        function openProductPopup() {
+            document.getElementById('productPopup').classList.add('show');
+            switchProduct('standard');
+        }
+
+        function closeProductPopup() {
+            document.getElementById('productPopup').classList.remove('show');
+        }
+
+        function switchProduct(productType) {
+            currentProduct = productType;
+            const product = products[productType];
+            
+            // Update active tab
+            document.querySelectorAll('.product-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update product content
+            const content = `
+                <div class="header">
+                    <p class="title">${product.name}</p>
+                    <div class="price-container">
+                        <span>$</span>
+                        <span>${product.price}</span>
+                        <span>/mo</span>
+                    </div>
+                    <p style="text-align: center; color: #888; margin-top: 10px;">${product.duration} • ${product.robux}</p>
+                </div>
+                <div class="lists">
+                    ${product.features.map(feature => `
+                        <div class="list">
+                            <span>
+                                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </span>
+                            <p>${feature}</p>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="button-container">
+                    <button onclick="openCheckout()">Buy Now</button>
+                </div>
+            `;
+            
+            document.getElementById('productContent').innerHTML = content;
+        }
+
+        // Checkout functions
+        function openCheckout() {
+            closeProductPopup();
+            document.getElementById('checkoutPopup').classList.add('show');
+            
+            // Generate new order ID
+            currentOrderId = 'GX-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+            document.getElementById('orderIdDisplay').textContent = currentOrderId;
+            orderIdCopied = false;
+            document.getElementById('copyOrderIdBtn').textContent = 'Copy';
+            document.getElementById('copyOrderIdBtn').classList.remove('copied');
+            
+            // Update checkout details
+            updateCheckoutDetails();
+        }
+
+        function closeCheckout() {
+            document.getElementById('checkoutPopup').classList.remove('show');
+        }
+
+        function updateCheckoutDetails() {
+            const product = products[currentProduct];
+            const originalPrice = product.price;
+            const discountAmount = originalPrice * appliedDiscount;
+            const finalPrice = originalPrice - discountAmount;
+            
+            if (selectedPaymentMethod === 'Robux') {
+                const robuxPrice = parseInt(product.robux.replace(' RBX', ''));
+                const robuxDiscount = robuxPrice * appliedDiscount;
+                const finalRobuxPrice = robuxPrice - robuxDiscount;
+                
+                document.getElementById('checkoutSubscription').textContent = product.name;
+                document.getElementById('checkoutDuration').textContent = product.duration;
+                document.getElementById('checkoutPrice').textContent = `${robuxPrice} RBX`;
+                document.getElementById('checkoutDiscount').textContent = appliedDiscount > 0 ? `-${Math.round(robuxDiscount)} RBX` : '0 RBX';
+                document.getElementById('checkoutTotal').textContent = `${Math.round(finalRobuxPrice)} RBX`;
+            } else if (selectedPaymentMethod === 'Gcash') {
+                const pesoPrice = parseFloat(product.gcash.replace('₱', ''));
+                const pesoDiscount = pesoPrice * appliedDiscount;
+                const finalPesoPrice = pesoPrice - pesoDiscount;
+                
+                document.getElementById('checkoutSubscription').textContent = product.name;
+                document.getElementById('checkoutDuration').textContent = product.duration;
+                document.getElementById('checkoutPrice').textContent = `₱${pesoPrice.toFixed(4)}`;
+                document.getElementById('checkoutDiscount').textContent = appliedDiscount > 0 ? `-₱${pesoDiscount.toFixed(4)}` : '₱0';
+                document.getElementById('checkoutTotal').textContent = `₱${finalPesoPrice.toFixed(4)}`;
+            } else {
+                document.getElementById('checkoutSubscription').textContent = product.name;
+                document.getElementById('checkoutDuration').textContent = product.duration;
+                document.getElementById('checkoutPrice').textContent = `$${originalPrice}`;
+                document.getElementById('checkoutDiscount').textContent = appliedDiscount > 0 ? `-$${discountAmount.toFixed(2)}` : '$0';
+                document.getElementById('checkoutTotal').textContent = `$${finalPrice.toFixed(2)}`;
+            }
+            
+            updateCheckoutButton();
+        }
+
+        function selectPaymentMethod(method) {
+            selectedPaymentMethod = method;
+            document.getElementById('paymentMethodDisplay').innerHTML = `
+                <span>${method}</span>
+                <svg viewBox="0 0 360 360" xml:space="preserve">
+                    <g id="SVGRepo_iconCarrier">
+                        <path id="XMLID_225_" d="M325.607,79.393c-5.857-5.857-15.355-5.858-21.213,0.001l-139.39,139.393L25.607,79.393 c-5.857-5.857-15.355-5.858-21.213,0.001c-5.858,5.858-5.858,15.355,0,21.213l150.004,150c2.813,2.813,6.628,4.393,10.606,4.393 s7.794-1.581,10.606-4.394l149.996-150C331.465,94.749,331.465,85.251,325.607,79.393z"></path>
+                    </g>
+                </svg>
+            `;
+            updateCheckoutDetails();
+            updateCheckoutButton();
+        }
+
+        function copyOrderId() {
+            navigator.clipboard.writeText(currentOrderId).then(() => {
+                orderIdCopied = true;
+                document.getElementById('copyOrderIdBtn').textContent = 'Copied!';
+                document.getElementById('copyOrderIdBtn').classList.add('copied');
+                updateCheckoutButton();
+            });
+        }
+
+        function applyPromoCode() {
+            const code = document.getElementById('promoCode').value.trim();
+            const messageEl = document.getElementById('promoMessage');
+            
+            if (promoCodes[code]) {
+                appliedDiscount = promoCodes[code];
+                messageEl.textContent = `Promo code applied! ${(appliedDiscount * 100)}% discount`;
+                messageEl.className = 'promo-message success';
+                updateCheckoutDetails();
+            } else {
+                messageEl.textContent = 'Invalid promo code';
+                messageEl.className = 'promo-message error';
+            }
+        }
+
+        function updateCheckoutButton() {
+            const discordUsername = document.getElementById('discordUsername').value.trim();
+            const canCheckout = discordUsername && selectedPaymentMethod && orderIdCopied;
+            
+            document.getElementById('checkoutBtn').disabled = !canCheckout;
+        }
+
+        function proceedToOrderConfirmation() {
+            const discordUsername = document.getElementById('discordUsername').value.trim();
+            
+            if (!discordUsername || !selectedPaymentMethod || !orderIdCopied) {
+                alert('Please fill in all required fields and copy the Order ID');
+                return;
+            }
+            
+            // Update confirmation popup with user details
+            document.getElementById('confirmDiscordUsername').textContent = discordUsername;
+            document.getElementById('confirmPaymentMethod').textContent = selectedPaymentMethod;
+            document.getElementById('confirmSubscription').textContent = products[currentProduct].name;
+            document.getElementById('confirmOrderId').textContent = currentOrderId;
+            
+            // Show order confirmation popup
+            document.getElementById('checkoutPopup').classList.remove('show');
+            document.getElementById('orderConfirmationPopup').classList.add('show');
+        }
+
+        function confirmOrder() {
+            const discordUsername = document.getElementById('discordUsername').value.trim();
+            const product = products[currentProduct];
+            const originalPrice = product.price;
+            const discountAmount = originalPrice * appliedDiscount;
+            const finalPrice = originalPrice - discountAmount;
+            
+            // Send to Discord webhook
+            const webhookData = {
+                embeds: [{
+                    title: "🎮 New Galaxia Order",
+                    color: 0x8b5cf6,
+                    fields: [
+                        {
+                            name: "Discord Username",
+                            value: discordUsername,
+                            inline: true
+                        },
+                        {
+                            name: "Payment Method",
+                            value: selectedPaymentMethod,
+                            inline: true
+                        },
+                        {
+                            name: "Subscription",
+                            value: `${product.name} (${product.duration})`,
+                            inline: true
+                        },
+                        {
+                            name: "Order ID",
+                            value: currentOrderId,
+                            inline: true
+                        },
+                        {
+                            name: "Price",
+                            value: appliedDiscount > 0 ? `~~$${originalPrice}~~ $${finalPrice.toFixed(2)}` : `$${finalPrice.toFixed(2)}`,
+                            inline: true
+                        },
+                        {
+                            name: "Discount Applied",
+                            value: appliedDiscount > 0 ? `${(appliedDiscount * 100)}%` : "None",
+                            inline: true
+                        }
+                    ],
+                    timestamp: new Date().toISOString(),
+                    footer: {
+                        text: "Galaxia Serverside"
+                    }
+                }]
+            };
+            
+            fetch('https://discord.com/api/webhooks/1408041573631004682/8GvQSNAUvscajMXeLxg9bxx2aVMFCZ04hDCZBiLAm3uDjLSmcn6wZnPDq3ogPCrfyAOV', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(webhookData)
+            }).then(() => {
+                closeOrderConfirmation();
+                document.getElementById('discordJoinPopup').classList.add('show');
+                resetForm();
+            }).catch(() => {
+                closeOrderConfirmation();
+                document.getElementById('discordJoinPopup').classList.add('show');
+                resetForm();
+            });
+        }
+
+        function cancelOrder() {
+            closeOrderConfirmation();
+            document.getElementById('checkoutPopup').classList.add('show');
+        }
+
+        function closeOrderConfirmation() {
+            document.getElementById('orderConfirmationPopup').classList.remove('show');
+        }
+
+        function resetForm() {
+            document.getElementById('discordUsername').value = '';
+            document.getElementById('promoCode').value = '';
+            document.getElementById('promoMessage').textContent = '';
+            selectedPaymentMethod = '';
+            appliedDiscount = 0;
+            orderIdCopied = false;
+            document.getElementById('paymentMethodDisplay').innerHTML = `
+                <span>Select Payment Method</span>
+                <svg viewBox="0 0 360 360" xml:space="preserve">
+                    <g id="SVGRepo_iconCarrier">
+                        <path id="XMLID_225_" d="M325.607,79.393c-5.857-5.857-15.355-5.858-21.213,0.001l-139.39,139.393L25.607,79.393 c-5.857-5.857-15.355-5.858-21.213,0.001c-5.858,5.858-5.858,15.355,0,21.213l150.004,150c2.813,2.813,6.628,4.393,10.606,4.393 s7.794-1.581,10.606-4.394l149.996-150C331.465,94.749,331.465,85.251,325.607,79.393z"></path>
+                    </g>
+                </svg>
+            `;
+            updateCheckoutDetails();
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            createStars();
+            
+            const cardContainer = document.getElementById('cardContainer');
+            cardContainer.addEventListener('mousemove', handleMouseMove);
+            cardContainer.addEventListener('mouseleave', handleMouseLeave);
+            cardContainer.addEventListener('click', openProductPopup);
+            
+            // Update checkout button when inputs change
+            document.getElementById('discordUsername').addEventListener('input', updateCheckoutButton);
+            
+            // Close popups when clicking outside
+            document.getElementById('productPopup').addEventListener('click', function(e) {
+                if (e.target === this) closeProductPopup();
+            });
+            
+            document.getElementById('checkoutPopup').addEventListener('click', function(e) {
+                if (e.target === this) closeCheckout();
+            });
+            
+            document.getElementById('orderConfirmationPopup').addEventListener('click', function(e) {
+                if (e.target === this) cancelOrder();
+            });
+        });
+    </script>
+</body>
+</html>
