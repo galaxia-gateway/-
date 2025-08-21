@@ -1015,7 +1015,7 @@
                 <li class="feature-item">
                     <div class="feature-icon">
                         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 1C7.03 1 3 5.03 3 10v4c0 1.66 1.34 3 3 3h1v-6H6c-0.55 0-1 0.45-1 1v2c0 0.55 0.45 1 1 1h1v2c0 1.66 1.34 3 3 3h4c1.66 0 3-1.3 1.66 1.34 3 3 3h4c1.66 0 3-1.34 3-3v-2h1c0.55 0 1-0.45 1-1v-2c0-0.55-0.45-1-1-1h-1v-6h1c1.66 0 3 1.34 3 3v4c0 4.97-4.03 9-9 9s-9-4.03-9-9v-4c0-4.97 4.03-9 9-9s9 4.03 9 9z"/>
+                            <path d="M12 1C7.03 1 3 5.03 3 10v4c0 1.66 1.34 3 3 3h1v-6H6c-0.55 0-1 0.45-1 1v2c0 0.55 0.45 1 1 1h1v2c0 1.66 1.34 3 3 3h4c1.66 0 3-1.3 1.66 1.34 3 3 3h4c1.66 0 3-1.3 1.66 1.34 3 3 3h4c1.66 0 3-1.34 3-3v-2h1c0.55 0 1-0.45 1-1v-2c0-0.55-0.45-1-1-1h-1v-6h1c1.66 0 3 1.34 3 3v4c0 4.97-4.03 9-9 9s-9-4.03-9-9v-4c0-4.97 4.03-9 9-9s9 4.03 9 9z"/>
                         </svg>
                     </div>
                     <span>24/7 support</span>
@@ -1066,7 +1066,7 @@
             <div class="product-tabs">
                 <div class="product-tab active" onclick="switchProduct('standard')">STANDARD</div>
                 <div class="product-tab" onclick="switchProduct('premium')">PREMIUM</div>
-                <div class="product-tab" onclick="switchProduct('exclusive')">GG EXCLUSIVE</div>
+                <div class="product-tab" onclick="switchProduct('exclusive')">EXCLUSIVE</div>
             </div>
 
             <div id="productContent">
@@ -1215,25 +1215,25 @@
                 gcash: '₱1,712.9051',
                 features: [
                     'Premium script library',
-                    'Priority support',
+                    'has restrictions',
                     '90-day access',
-                    'Weekly updates',
-                    'Advanced features'
+                    'Good games',
+                    'Advanced Quick Buttons'
                 ]
             },
             exclusive: {
-                name: 'GG EXCLUSIVE',
+                name: 'EXCLUSIVE',
                 duration: 'LIFETIME',
-                price: 50,
+                price: 70,
                 robux: '7000 RBX',
                 gcash: '₱3,996.7786',
                 features: [
                     'Full script collection',
-                    'VIP support 24/7',
+                    'Best Games',
                     'Lifetime access',
                     'Daily updates',
-                    'Exclusive content',
-                    'Beta features'
+                    '0 Restrictions',
+                    'NO STOCK'
                 ]
             }
         };
@@ -1244,7 +1244,11 @@
             'UziDoozi': 0.3,
             'DoxyToxy': 0.3,
             'NotepadBotfrag': 0.3,
-            'COOKED': 0.9 // Added new promo code
+            'COOKED': 0.9, // Added new promo code
+            'HolyBuackaMoly': 0.8, // 80% off
+            'HolyPresentoyDaMiracleDeTotoy': 7.77, // 777% off
+            'Pneumonoultramicroscopicsilicovolcanoconiosis': 6767.67, // 676767% off
+            'Trybetteraureus': 0.5 // 50% off
         };
 
         // Generate stars
@@ -1303,7 +1307,7 @@
                     <div class="price-container">
                         <span>$</span>
                         <span>${product.price}</span>
-                        <span>/mo</span>
+                        <span></span>
                     </div>
                     <p style="text-align: center; color: #888; margin-top: 10px;">${product.duration} • ${product.robux}</p>
                 </div>
