@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Galaxia Converter</title>
+
+   <link rel="website icon" type="png"
+    href="galaxia.png">
+  <style>
+    :root {
+      --bg:#0b1220;
+      --panel:#111a2b;
+      --panel-2:#0f1626;
+      --text:#e8eefc;
+      --muted:#9fb0d3;
+      --accent:#3b82f6;
+      --accent-2:#22d3ee;
+      --ring: 0 0 0 3px rgba(59,130,246,.35);
+    }
+    * { box-sizing:border-box }
+    body {
+      margin:0;
+      font-family: system-ui, sans-serif;
+      background: radial-gradient(1000px 800px at 20% -10%, rgba(59,130,246,.15), transparent 60%),
+                  radial-gradient(1000px 600px at 120% 10%, rgba(34,211,238,.12), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      padding:20px;
+    }
+    h1 { text-align:center; font-size:2em; margin-bottom:30px }
+    .card {
+      max-width:500px;
+      margin:20px auto;
+      padding:20px;
+      border-radius:16px;
+      background: linear-gradient(180deg,var(--panel),var(--panel-2));
+      box-shadow: 0 8px 24px rgba(0,0,0,.4);
+    }
+    .card h2 { margin-top:0; font-size:1.3em }
+    input, button {
+      width:100%;
+      padding:12px;
+      margin:8px 0;
+      border:none;
+      border-radius:10px;
+      font-size:1em;
+    }
+    input { background:#0c1322; color:var(--text) }
+    input:focus { outline:none; box-shadow:var(--ring); border:1px solid var(--accent) }
+    button {
+      background: linear-gradient(180deg, var(--accent), #245ec8);
+      color:white;
+      font-weight:bold;
+      cursor:pointer;
+    }
+    button:hover { opacity:.9 }
+    .result { margin-top:10px; font-size:1.2em; font-weight:bold }
+  </style>
+</head>
+<body>
+  <h1>🌌 Galaxia Converter 🌌</h1>
+
+  <div class="card">
+    <h2>USD ➝ Robux</h2>
+    <input type="number" id="usdInput" placeholder="Enter USD (e.g., 200)">
+    <input type="number" id="usdToRbxRate" placeholder="Robux per $1" value="100">
+    <button onclick="usdToRobux()">Convert</button>
+    <div class="result" id="usdToRobuxResult"></div>
+  </div>
+
+  <div class="card">
+    <h2>Robux ➝ USD</h2>
+    <input type="number" id="rbxInput" placeholder="Enter Robux">
+    <input type="number" id="rbxToUsdRate" placeholder="Robux per $1" value="100">
+    <button onclick="robuxToUsd()">Convert</button>
+    <div class="result" id="robuxToUsdResult"></div>
+  </div>
+
+  <div class="card">
+    <h2>USD ➝ PHP</h2>
+    <input type="number" id="usdPhpInput" placeholder="Enter USD">
+    <input type="number" id="usdPhpRate" placeholder="₱ per $1" value="56">
+    <button onclick="usdToPhp()">Convert</button>
+    <div class="result" id="usdPhpResult"></div>
+  </div>
+
+  <div class="card">
+    <h2>PHP ➝ USD</h2>
+    <input type="number" id="phpUsdInput" placeholder="Enter PHP">
+    <input type="number" id="phpUsdRate" placeholder="₱ per $1" value="56">
+    <button onclick="phpToUsd()">Convert</button>
+    <div class="result" id="phpUsdResult"></div>
+  </div>
+
+  <div class="card">
+    <h2>Discount Calculator</h2>
+    <input type="number" id="priceInput" placeholder="Original Price">
+    <input type="number" id="discountInput" placeholder="Discount %">
+    <button onclick="discountCalc()">Calculate</button>
+    <div class="result" id="discountResult"></div>
+  </div>
+
+  <script>
+    function usdToRobux(){
+      const usd = parseFloat(document.getElementById('usdInput').value);
+      const rate = parseFloat(document.getElementById('usdToRbxRate').value);
+      if(!isNaN(usd) && !isNaN(rate) && rate > 0){
+        document.getElementById('usdToRobuxResult').innerText = (usd * rate).toFixed(2) + " Robux";
+      }
+    }
+    function robuxToUsd(){
+      const rbx = parseFloat(document.getElementById('rbxInput').value);
+      const rate = parseFloat(document.getElementById('rbxToUsdRate').value);
+      if(!isNaN(rbx) && !isNaN(rate) && rate > 0){
+        document.getElementById('robuxToUsdResult').innerText = "$" + (rbx / rate).toFixed(2);
+      }
+    }
+    function usdToPhp(){
+      const usd = parseFloat(document.getElementById('usdPhpInput').value);
+      const rate = parseFloat(document.getElementById('usdPhpRate').value);
+      if(!isNaN(usd) && !isNaN(rate) && rate > 0){
+        document.getElementById('usdPhpResult').innerText = "₱" + (usd * rate).toFixed(2);
+      }
+    }
+    function phpToUsd(){
+      const php = parseFloat(document.getElementById('phpUsdInput').value);
+      const rate = parseFloat(document.getElementById('phpUsdRate').value);
+      if(!isNaN(php) && !isNaN(rate) && rate > 0){
+        document.getElementById('phpUsdResult').innerText = "$" + (php / rate).toFixed(2);
+      }
+    }
+    function discountCalc(){
+      const price = parseFloat(document.getElementById('priceInput').value);
+      const discount = parseFloat(document.getElementById('discountInput').value);
+      if(!isNaN(price) && !isNaN(discount)){
+        const finalPrice = price - (price * (discount/100));
+        document.getElementById('discountResult').innerText = "Final Price: $" + finalPrice.toFixed(2);
+      }
+    }
+  </script>
+</body>
+</html>
