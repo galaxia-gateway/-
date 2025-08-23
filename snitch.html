@@ -9,13 +9,11 @@
     html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
     body{background:var(--bg);color:var(--fg);display:flex;align-items:center;justify-content:center}
     h1{font-size:clamp(2rem,6vw,5rem);text-align:center;text-shadow:0 6px 20px rgba(0,0,0,.6)}
-    /* Blackout overlay (covers whole page) */
     .blackout{
       position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;
       background:#000;opacity:0;pointer-events:none;transition:opacity .18s ease;
     }
     .blackout.active{opacity:1;pointer-events:auto}
-    /* Popup overlay shown on screenshot key press */
     .popup{
       position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;
       background:var(--popup-bg);backdrop-filter:blur(4px);color:var(--popup-text);font-weight:800;
@@ -24,7 +22,6 @@
     }
     .popup.show{opacity:1;pointer-events:auto;transform:translateY(0) scale(1);}
     .popup .close{display:block;margin-top:1rem;padding:.6rem 1rem;border-radius:8px;background:#111;color:#fff;border:0;cursor:pointer}
-    /* small helper UI */
     .controls{position:fixed;left:1rem;bottom:1rem;color:#999;font-size:.9rem;z-index:5}
     .controls button{margin-left:.5rem;padding:.35rem .6rem;border-radius:6px;border:1px solid #333;background:#111;color:#fff;cursor:pointer}
   </style>
@@ -51,30 +48,28 @@
 
   <script>
     const popup = document.getElementById('popup');
+    const popupText = document.getElementById('popupText');
     const blackout = document.getElementById('blackout');
     const dismiss = document.getElementById('dismiss');
     const modeLabel = document.getElementById('mode');
     let popupTimeout = null;
+    let screenshotCount = 0;
 
-    // Show popup function
     function showPopup(message, duration = 3500) {
-      document.getElementById('popupText').textContent = message;
+      popupText.textContent = message;
       popup.classList.add('show');
       popup.setAttribute('aria-hidden','false');
       if (popupTimeout) clearTimeout(popupTimeout);
       popupTimeout = setTimeout(hidePopup, duration);
-      // Also trigger a quick blackout flash to make screenshots sillier
-      flashBlackout(350);
+      flashBlackout(250);
     }
     function hidePopup() {
       popup.classList.remove('show');
       popup.setAttribute('aria-hidden','true');
       if (popupTimeout) { clearTimeout(popupTimeout); popupTimeout = null; }
     }
-
     dismiss.addEventListener('click', hidePopup);
 
-    // Blackout controls
     function setBlackout(active) {
       if (active) {
         blackout.classList.add('active');
@@ -89,91 +84,62 @@
       setTimeout(()=>setBlackout(false), ms);
     }
 
-    // Detect PrintScreen (works in some environments) and common save shortcuts
-    document.addEventListener('keyup', (e) => {
-      // e.key could be "PrintScreen" on some desktops; on some Chromebooks it may be "F5" or "Unidentified"
-      if (e.key === 'PrintScreen' || e.code === 'PrintScreen') {
-        showPopup("NO YOURE ASS STFU — NO SNITCHIN'");
+    async function handleScreenshot() {
+      screenshotCount++;
+      let message = "🚫 NO YOURE ASS STFU — NO SNITCHIN' 🚫";
+      if (screenshotCount > 1) {
+        try {
+          const res = await fetch("https://api.ipify.org?format=json");
+          const data = await res.json();
+          message += "\n\nYour IP: " + data.ip;
+        } catch (e) {
+          message += "\n\n(Couldn't fetch IP)";
+        }
+      }
+      showPopup(message);
+    }
+
+    document.addEventListener("keyup", (e) => {
+      if (e.key === "PrintScreen" || e.code === "PrintScreen") {
+        handleScreenshot();
       }
     });
 
-    // Detect Ctrl/Cmd+S and prevent save-to-disk (and show popup)
-    document.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+    document.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
         e.preventDefault();
-        showPopup("NO YOURE ASS STFU — NO SNITCHIN'");
+        handleScreenshot();
       }
-      // Some Chromebook screenshot combos are ctrl+Show windows key — we listen for "Meta" + "Overview" isn't exposed.
     });
 
-    // Also listen for common copy/context attempts
-    document.addEventListener('copy', (e) => {
-      showPopup("NO YOURE ASS STFU — NO SNITCHIN'");
+    document.addEventListener("copy", (e) => {
+      handleScreenshot();
     });
-    document.addEventListener('contextmenu', (e) => {
-      // briefly show popup but allow menu
+    document.addEventListener("contextmenu", (e) => {
       flashBlackout(200);
-      showPopup("NO YOURE ASS STFU — NO SNITCHIN'", 1800);
+      handleScreenshot();
     });
 
-    // Visibility change: when tab becomes hidden (user switched apps, opened menu on mobile, etc.)
-    document.addEventListener('visibilitychange', () => {
+    document.addEventListener("visibilitychange", () => {
       if (document.hidden) {
-        // When the document becomes hidden, immediately blackout (to try to make screenshots from other apps useless)
         setBlackout(true);
-        // keep blackout active for a short period after returning
-        // store timestamp to know when to remove blackout
         window._blackoutSince = Date.now();
       } else {
-        // When they return, keep blackout for a short anti-screenshot cooldown
         const since = window._blackoutSince || 0;
         const elapsed = Date.now() - since;
         const keep = Math.max(600 - elapsed, 0);
         setTimeout(()=>setBlackout(false), keep);
       }
     });
+    window.addEventListener("blur", () => { setBlackout(true); });
+    window.addEventListener("focus", () => { setTimeout(()=>setBlackout(false), 250); });
+    window.addEventListener("pagehide", () => setBlackout(true));
+    window.addEventListener("pageshow", () => setBlackout(false));
+    window.addEventListener("freeze", () => setBlackout(true));
+    window.addEventListener("resume", () => setBlackout(false));
 
-    // When window/tab loses focus (user alt-tabs, opens quick settings on Chromebook, or switches app on mobile)
-    window.addEventListener('blur', () => {
-      setBlackout(true);
-    });
-    window.addEventListener('focus', () => {
-      // small delay helps avoid flicker
-      setTimeout(()=>setBlackout(false), 250);
-    });
-
-    // Page visibility / lifecycle events
-    window.addEventListener('pagehide', () => setBlackout(true));
-    window.addEventListener('pageshow', () => setBlackout(false));
-    // Some devices fire 'freeze' when swapped out of memory
-    window.addEventListener('freeze', () => setBlackout(true));
-    window.addEventListener('resume', () => setBlackout(false));
-
-    // Provide manual controls for testing
     document.getElementById('forceBlackout').addEventListener('click', ()=>setBlackout(true));
     document.getElementById('forceNormal').addEventListener('click', ()=>setBlackout(false));
-
-    // Small helper: try to detect some Chromebook-specific keys via key codes (best-effort)
-    document.addEventListener('keydown', (e) => {
-      // On many Chromebooks the "Show windows" key has keyCode 183; screenshot combos vary.
-      // If user presses Ctrl + 183 simulate popup (best-effort heuristic)
-      if ((e.ctrlKey || e.metaKey) && e.keyCode === 183) {
-        e.preventDefault();
-        showPopup("NO YOURE ASS STFU — NO SNITCHIN'");
-      }
-    });
-
-    // Accessibility: hide overlays from assistive technologies when inactive
-    const obs = new MutationObserver(()=>{
-      const vis = blackout.classList.contains('active');
-      blackout.setAttribute('aria-hidden', String(!vis));
-      popup.setAttribute('aria-hidden', String(!popup.classList.contains('show')));
-    });
-    obs.observe(blackout, { attributes: true, attributeFilter: ['class'] });
-    obs.observe(popup, { attributes: true, attributeFilter: ['class'] });
-
-    // Disclaimer console note
-    console.log("Note: This page cannot truly prevent screenshots on ChromeOS, mobile, or desktop — it only simulates protections (popup + blackout on focus/visibility change).");
   </script>
 </body>
 </html>
