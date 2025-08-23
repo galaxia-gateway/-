@@ -1,145 +1,155 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Galaxia Gateway — No Snitchin'</title>
+  <meta charset="UTF-8">
+  <title>Galaxia Gateway - No Snitchin</title>
   <style>
-    :root{--bg:#000;--fg:#00ff33;--popup-bg:rgba(0,0,0,.95);--popup-text:#ff4444}
-    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
-    body{background:var(--bg);color:var(--fg);display:flex;align-items:center;justify-content:center}
-    h1{font-size:clamp(2rem,6vw,5rem);text-align:center;text-shadow:0 6px 20px rgba(0,0,0,.6)}
-    .blackout{
-      position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;
-      background:#000;opacity:0;pointer-events:none;transition:opacity .18s ease;
+    body {
+      background: black;
+      color: white;
+      font-family: monospace;
+      text-align: center;
+      padding-top: 20vh;
+      transition: background 0.5s;
     }
-    .blackout.active{opacity:1;pointer-events:auto}
-    .popup{
-      position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;
-      background:var(--popup-bg);backdrop-filter:blur(4px);color:var(--popup-text);font-weight:800;
-      font-size:clamp(1.2rem,3vw,2.5rem);text-align:center;padding:2rem;transform:translateY(20px) scale(.98);
-      opacity:0;pointer-events:none;transition:opacity .18s ease,transform .18s cubic-bezier(.2,.9,.3,1);
+    #ipBox {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(255,0,0,0.85);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 18px;
+      display: none;
+      text-shadow: 0 0 10px red, 0 0 20px red;
+      z-index: 9999;
     }
-    .popup.show{opacity:1;pointer-events:auto;transform:translateY(0) scale(1);}
-    .popup .close{display:block;margin-top:1rem;padding:.6rem 1rem;border-radius:8px;background:#111;color:#fff;border:0;cursor:pointer}
-    .controls{position:fixed;left:1rem;bottom:1rem;color:#999;font-size:.9rem;z-index:5}
-    .controls button{margin-left:.5rem;padding:.35rem .6rem;border-radius:6px;border:1px solid #333;background:#111;color:#fff;cursor:pointer}
+    #banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: red;
+      color: white;
+      font-size: 22px;
+      font-weight: bold;
+      padding: 15px;
+      display: none;
+      text-shadow: 0 0 10px yellow, 0 0 20px yellow;
+      z-index: 9999;
+    }
+    .shake {
+      animation: shake 0.4s;
+    }
+    @keyframes shake {
+      0% { transform: translate(5px, 5px); }
+      25% { transform: translate(-5px, -5px); }
+      50% { transform: translate(5px, -5px); }
+      75% { transform: translate(-5px, 5px); }
+      100% { transform: translate(0,0); }
+    }
+    .blackout {
+      background: black !important;
+      color: black !important;
+    }
   </style>
 </head>
 <body>
-  <h1 id="title">Galaxia Gateway</h1>
-
-  <div class="blackout" id="blackout" aria-hidden="true"></div>
-
-  <div class="popup" id="popup" role="dialog" aria-modal="true" aria-hidden="true">
-    <div>
-      🚫 <span id="popupText">NO YOURE ASS STFU — NO SNITCHIN'</span> 🚫
-      <div style="text-align:center">
-        <button class="close" id="dismiss">Dismiss</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="controls">
-    Mode: <strong id="mode">Normal</strong>
-    <button id="forceBlackout">Force Blackout</button>
-    <button id="forceNormal">Unblackout</button>
-  </div>
+  <h1>🚫 Galaxia Gateway - NO SNITCHIN 🚫</h1>
+  <div id="ipBox"></div>
+  <div id="banner"></div>
 
   <script>
-    const popup = document.getElementById('popup');
-    const popupText = document.getElementById('popupText');
-    const blackout = document.getElementById('blackout');
-    const dismiss = document.getElementById('dismiss');
-    const modeLabel = document.getElementById('mode');
-    let popupTimeout = null;
-    let screenshotCount = 0;
+    let attempts = 0;
+    let userIP = "UNKNOWN";
 
-    function showPopup(message, duration = 3500) {
-      popupText.textContent = message;
-      popup.classList.add('show');
-      popup.setAttribute('aria-hidden','false');
-      if (popupTimeout) clearTimeout(popupTimeout);
-      popupTimeout = setTimeout(hidePopup, duration);
-      flashBlackout(250);
-    }
-    function hidePopup() {
-      popup.classList.remove('show');
-      popup.setAttribute('aria-hidden','true');
-      if (popupTimeout) { clearTimeout(popupTimeout); popupTimeout = null; }
-    }
-    dismiss.addEventListener('click', hidePopup);
-
-    function setBlackout(active) {
-      if (active) {
-        blackout.classList.add('active');
-        modeLabel.textContent = 'Blackout';
-      } else {
-        blackout.classList.remove('active');
-        modeLabel.textContent = 'Normal';
+    async function fetchIP() {
+      try {
+        let res = await fetch("https://api.ipify.org?format=json");
+        let data = await res.json();
+        userIP = data.ip;
+      } catch (e) {
+        userIP = "ERROR";
       }
     }
-    function flashBlackout(ms=250){
-      setBlackout(true);
-      setTimeout(()=>setBlackout(false), ms);
+    fetchIP();
+
+    function triggerBlackout() {
+      document.body.classList.add("blackout");
+      setTimeout(() => {
+        document.body.classList.remove("blackout");
+      }, 3000);
     }
 
-    async function handleScreenshot() {
-      screenshotCount++;
-      let message = "🚫 NO YOURE ASS STFU — NO SNITCHIN' 🚫";
-      if (screenshotCount > 1) {
-        try {
-          const res = await fetch("https://api.ipify.org?format=json");
-          const data = await res.json();
-          message += "\n\nYour IP: " + data.ip;
-        } catch (e) {
-          message += "\n\n(Couldn't fetch IP)";
+    function triggerShake() {
+      document.body.classList.add("shake");
+      setTimeout(() => {
+        document.body.classList.remove("shake");
+      }, 400);
+    }
+
+    function showBanner(msg) {
+      let banner = document.getElementById("banner");
+      banner.textContent = msg;
+      banner.style.display = "block";
+      setTimeout(() => { banner.style.display = "none"; }, 3000);
+    }
+
+    function showIPBox() {
+      let box = document.getElementById("ipBox");
+      box.textContent = "Your IP: " + userIP;
+      box.style.display = "block";
+    }
+
+    function handleSnitch() {
+      attempts++;
+      if (attempts === 1) {
+        alert("NO YOURE ASS STFU NO SNITCHIN\nYour IP: " + userIP);
+        triggerBlackout();
+        showIPBox();
+      } else if (attempts === 2) {
+        window.location.href = "https://en.wikipedia.org/wiki/Remote_access_trojan";
+      } else {
+        showBanner("⚠️ Snitch Attempt #" + attempts + " logged ⚠️");
+        triggerShake();
+        triggerBlackout();
+      }
+    }
+
+    // Detect screenshot keys
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "PrintScreen" || (e.ctrlKey && e.shiftKey && (e.key === "s" || e.key === "S"))) {
+        e.preventDefault();
+        handleSnitch();
+      }
+    });
+
+    // Detect refresh attempt (F5, Ctrl+R, browser reload)
+    window.addEventListener("beforeunload", (e) => {
+      localStorage.setItem("snitchIP", userIP);
+      localStorage.setItem("refreshSnitch", "true");
+    });
+
+    window.addEventListener("load", () => {
+      if (localStorage.getItem("refreshSnitch") === "true") {
+        localStorage.setItem("refreshSnitch", "false");
+        attempts++;
+        if (attempts === 1) {
+          alert("REFRESH ATTEMPT LOGGED!\nYour IP: " + localStorage.getItem("snitchIP"));
+          showIPBox();
+          showBanner("⚠️ Refresh Attempt Logged ⚠️");
+        } else if (attempts === 2) {
+          window.location.href = "https://en.wikipedia.org/wiki/Remote_access_trojan";
         }
       }
-      showPopup(message);
-    }
-
-    document.addEventListener("keyup", (e) => {
-      if (e.key === "PrintScreen" || e.code === "PrintScreen") {
-        handleScreenshot();
-      }
     });
 
-    document.addEventListener("keydown", (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
-        e.preventDefault();
-        handleScreenshot();
-      }
+    // Extra: blackout if they switch tabs
+    window.addEventListener("blur", () => {
+      triggerBlackout();
     });
-
-    document.addEventListener("copy", (e) => {
-      handleScreenshot();
-    });
-    document.addEventListener("contextmenu", (e) => {
-      flashBlackout(200);
-      handleScreenshot();
-    });
-
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden) {
-        setBlackout(true);
-        window._blackoutSince = Date.now();
-      } else {
-        const since = window._blackoutSince || 0;
-        const elapsed = Date.now() - since;
-        const keep = Math.max(600 - elapsed, 0);
-        setTimeout(()=>setBlackout(false), keep);
-      }
-    });
-    window.addEventListener("blur", () => { setBlackout(true); });
-    window.addEventListener("focus", () => { setTimeout(()=>setBlackout(false), 250); });
-    window.addEventListener("pagehide", () => setBlackout(true));
-    window.addEventListener("pageshow", () => setBlackout(false));
-    window.addEventListener("freeze", () => setBlackout(true));
-    window.addEventListener("resume", () => setBlackout(false));
-
-    document.getElementById('forceBlackout').addEventListener('click', ()=>setBlackout(true));
-    document.getElementById('forceNormal').addEventListener('click', ()=>setBlackout(false));
   </script>
 </body>
 </html>
