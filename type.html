@@ -19,12 +19,14 @@
   .controls{display:flex;gap:8px;margin-top:12px}
   button{padding:8px 12px;border-radius:8px;border:0;background:var(--accent);color:#021025;font-weight:600;cursor:pointer}
   .small{font-size:13px;color:var(--muted)}
+  .captchaBox{display:none;margin-top:16px;padding:12px;border-radius:8px;background:#111a33;color:white}
+  .captchaBox input{margin-top:8px;padding:6px;border-radius:6px;border:none;width:100%}
 </style>
 </head>
 <body>
   <div class="card" role="main">
     <h1>Type the Longest Words — by hand</h1>
-    <p>Type each word manually. Pasting and dropping is blocked. After you finish one word it automatically moves to the next (there are 6 words total).</p>
+    <p>Type each word manually. After finishing each word, you must solve a captcha to proceed. Fail 3 times and your progress resets.</p>
 
     <div class="small">Word <span id="wordIndex">1</span> of <span id="wordTotal">6</span></div>
     <div class="target" id="targetText">pneumonoultramicroscopicsilicovolcanoconiosis</div>
@@ -37,7 +39,15 @@
       <div id="message">Waiting for you to start typing.</div>
     </div>
 
-    <div class="hint">Pasting, dragging text, right-click paste, and Ctrl/Cmd+V are blocked. If you try to insert a wrong character it will be ignored. You can reset the current word or skip (skipping marks it as skipped).</div>
+    <div class="captchaBox" id="captchaBox">
+      <div id="captchaQuestion">Captcha question</div>
+      <div class="hint" id="captchaHint"></div>
+      <input type="text" id="captchaInput" placeholder="Type your answer..."/>
+      <button id="captchaSubmit">Submit</button>
+      <div class="small" id="captchaTries">Tries left: 3</div>
+    </div>
+
+    <div class="hint">Pasting, dragging text, right-click paste, and Ctrl/Cmd+V are blocked. Wrong input is ignored.</div>
 
     <div class="controls">
       <button id="resetBtn">Reset Word</button>
@@ -48,7 +58,6 @@
 
 <script>
 (function(){
-  // List of words: original + 5 more as requested
   const WORDS = [
     "pneumonoultramicroscopicsilicovolcanoconiosis",
     "hippopotomonstrosesquipedaliophobia",
@@ -58,8 +67,18 @@
     "antidisestablishmentarianism"
   ];
 
-  let currentIndex = 0; // 0-based
-  let prevValid = ""; // last valid typed prefix for current word
+  const CAPTCHAS = [
+    {q:"What comes out of a dick after having satisfaction?", a:"4", hint:"it's you're mom's grandkids."},
+    {q:"What is a different term for pussy?", a:"vagina", hint:"starts with V ends with A."},
+    {q:"Spell the word i suck dicks.", a:"i suck dicks", hint:"just copy i suck dicks."},
+    {q:"List down a site where you watch porn.", a:"pornhub", hint:"ends with P and ends with Hub."},
+    {q:"Wanna have sex?", a:"a", hint:"a:yes b:no case sensitive."},
+    {q:"What does Yn stands for?", a:"young nigga", hint:"nigga."}
+  ];
+
+  let currentIndex = 0;
+  let prevValid = "";
+  let captchaTries = 3;
 
   const textarea = document.getElementById("typeBox");
   const bar = document.getElementById("bar");
@@ -72,6 +91,13 @@
   const wordIndex = document.getElementById("wordIndex");
   const wordTotal = document.getElementById("wordTotal");
 
+  const captchaBox = document.getElementById("captchaBox");
+  const captchaQuestion = document.getElementById("captchaQuestion");
+  const captchaHint = document.getElementById("captchaHint");
+  const captchaInput = document.getElementById("captchaInput");
+  const captchaSubmit = document.getElementById("captchaSubmit");
+  const captchaTriesEl = document.getElementById("captchaTries");
+
   wordTotal.textContent = WORDS.length;
 
   function loadWord(i){
@@ -79,35 +105,59 @@
     prevValid = "";
     textarea.value = "";
     textarea.setSelectionRange(0,0);
-    const w = WORDS[currentIndex];
-    targetText.textContent = w;
+    targetText.textContent = WORDS[currentIndex];
     updateUI(0);
     wordIndex.textContent = (currentIndex+1);
     message.textContent = "Start typing the word manually.";
+    textarea.style.display = "block";
+    captchaBox.style.display = "none";
     textarea.focus();
   }
 
-  // Prevent paste via keyboard shortcuts
-  document.addEventListener("keydown", e => {
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "v") {
-      e.preventDefault();
-      flashMessage("Pasting is disabled.");
+  function startCaptcha(){
+    captchaTries = 3;
+    captchaInput.value = "";
+    const c = CAPTCHAS[currentIndex];
+    captchaQuestion.textContent = c.q;
+    captchaHint.textContent = "Hint: " + c.hint;
+    captchaTriesEl.textContent = "Tries left: " + captchaTries;
+    textarea.style.display = "none";
+    captchaBox.style.display = "block";
+    captchaInput.focus();
+  }
+
+  captchaSubmit.addEventListener("click", () => {
+    const c = CAPTCHAS[currentIndex];
+    if (captchaInput.value.trim().toLowerCase() === c.a.toLowerCase()) {
+      flashMessage("Captcha solved! Moving to next word...");
+      setTimeout(() => {
+        if (currentIndex < WORDS.length - 1) {
+          loadWord(currentIndex+1);
+        } else {
+          message.textContent = "All words completed — well done! 🎉";
+        }
+      }, 700);
+    } else {
+      captchaTries--;
+      captchaTriesEl.textContent = "Tries left: " + captchaTries;
+      if (captchaTries <= 0) {
+        flashMessage("Captcha failed 3 times. Progress reset.");
+        setTimeout(() => loadWord(0), 700);
+      } else {
+        flashMessage("Wrong answer. Try again.");
+      }
     }
+  });
+
+  // Prevent paste etc.
+  document.addEventListener("keydown", e => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "v") { e.preventDefault(); flashMessage("Pasting is disabled."); }
   }, {capture:true});
-
-  // Prevent right-click paste
   textarea.addEventListener("contextmenu", e => { e.preventDefault(); flashMessage("Context menu disabled here."); });
-
-  // Prevent dropping text
   textarea.addEventListener("drop", e => { e.preventDefault(); flashMessage("Dropping text is disabled."); });
-
-  // Intercept onpaste
   textarea.addEventListener("paste", e => { e.preventDefault(); flashMessage("Pasting is disabled."); });
+  textarea.addEventListener("auxclick", e => { if (e.button===1){ e.preventDefault(); flashMessage("Middle-click paste disabled."); }});
 
-  // Prevent middle-click paste
-  textarea.addEventListener("auxclick", e => { if (e.button === 1) { e.preventDefault(); flashMessage("Middle-click paste is disabled."); } });
-
-  // Input handling: only accept correct prefix
   textarea.addEventListener("input", e => {
     const v = textarea.value || "";
     const target = WORDS[currentIndex];
@@ -115,30 +165,19 @@
       prevValid = v;
       updateUI(v.length);
       if (v.length === target.length) {
-        flashMessage("Completed! Moving to next word...");
-        setTimeout(() => {
-          // Move to next, if any
-          if (currentIndex < WORDS.length - 1) {
-            loadWord(currentIndex + 1);
-          } else {
-            message.textContent = "All words completed — well done! 🎉";
-            updateUI(target.length);
-            textarea.blur();
-          }
-        }, 700);
+        flashMessage("Completed! Solve the captcha...");
+        setTimeout(() => startCaptcha(), 700);
       } else {
         message.textContent = "Correct so far.";
       }
     } else {
-      // Reject invalid change
       textarea.value = prevValid;
       textarea.setSelectionRange(prevValid.length, prevValid.length);
-      flashMessage("Wrong character ignored. Only the next correct letter is accepted.");
+      flashMessage("Wrong character ignored.");
       updateUI(prevValid.length);
     }
   });
 
-  // MutationObserver to detect programmatic changes
   const mo = new MutationObserver(muts => {
     const v = textarea.value || "";
     const target = WORDS[currentIndex];
@@ -151,52 +190,30 @@
       updateUI(prevValid.length);
     }
   });
-  mo.observe(textarea, {attributes:true, childList:true, subtree:true, characterData:true});
+  mo.observe(textarea,{attributes:true,childList:true,subtree:true,characterData:true});
 
   let msgTimer = null;
   function flashMessage(txt){
     clearTimeout(msgTimer);
     message.textContent = txt;
     msgTimer = setTimeout(() => {
-      // revert only if not complete
       const target = WORDS[currentIndex];
-      if ((textarea.value || "").length !== target.length) message.textContent = "Correct so far.";
-    }, 1400);
+      if ((textarea.value||"").length !== target.length) message.textContent = "Correct so far.";
+    },1400);
   }
 
   function updateUI(len){
     const target = WORDS[currentIndex];
-    const pct = Math.round((len / target.length) * 100);
-    bar.style.width = pct + "%";
+    const pct = Math.round((len/target.length)*100);
+    bar.style.width = pct+"%";
     count.textContent = `${len} / ${target.length}`;
   }
 
-  resetBtn.addEventListener("click", () => {
-    textarea.value = "";
-    prevValid = "";
-    updateUI(0);
-    message.textContent = "Reset. Start typing this word manually.";
-    textarea.focus();
-  });
+  resetBtn.addEventListener("click", () => { textarea.value=""; prevValid=""; updateUI(0); message.textContent="Reset. Start typing this word manually."; textarea.focus(); });
+  skipBtn.addEventListener("click", () => { if (currentIndex < WORDS.length-1){ loadWord(currentIndex+1);} else { flashMessage("This is the last word."); }});
+  restartBtn.addEventListener("click", () => { loadWord(0); });
 
-  skipBtn.addEventListener("click", () => {
-    if (currentIndex < WORDS.length - 1) {
-      flashMessage("Word skipped. Moving to next...");
-      setTimeout(() => loadWord(currentIndex + 1), 500);
-    } else {
-      flashMessage("This is the last word. Restart to try again.");
-    }
-  });
-
-  restartBtn.addEventListener("click", () => {
-    flashMessage("Restarting all words...");
-    setTimeout(() => loadWord(0), 500);
-  });
-
-  // Initialize
   loadWord(0);
-
-  // Note: This increases barriers to casual pasting, but cannot stop someone determined using devtools.
 })();
 </script>
 </body>
