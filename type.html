@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Type the Longest Word (no paste)</title>
+<title>Type the Longest Words — no paste</title>
 <style>
   :root { --bg:#0b1020; --card:#0f1724; --accent:#7dd3fc; --muted:#94a3b8; color-scheme: dark; }
   body{background:linear-gradient(180deg,#02040a,#081025);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px;color:var(--muted)}
-  .card{background:var(--card);padding:28px;border-radius:14px;box-shadow:0 8px 30px rgba(2,6,23,0.6);width:100%;max-width:720px}
+  .card{background:var(--card);padding:28px;border-radius:14px;box-shadow:0 8px 30px rgba(2,6,23,0.6);width:100%;max-width:820px}
   h1{margin:0 0 6px 0;color:white;font-size:20px}
   p{margin:0 0 18px 0}
   .target{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#071024;padding:10px;border-radius:8px;color:var(--accent);overflow:auto;white-space:nowrap}
@@ -16,14 +16,17 @@
   .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),#60a5fa);transition:width .12s linear}
   .status{display:flex;justify-content:space-between;align-items:center;margin-top:10px;color:var(--muted);font-size:13px}
   .hint{color:#9ca3af;font-size:13px;margin-top:10px}
-  button{margin-top:14px;padding:8px 12px;border-radius:8px;border:0;background:var(--accent);color:#021025;font-weight:600;cursor:pointer}
+  .controls{display:flex;gap:8px;margin-top:12px}
+  button{padding:8px 12px;border-radius:8px;border:0;background:var(--accent);color:#021025;font-weight:600;cursor:pointer}
+  .small{font-size:13px;color:var(--muted)}
 </style>
 </head>
 <body>
   <div class="card" role="main">
-    <h1>Type the longest common English word — by hand</h1>
-    <p>Type the word below without pasting. The field rejects any character that doesn't match the next expected letter.</p>
+    <h1>Type the Longest Words — by hand</h1>
+    <p>Type each word manually. Pasting and dropping is blocked. After you finish one word it automatically moves to the next (there are 6 words total).</p>
 
+    <div class="small">Word <span id="wordIndex">1</span> of <span id="wordTotal">6</span></div>
     <div class="target" id="targetText">pneumonoultramicroscopicsilicovolcanoconiosis</div>
 
     <textarea id="typeBox" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Start typing here..."></textarea>
@@ -34,28 +37,58 @@
       <div id="message">Waiting for you to start typing.</div>
     </div>
 
-    <div class="hint">Pasting, dragging text, right-click paste, and Ctrl/Cmd+V are blocked. If you try to insert a wrong character it will be ignored.</div>
-    <button id="resetBtn">Reset</button>
+    <div class="hint">Pasting, dragging text, right-click paste, and Ctrl/Cmd+V are blocked. If you try to insert a wrong character it will be ignored. You can reset the current word or skip (skipping marks it as skipped).</div>
+
+    <div class="controls">
+      <button id="resetBtn">Reset Word</button>
+      <button id="skipBtn">Skip Word</button>
+      <button id="restartBtn">Restart All</button>
+    </div>
   </div>
 
 <script>
 (function(){
-  // Target word (common "longest" dictionary word)
-  const TARGET = "pneumonoultramicroscopicsilicovolcanoconiosis";
-  const MAX = TARGET.length;
+  // List of words: original + 5 more as requested
+  const WORDS = [
+    "pneumonoultramicroscopicsilicovolcanoconiosis",
+    "hippopotomonstrosesquipedaliophobia",
+    "supercalifragilisticexpialidocious",
+    "pseudopseudohypoparathyroidism",
+    "floccinaucinihilipilification",
+    "antidisestablishmentarianism"
+  ];
+
+  let currentIndex = 0; // 0-based
+  let prevValid = ""; // last valid typed prefix for current word
 
   const textarea = document.getElementById("typeBox");
   const bar = document.getElementById("bar");
   const count = document.getElementById("count");
   const message = document.getElementById("message");
   const resetBtn = document.getElementById("resetBtn");
+  const skipBtn = document.getElementById("skipBtn");
+  const restartBtn = document.getElementById("restartBtn");
+  const targetText = document.getElementById("targetText");
+  const wordIndex = document.getElementById("wordIndex");
+  const wordTotal = document.getElementById("wordTotal");
 
-  // Keep previous valid value to revert on invalid programmatic changes
-  let prevValid = "";
+  wordTotal.textContent = WORDS.length;
+
+  function loadWord(i){
+    currentIndex = i;
+    prevValid = "";
+    textarea.value = "";
+    textarea.setSelectionRange(0,0);
+    const w = WORDS[currentIndex];
+    targetText.textContent = w;
+    updateUI(0);
+    wordIndex.textContent = (currentIndex+1);
+    message.textContent = "Start typing the word manually.";
+    textarea.focus();
+  }
 
   // Prevent paste via keyboard shortcuts
   document.addEventListener("keydown", e => {
-    // block Ctrl/Meta + V
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "v") {
       e.preventDefault();
       flashMessage("Pasting is disabled.");
@@ -63,54 +96,53 @@
   }, {capture:true});
 
   // Prevent right-click paste
-  textarea.addEventListener("contextmenu", e => {
-    e.preventDefault();
-    flashMessage("Context menu disabled here.");
-  });
+  textarea.addEventListener("contextmenu", e => { e.preventDefault(); flashMessage("Context menu disabled here."); });
 
   // Prevent dropping text
-  textarea.addEventListener("drop", e => {
-    e.preventDefault();
-    flashMessage("Dropping text is disabled.");
-  });
+  textarea.addEventListener("drop", e => { e.preventDefault(); flashMessage("Dropping text is disabled."); });
 
   // Intercept onpaste
-  textarea.addEventListener("paste", e => {
-    e.preventDefault();
-    flashMessage("Pasting is disabled.");
-  });
+  textarea.addEventListener("paste", e => { e.preventDefault(); flashMessage("Pasting is disabled."); });
 
-  // When input happens, only accept characters that match the expected next characters.
+  // Prevent middle-click paste
+  textarea.addEventListener("auxclick", e => { if (e.button === 1) { e.preventDefault(); flashMessage("Middle-click paste is disabled."); } });
+
+  // Input handling: only accept correct prefix
   textarea.addEventListener("input", e => {
     const v = textarea.value || "";
-    // We only allow forward typing that matches the prefix of TARGET.
-    // If user tries to insert text (pasting, autocomplete, or pasting via devtools), we revert.
-    if (TARGET.startsWith(v)) {
-      // valid prefix
+    const target = WORDS[currentIndex];
+    if (target.startsWith(v)) {
       prevValid = v;
       updateUI(v.length);
-      if (v.length === MAX) {
-        message.textContent = "Success! You typed the whole word manually. 🎉";
-        textarea.blur();
+      if (v.length === target.length) {
+        flashMessage("Completed! Moving to next word...");
+        setTimeout(() => {
+          // Move to next, if any
+          if (currentIndex < WORDS.length - 1) {
+            loadWord(currentIndex + 1);
+          } else {
+            message.textContent = "All words completed — well done! 🎉";
+            updateUI(target.length);
+            textarea.blur();
+          }
+        }, 700);
       } else {
-        message.textContent = "Keep going — correct so far.";
+        message.textContent = "Correct so far.";
       }
     } else {
-      // Reject change: restore last valid value and show notice.
+      // Reject invalid change
       textarea.value = prevValid;
-      // move caret to end
       textarea.setSelectionRange(prevValid.length, prevValid.length);
-      flashMessage("Only the next correct letter is accepted. Wrong input ignored.");
+      flashMessage("Wrong character ignored. Only the next correct letter is accepted.");
       updateUI(prevValid.length);
     }
   });
 
-  // Observe attribute/value changes that are not from typing and revert them.
-  // This helps detect programmatic changes (not foolproof vs console).
+  // MutationObserver to detect programmatic changes
   const mo = new MutationObserver(muts => {
     const v = textarea.value || "";
-    if (!TARGET.startsWith(v)) {
-      // revert to prevValid if mutated programmatically
+    const target = WORDS[currentIndex];
+    if (!target.startsWith(v)) {
       if (textarea.value !== prevValid) {
         textarea.value = prevValid;
         textarea.setSelectionRange(prevValid.length, prevValid.length);
@@ -121,50 +153,50 @@
   });
   mo.observe(textarea, {attributes:true, childList:true, subtree:true, characterData:true});
 
-  // Small visual flash message
   let msgTimer = null;
   function flashMessage(txt){
     clearTimeout(msgTimer);
     message.textContent = txt;
     msgTimer = setTimeout(() => {
-      // only revert to default if not complete
-      if (textarea.value.length !== MAX) message.textContent = "Keep going — correct so far.";
-    }, 1600);
+      // revert only if not complete
+      const target = WORDS[currentIndex];
+      if ((textarea.value || "").length !== target.length) message.textContent = "Correct so far.";
+    }, 1400);
   }
 
   function updateUI(len){
-    const pct = Math.round((len / MAX) * 100);
+    const target = WORDS[currentIndex];
+    const pct = Math.round((len / target.length) * 100);
     bar.style.width = pct + "%";
-    count.textContent = `${len} / ${MAX}`;
+    count.textContent = `${len} / ${target.length}`;
   }
 
   resetBtn.addEventListener("click", () => {
     textarea.value = "";
     prevValid = "";
     updateUI(0);
-    message.textContent = "Reset. Start typing the word manually.";
+    message.textContent = "Reset. Start typing this word manually.";
     textarea.focus();
   });
 
-  // Focus the textarea on load
-  textarea.focus();
-
-  // Accessibility: announce the target length
-  document.title = `Type the word (${MAX} letters)`;
-
-  // Prevent middle-click paste in some browsers (on Linux)
-  textarea.addEventListener("auxclick", e => {
-    if (e.button === 1) {
-      e.preventDefault();
-      flashMessage("Middle-click paste is disabled.");
+  skipBtn.addEventListener("click", () => {
+    if (currentIndex < WORDS.length - 1) {
+      flashMessage("Word skipped. Moving to next...");
+      setTimeout(() => loadWord(currentIndex + 1), 500);
+    } else {
+      flashMessage("This is the last word. Restart to try again.");
     }
   });
 
-  // Initialize UI
-  updateUI(0);
+  restartBtn.addEventListener("click", () => {
+    flashMessage("Restarting all words...");
+    setTimeout(() => loadWord(0), 500);
+  });
 
-  // Note: It's impossible to fully prevent someone determined from injecting text via devtools or browser extensions.
-  // This script prevents normal paste/drop/context-menu/keyboard paste and refuses characters that don't match the target.
+  // Initialize
+  loadWord(0);
+
+  // Note: This increases barriers to casual pasting, but cannot stop someone determined using devtools.
 })();
 </script>
 </body>
