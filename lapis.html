@@ -1,0 +1,4945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lapis Dashboard</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300aaff'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15H9v-2h2v2zm0-4H9v-2h2v2zm0-4H9V7h2v2zm4 8h-2v-2h2v2zm0-4h-2v-2h2v2zm0-4h-2V7h2v2z'/%3E%3C/svg%3E" type="image/svg+xml">
+  <style>
+      /* Basic Reset & Body Styles */
+      * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+      }
+
+      body {
+          font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          color: white;
+          min-height: 100vh;
+          height: 100vh;
+          overflow-y: auto;
+          overflow-x: hidden;
+          /* Reworked background pattern */
+          background-color: #1e293b;
+          background-image: linear-gradient(
+              30deg,
+              #0f172a 12%,
+              transparent 12.5%,
+              transparent 87.5%,
+              #0f172a 87.5%,
+              #0f172a
+            ),
+            linear-gradient(
+              150deg,
+              #0f172a 12%,
+              transparent 12.5%,
+              transparent 87.5%,
+              #0f172a 87.5%,
+              #0f172a
+            ),
+            linear-gradient(
+              30deg,
+              #0f172a 12%,
+              transparent 12.5%,
+              transparent 87.5%,
+              #0f172a 87.5%,
+              #0f172a
+            ),
+            linear-gradient(
+              150deg,
+              #0f172a 12%,
+              transparent 12.5%,
+              transparent 87.5%,
+              #0f172a 87.5%,
+              #0f172a
+            ),
+            linear-gradient(
+              60deg,
+              rgba(59, 130, 246, 0.2) 25%,
+              transparent 25.5%,
+              transparent 75%,
+              rgba(59, 130, 246, 0.2) 75%,
+              rgba(59, 130, 246, 0.2)
+            );
+          background-size: 80px 140px;
+          background-position:
+            0 0,
+            0 0,
+            40px 70px,
+            40px 70px,
+            0 0;
+          position: relative;
+      }
+
+      /* Lapis Overlay for Background Theme and Mouse Movement */
+      .lapis-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: -1; /* Below other content but above the body background */
+          background: rgba(0, 170, 255, 0.1); /* Semi-transparent Lapis color */
+          backdrop-filter: blur(5px); /* Subtle blur effect */
+          transition: background-position 0.1s linear; /* Smooth transition for mouse movement */
+      }
+
+      /* Custom Background - Lapis Themed */
+      .container {
+          width: 100%;
+          height: 100%;
+          position: fixed;
+          top: 0;
+          left: 0;
+          z-index: -2;
+          /* Reworked background pattern */
+          background-color: #1e293b;
+          background-image: linear-gradient(
+              30deg,
+              #0f172a 12%,
+              transparent 12.5%,
+              transparent 87.5%,
+              #0f172a 87.5%,
+              #0f172a
+            ),
+            linear-gradient(
+              150deg,
+              #0f172a 12%,
+              transparent 12.5%,
+              transparent 87.5%,
+              #0f172a 87.5%,
+              #0f172a
+            ),
+            linear-gradient(
+              30deg,
+              #0f172a 12%,
+              transparent 12.5%,
+              transparent 87.5%,
+              #0f172a 87.5%,
+              #0f172a
+            ),
+            linear-gradient(
+              150deg,
+              #0f172a 12%,
+              transparent 12.5%,
+              transparent 87.5%,
+              #0f172a 87.5%,
+              #0f172a
+            ),
+            linear-gradient(
+              60deg,
+              rgba(59, 130, 246, 0.2) 25%,
+              transparent 25.5%,
+              transparent 75%,
+              rgba(59, 130, 246, 0.2) 75%,
+              rgba(59, 130, 246, 0.2)
+            );
+          background-size: 80px 140px;
+          background-position:
+            0 0,
+            0 0,
+            40px 70px,
+            40px 70px,
+            0 0;
+      }
+
+      .container::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            45deg,
+            transparent 45%,
+            rgba(59, 130, 246, 0.1) 45%,
+            rgba(59, 130, 246, 0.1) 55%,
+            transparent 55%
+          ),
+          linear-gradient(
+            -45deg,
+            transparent 45%,
+            rgba(59, 130, 246, 0.1) 45%,
+            rgba(59, 130, 246, 0.1) 55%,
+            transparent 55%
+          );
+        background-size: 40px 40px;
+        background-position:
+          0 0,
+          20px 20px;
+        filter: drop-shadow(0 0 2px rgba(59, 130, 246, 0.3));
+      }
+
+      .container::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          0deg,
+          transparent 0%,
+          rgba(59, 130, 246, 0.05) 50%,
+          transparent 100%
+        );
+        transform: perspective(500px) rotateX(30deg);
+      }
+
+      /* Keyframes for moving gradient background (adjusted for new background) */
+      @keyframes movingBackground {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+      }
+
+      /* Enhanced Button Animations */
+      .btn, .action-btn, .executor-btn {
+          position: relative;
+          overflow: hidden;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          transform: translateZ(0);
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* Initial subtle shadow */
+      }
+
+      .btn::before, .action-btn::before, .executor-btn::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent); /* Stronger shimmer */
+          transition: left 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+          z-index: 1;
+      }
+
+      .btn:hover::before, .action-btn:hover::before, .executor-btn:hover::before {
+          left: 100%;
+      }
+
+      .btn:hover, .action-btn:hover, .executor-btn:hover {
+          transform: translateY(-5px) scale(1.08);
+          box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 170, 255, 0.7); /* Lapis glow */
+      }
+
+      .btn:active, .action-btn:active, .executor-btn:active {
+          transform: translateY(-1px) scale(0.98);
+          transition: all 0.1s;
+      }
+
+      /* Pulse Animation for Important Buttons */
+      @keyframes pulse {
+          0% { box-shadow: 0 0 0 0 rgba(0, 170, 255, 0.7); } /* Lapis pulse */
+          70% { box-shadow: 0 0 0 12px rgba(0, 170, 255, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(0, 170, 255, 0); }
+      }
+
+      .btn-pulse {
+          animation: pulse 2.5s infinite;
+      }
+
+      /* Dropdown Menu Styles */
+      .menu {
+          font-size: 16px;
+          line-height: 1.6;
+          color: #ffffff;
+          width: fit-content;
+          display: flex;
+          list-style: none;
+          margin-bottom: 20px;
+      }
+
+      .menu a {
+          text-decoration: none;
+          color: inherit;
+          font-family: inherit;
+          font-size: inherit;
+          line-height: inherit;
+      }
+
+      .menu .link {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          padding: 12px 36px;
+          border-radius: 16px;
+          overflow: hidden;
+          transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+          background: rgba(0, 170, 255, 0.1); /* Lapis background */
+          border: 1px solid rgba(0, 170, 255, 0.3); /* Lapis border */
+      }
+
+      .menu .link::after {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(45deg, #007bff, #00aaff); /* Lapis gradient */
+          z-index: -1;
+          transform: scaleX(0);
+          transform-origin: left;
+          transition: transform 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+      }
+
+      .menu .link svg {
+          width: 14px;
+          height: 14px;
+          fill: #ffffff;
+          transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+      }
+
+      .menu .item {
+          position: relative;
+      }
+
+      .menu .item .submenu {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          position: absolute;
+          top: 100%;
+          border-radius: 0 0 16px 16px;
+          left: 0;
+          width: 100%;
+          overflow: hidden;
+          border: 1px solid rgba(0, 170, 255, 0.4); /* Lapis border */
+          background: rgba(0, 0, 0, 0.9);
+          backdrop-filter: blur(20px);
+          opacity: 0;
+          visibility: hidden;
+          transform: translateY(-12px);
+          transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+          z-index: 1000;
+          pointer-events: none;
+          list-style: none;
+      }
+
+      .menu .item:hover .submenu {
+          opacity: 1;
+          visibility: visible;
+          transform: translateY(0);
+          pointer-events: auto;
+          border-top: transparent;
+          border-color: #007bff; /* Lapis border */
+      }
+
+      .menu .item:hover .link {
+          color: #ffffff;
+          border-radius: 16px 16px 0 0;
+      }
+
+      .menu .item:hover .link::after {
+          transform: scaleX(1);
+          transform-origin: right;
+      }
+
+      .menu .item:hover .link svg {
+          fill: #ffffff;
+          transform: rotate(-180deg);
+      }
+
+      .submenu .submenu-item {
+          width: 100%;
+          transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+      }
+
+      .submenu .submenu-link {
+          display: block;
+          padding: 12px 24px;
+          width: 100%;
+          position: relative;
+          text-align: center;
+          transition: all 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+          color: rgba(255, 255, 255, 0.8);
+      }
+
+      .submenu .submenu-item:last-child .submenu-link {
+          border-bottom: none;
+      }
+
+      .submenu .submenu-link::before {
+          content: "";
+          position: absolute;
+          top: 0;
+          left: 0;
+          transform: scaleX(0);
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(45deg, #007bff, #00aaff); /* Lapis gradient */
+          z-index: -1;
+          transform-origin: left;
+          transition: transform 0.48s cubic-bezier(0.23, 1, 0.32, 1);
+      }
+
+      .submenu .submenu-link:hover:before {
+          transform: scaleX(1);
+          transform-origin: right;
+      }
+
+      .submenu .submenu-link:hover {
+          color: #ffffff;
+      }
+
+      /* Auth Screen Styles */
+      .auth-container {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0,0,0,0.5);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 9999;
+          transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+      }
+
+      .auth-container.hidden {
+          opacity: 0;
+          transform: translateY(-100%);
+          pointer-events: none;
+      }
+
+      .auth-box {
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(0, 170, 255, 0.3); /* Lapis border */
+          border-radius: 20px;
+          padding: 40px;
+          width: 400px;
+          text-align: center;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      }
+
+      .auth-title {
+          font-size: 2rem;
+          margin-bottom: 30px;
+          background: linear-gradient(45deg, #007bff, #00aaff); /* Lapis gradient */
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          filter: drop-shadow(0 0 10px rgba(0, 170, 255, 0.3));
+      }
+
+      .form-group {
+          margin-bottom: 20px;
+          text-align: left;
+      }
+
+      .form-group label {
+          display: block;
+          margin-bottom: 8px;
+          color: rgba(255, 255, 255, 0.9);
+          font-weight: 500;
+      }
+
+      .form-group input, .form-group textarea {
+          width: 100%;
+          padding: 14px 16px;
+          border: none; /* Removed border */
+          border-radius: 0; /* Removed border-radius */
+          background: none; /* Removed background */
+          backdrop-filter: none; /* Removed backdrop-filter */
+          color: white;
+          font-size: 14px;
+          transition: all 0.3s ease;
+      }
+
+      .form-group input:focus, .form-group textarea:focus {
+          outline: none;
+          border-color: transparent; /* Ensure no border on focus */
+          box-shadow: none; /* Ensure no box-shadow on focus */
+          background: none; /* Ensure no background on focus */
+      }
+
+      .form-group input::placeholder, .form-group textarea::placeholder {
+          color: rgba(255, 255, 255, 0.5);
+      }
+
+      .btn {
+          background: linear-gradient(45deg, #007bff, #00aaff); /* Lapis gradient */
+          color: white;
+          border: none;
+          padding: 14px 24px;
+          border-radius: 12px;
+          cursor: pointer;
+          font-size: 16px;
+          font-weight: 600;
+          transition: all 0.3s ease;
+          width: 100%;
+          margin-bottom: 12px;
+          position: relative;
+          overflow: hidden;
+      }
+
+      .btn-secondary {
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(0, 170, 255, 0.3); /* Lapis border */
+          backdrop-filter: blur(10px);
+      }
+
+      .btn-secondary:hover {
+          background: rgba(255, 255, 255, 0.1);
+          border-color: #007bff; /* Lapis border */
+      }
+
+      /* Modified error-message to remove red bar */
+      .error-message {
+          color: #ff0000;
+          font-size: 14px;
+          margin-top: 10px;
+          padding: 0; /* Removed padding */
+          border: none; /* Removed border */
+          border-radius: 8px;
+          backdrop-filter: blur(10px);
+      }
+      /* New style for inline validation messages */
+      .validation-message {
+          color: #ff0000;
+          font-size: 12px;
+          margin-top: 4px;
+          margin-left: 4px;
+          display: none;
+      }
+      .validation-message.show {
+          display: block;
+      }
+
+      .auth-link {
+          color: #00aaff;
+          text-decoration: none;
+          font-size: 14px;
+          margin-top: 10px;
+          display: block;
+          cursor: pointer;
+          transition: color 0.3s ease;
+      }
+
+      .auth-link:hover {
+          color: #99ccff;
+      }
+
+
+      /* Main App Layout */
+      .main-app {
+          display: flex;
+          width: 100%;
+          opacity: 0;
+          transform: translateY(20px);
+          transition: all 0.5s ease-out;
+      }
+
+      .main-app.visible {
+          opacity: 1;
+          transform: translateY(0);
+      }
+
+      /* Sidebar Styles - Fixed horizontal scroll */
+      .sidebar {
+          position: fixed;
+          top: 0;
+          left: 0;
+          height: 100vh;
+          width: 280px;
+          background: linear-gradient(180deg, rgba(0, 0, 0, 0.6), rgba(0, 170, 255, 0.2)); /* Reworked background */
+          backdrop-filter: blur(20px);
+          border-right: 1px solid rgba(0, 170, 255, 0.4); /* Stronger Lapis border */
+          display: flex;
+          flex-direction: column;
+          overflow-y: auto;
+          overflow-x: hidden;
+          z-index: 1000;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(0, 170, 255, 0.4) transparent; /* Lapis scrollbar */
+          box-shadow: 5px 0 20px rgba(0, 0, 0, 0.5); /* Added shadow */
+      }
+
+      .sidebar::-webkit-scrollbar {
+          width: 6px;
+      }
+
+      .sidebar::-webkit-scrollbar-track {
+          background: transparent;
+      }
+
+      .sidebar::-webkit-scrollbar-thumb {
+          background-color: rgba(0, 170, 255, 0.4); /* Lapis scrollbar */
+          border-radius: 3px;
+      }
+
+      .sidebar::-webkit-scrollbar-thumb:hover {
+          background-color: rgba(0, 170, 255, 0.6); /* Lapis scrollbar */
+      }
+
+      .sidebar-header {
+          padding: 24px 20px;
+          border-bottom: 1px solid rgba(0, 170, 255, 0.3); /* Stronger Lapis border */
+          flex-shrink: 0;
+      }
+
+      .sidebar-logo {
+          font-size: 1.8rem;
+          font-weight: bold;
+          background: linear-gradient(45deg, #007bff, #00aaff); /* Lapis gradient */
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          margin-bottom: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          filter: drop-shadow(0 0 15px rgba(0, 170, 255, 0.5)); /* Stronger shadow */
+      }
+
+      .menu-toggle {
+          background: none;
+          border: none;
+          color: white;
+          font-size: 1.2rem;
+          cursor: pointer;
+          display: none;
+          padding: 8px;
+          border-radius: 8px;
+          transition: all 0.3s ease;
+      }
+
+      .menu-toggle:hover {
+          background: rgba(0, 170, 255, 0.2); /* Lapis hover */
+      }
+
+      .user-profile {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 16px;
+          background: rgba(0, 170, 255, 0.15); /* More visible Lapis background */
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(0, 170, 255, 0.3); /* Stronger Lapis border */
+          border-radius: 16px;
+          margin-bottom: 16px;
+          transition: all 0.4s ease;
+      }
+
+      .user-profile:hover {
+          background: rgba(0, 170, 255, 0.3); /* Darker lapis hover */
+          transform: translateY(-4px) scale(1.02);
+          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 170, 255, 0.7); /* Lapis glow */
+      }
+
+      .user-avatar {
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          background: linear-gradient(45deg, #007bff, #00aaff); /* Lapis gradient */
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: bold;
+          font-size: 16px;
+          box-shadow: 0 4px 15px rgba(0, 170, 255, 0.5); /* Stronger shadow */
+          flex-shrink: 0;
+      }
+
+      .user-info {
+          flex: 1;
+          min-width: 0;
+      }
+
+      .user-info h4 {
+          font-size: 14px;
+          margin-bottom: 4px;
+          font-weight: 600;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+      }
+
+      .user-info p {
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.8);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+      }
+
+      .sidebar-nav {
+          padding: 16px 0;
+          flex: 1;
+          overflow-y: auto;
+          overflow-x: hidden;
+      }
+
+      .nav-section {
+          margin-bottom: 20px;
+      }
+
+      .nav-section-title {
+          font-size: 11px;
+          font-weight: 700;
+          color: rgba(255, 255, 255, 0.6);
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          margin-bottom: 16px;
+          padding: 0 20px;
+      }
+
+      .nav-item {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          padding: 14px 20px;
+          color: rgba(255, 255, 255, 0.9);
+          text-decoration: none;
+          transition: all 0.4s ease; /* Increased transition time */
+          cursor: pointer;
+          border: none;
+          background: transparent; /* Start with transparent background */
+          width: 100%;
+          text-align: left;
+          font-size: 14px;
+          font-weight: 500;
+          position: relative;
+          margin: 2px 0;
+          white-space: nowrap;
+          overflow: hidden;
+          border-left: 4px solid transparent; /* Initial transparent border */
+      }
+
+      .nav-item::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, rgba(0, 170, 255, 0.1), rgba(0, 170, 255, 0.05)); /* Subtle gradient background */
+          transition: all 0.4s ease;
+          z-index: -1;
+          transform: scaleX(0); /* Start hidden */
+          transform-origin: left;
+      }
+
+      .nav-item:hover {
+          color: white;
+          transform: translateX(8px); /* More pronounced slide effect */
+          box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4); /* Stronger shadow */
+          border-left: 4px solid #00aaff; /* Lapis border on hover */
+      }
+
+      .nav-item:hover::before {
+          transform: scaleX(1); /* Expand background on hover */
+      }
+
+      .nav-item.active {
+          background: linear-gradient(90deg, rgba(0, 170, 255, 0.3), rgba(0, 170, 255, 0.1)); /* Lapis active background */
+          color: #99ccff; /* Lighter lapis for active text */
+          transform: translateX(5px); /* Slightly less slide for active */
+          border-left: 4px solid #00aaff; /* Lapis border for active */
+          box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+      }
+
+      .nav-item-icon {
+          font-size: 18px;
+          width: 24px;
+          text-align: center;
+          transition: all 0.4s ease; /* Increased transition time */
+          flex-shrink: 0;
+      }
+
+      .nav-item:hover .nav-item-icon {
+          transform: scale(1.2) rotate(5deg); /* More pronounced icon animation */
+          color: #ffffff;
+      }
+
+      .logout-btn {
+          margin: 20px;
+          margin-top: auto;
+          background: linear-gradient(45deg, #cc0000, #ff3333);
+          color: white;
+          border: none;
+          padding: 14px;
+          border-radius: 12px;
+          cursor: pointer;
+          transition: all 0.4s ease;
+          font-weight: 600;
+          font-size: 14px;
+          flex-shrink: 0;
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      }
+
+      .logout-btn:hover {
+          transform: translateY(-4px) scale(1.05);
+          box-shadow: 0 10px 30px rgba(255, 0, 0, 0.6);
+      }
+
+      /* Main Content Area */
+      .main-content {
+          margin-left: 280px;
+          height: 100vh;
+          overflow-y: auto;
+          flex: 1;
+          padding: 32px;
+          background: rgba(0,0,0,0.6); /* Darker background for content */
+          transition: all 0.3s ease;
+          z-index: -1;
+          border-left: 1px solid rgba(0, 170, 255, 0.2); /* Subtle border */
+      }
+
+      .content-header {
+          margin-bottom: 32px;
+      }
+
+      .content-title {
+          font-size: 2.5rem;
+          font-weight: 700;
+          margin-bottom: 12px;
+          background: linear-gradient(45deg, #99ccff, #ffffff); /* Lapis gradient */
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          filter: drop-shadow(0 0 10px rgba(0, 170, 255, 0.4)); /* Added shadow */
+      }
+
+      .content-subtitle {
+          color: rgba(255, 255, 255, 0.8);
+          font-size: 1.1rem;
+          font-weight: 400;
+      }
+
+      /* Dashboard Cards */
+      .dashboard-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 24px;
+          margin-bottom: 32px;
+      }
+
+      .dashboard-card {
+          background: rgba(255, 255, 255, 0.1); /* More visible glassmorphism */
+          backdrop-filter: blur(18px); /* Adjusted blur */
+          border: 1px solid rgba(0, 170, 255, 0.4); /* Stronger Lapis border */
+          border-radius: 20px; /* Rounded corners */
+          padding: 28px;
+          transition: all 0.5s ease; /* Increased transition time */
+          position: relative;
+          overflow: hidden;
+          cursor: pointer; /* Added for clickability */
+          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); /* Stronger shadow */
+      }
+
+      .dashboard-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(0, 170, 255, 0.7), transparent); /* Stronger Lapis gradient */
+      }
+
+      .dashboard-card:hover {
+          transform: translateY(-12px) scale(1.04); /* More pronounced lift and scale */
+          box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 170, 255, 0.8); /* Intense Lapis glow */
+          border-color: rgba(0, 170, 255, 0.8); /* More visible border on hover */
+      }
+
+      .card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+      }
+
+      .card-title {
+          font-size: 1rem;
+          color: rgba(255, 255, 255, 0.95);
+          margin: 0;
+          font-weight: 600;
+      }
+
+      .card-icon {
+          font-size: 28px;
+          opacity: 0.8;
+          color: #99ccff; /* Lighter lapis for icons */
+          transition: transform 0.3s ease;
+      }
+
+      .dashboard-card:hover .card-icon {
+          transform: rotate(10deg) scale(1.1); /* Icon animation on card hover */
+      }
+
+      .card-value {
+          font-size: 2.8rem;
+          font-weight: 700;
+          background: linear-gradient(45deg, #99ccff, #ffffff); /* Lapis gradient */
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          filter: drop-shadow(0 0 8px rgba(0, 170, 255, 0.3));
+      }
+
+      .card-description {
+          color: rgba(255, 255, 255, 0.7);
+          font-size: 14px;
+          font-weight: 500;
+      }
+
+      /* Content Sections */
+      .content-section {
+          display: none;
+          animation: slideIn 0.5s ease-out;
+      }
+
+      .content-section.active {
+          display: block;
+      }
+
+      @keyframes slideIn {
+          from {
+              opacity: 0;
+              transform: translateY(20px);
+          }
+          to {
+              opacity: 1;
+              transform: translateY(0);
+          }
+      }
+
+      .section-card {
+          background: rgba(255, 255, 255, 0.08); /* More visible background */
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(0, 170, 255, 0.3); /* Lapis border */
+          border-radius: 20px;
+          padding: 28px;
+          transition: all 0.4s ease;
+          min-height: calc(100vh - 200px);
+          box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+      }
+
+      .section-card:hover {
+          border-color: rgba(0, 170, 255, 0.5); /* Stronger Lapis border on hover */
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+      }
+
+      .section-title {
+          font-size: 1.5rem;
+          margin-bottom: 24px;
+          color: #99ccff; /* Lighter lapis for titles */
+          font-weight: 600;
+          filter: drop-shadow(0 0 8px rgba(0, 170, 255, 0.3));
+      }
+
+      .search-bar {
+          width: 100%;
+          padding: 16px 20px;
+          border: 1px solid rgba(0, 170, 255, 0.4); /* Stronger Lapis border */
+          border-radius: 16px;
+          background: rgba(255, 255, 255, 0.1); /* More visible background */
+          backdrop-filter: blur(10px);
+          color: white;
+          margin-bottom: 24px;
+          font-size: 14px;
+          transition: all 0.3s ease;
+      }
+
+      .search-bar:focus {
+          outline: none;
+          border-color: #007bff; /* Lapis border */
+          box-shadow: 0 0 0 3px rgba(0, 170, 255, 0.3), 0 0 20px rgba(0, 170, 255, 0.2); /* Stronger glow */
+          background: rgba(255, 255, 255, 0.12);
+      }
+
+      .search-bar::placeholder {
+          color: rgba(255, 255, 255, 0.6);
+      }
+
+      /* Enhanced Game Cards - Half Image, Half Description */
+      .item-list {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+          gap: 20px;
+      }
+
+      .list-item {
+          background: rgba(255, 255, 255, 0.08); /* More visible background */
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(0, 170, 255, 0.3); /* Lapis border */
+          border-radius: 16px;
+          padding: 0;
+          transition: all 0.5s ease; /* Increased transition time */
+          position: relative;
+          overflow: hidden;
+          min-height: 140px;
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      }
+
+      .list-item::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(0, 170, 255, 0.6), transparent); /* Stronger Lapis gradient */
+      }
+
+      .list-item:hover {
+          transform: translateY(-8px) scale(1.03); /* More pronounced lift and scale */
+          box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5), 0 0 35px rgba(0, 170, 255, 0.7); /* Intense Lapis glow */
+          border-color: rgba(0, 170, 255, 0.7); /* More visible border on hover */
+      }
+
+      /* Game Card Layout */
+      .game-card-content {
+          display: flex;
+          height: 140px;
+      }
+
+      .game-image-section {
+          width: 140px;
+          height: 140px;
+          position: relative;
+          overflow: hidden;
+          border-radius: 16px 0 0 16px;
+          flex-shrink: 0;
+      }
+
+      .game-image-section img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.5s ease; /* Increased transition time */
+      }
+
+      .game-image-section:hover img {
+          transform: scale(1.15); /* More pronounced zoom */
+      }
+
+      .game-info-section {
+          flex: 1;
+          padding: 20px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+      }
+
+      .game-details h3 {
+          margin-bottom: 8px;
+          color: #ffffff;
+          font-size: 1.2rem;
+          font-weight: 600;
+      }
+
+      .game-details .game-stats {
+          color: #99ccff; /* Lighter lapis for stats */
+          font-size: 14px;
+          margin-bottom: 8px;
+          font-weight: 500;
+      }
+
+      .game-details p {
+          color: rgba(255, 255, 255, 0.75);
+          font-size: 13px;
+          line-height: 1.4;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+      }
+
+      .game-actions {
+          display: flex;
+          gap: 8px;
+          margin-top: 12px;
+      }
+
+      .game-actions .action-btn {
+          flex: 1;
+          padding: 8px 16px;
+          font-size: 13px;
+          border-radius: 8px;
+      }
+
+      /* Script Cards (keep original style) */
+      .script-item {
+          background: rgba(255, 255, 255, 0.08); /* More visible background */
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(0, 170, 255, 0.3); /* Lapis border */
+          border-radius: 16px;
+          padding: 24px;
+          transition: all 0.5s ease; /* Increased transition time */
+          position: relative;
+          overflow: hidden;
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      }
+
+      .script-item::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(0, 170, 255, 0.6), transparent); /* Stronger Lapis gradient */
+      }
+
+      .script-item:hover {
+          transform: translateY(-8px) scale(1.03); /* More pronounced lift and scale */
+          box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5), 0 0 35px rgba(0, 170, 255, 0.7); /* Intense Lapis glow */
+          border-color: rgba(0, 170, 255, 0.7); /* More visible border on hover */
+      }
+
+      .item-info {
+          margin-bottom: 20px;
+      }
+
+      .item-icon {
+          width: 56px;
+          height: 56px;
+          border-radius: 12px;
+          background: linear-gradient(45deg, rgba(0, 170, 255, 0.3), rgba(0, 170, 255, 0.1)); /* Lapis gradient */
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #99ccff; /* Lighter lapis for icons */
+          font-size: 24px;
+          margin-bottom: 16px;
+          border: 1px solid rgba(0, 170, 255, 0.4); /* Stronger Lapis border */
+          transition: all 0.5s ease; /* Increased transition time */
+      }
+
+      .item-icon img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 12px;
+      }
+
+      .script-item:hover .item-icon {
+          transform: scale(1.2) rotate(-10deg); /* More pronounced icon animation */
+          box-shadow: 0 10px 30px rgba(0, 170, 255, 0.6); /* Stronger Lapis shadow */
+      }
+
+      .item-details h3 {
+          margin-bottom: 8px;
+          color: #ffffff;
+          font-size: 1.1rem;
+          font-weight: 600;
+      }
+
+      .item-details p {
+          color: rgba(255, 255, 255, 0.75);
+          font-size: 14px;
+          line-height: 1.5;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+      }
+
+      .item-actions {
+          display: flex;
+          gap: 12px;
+          flex-wrap: wrap;
+      }
+
+      .action-btn {
+          background: rgba(0, 170, 255, 0.2); /* Lapis background */
+          border: 1px solid rgba(0, 170, 255, 0.4); /* Lapis border */
+          color: #99ccff; /* Lighter lapis for text */
+          padding: 10px 16px;
+          border-radius: 10px;
+          cursor: pointer;
+          transition: all 0.4s ease;
+          font-size: 13px;
+          font-weight: 600;
+          backdrop-filter: blur(10px);
+          position: relative;
+          overflow: hidden;
+      }
+
+      .action-btn:hover {
+          background: rgba(0, 170, 255, 0.4); /* Darker lapis hover */
+          color: white;
+          transform: translateY(-3px) scale(1.05);
+          box-shadow: 0 10px 25px rgba(0, 170, 255, 0.6); /* Stronger Lapis shadow */
+      }
+
+      .action-btn.danger {
+          background: rgba(255, 0, 0, 0.2);
+          border-color: rgba(255, 0, 0, 0.4);
+          color: #ff0000;
+      }
+
+      .action-btn.danger:hover {
+          background: rgba(255, 0, 0, 0.4);
+          color: white;
+          box-shadow: 0 10px 25px rgba(255, 0, 0, 0.6);
+      }
+
+      /* Wide join button for games */
+      .action-btn.wide {
+          flex: 1;
+          min-width: 100%;
+          justify-content: center;
+          display: flex;
+          align-items: center;
+      }
+
+      /* Executor Restriction Styles */
+      .executor-restricted {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: 400px;
+          text-align: center;
+          background: rgba(255, 0, 0, 0.1);
+          border: 2px dashed rgba(255, 0, 0, 0.3);
+          border-radius: 20px;
+          padding: 40px;
+      }
+
+      .restriction-icon {
+          font-size: 4rem;
+          color: #ff0000;
+          margin-bottom: 20px;
+      }
+
+      .restriction-title {
+          font-size: 1.5rem;
+          color: #ff0000;
+          margin-bottom: 16px;
+          font-weight: 600;
+      }
+
+      .restriction-message {
+          color: rgba(255, 255, 255, 0.8);
+          margin-bottom: 24px;
+          line-height: 1.6;
+      }
+
+      .restriction-btn {
+          background: linear-gradient(45deg, #007bff, #00aaff); /* Lapis gradient */
+          color: white;
+          border: none;
+          padding: 12px 24px;
+          border-radius: 12px;
+          cursor: pointer;
+          font-weight: 600;
+          transition: all 0.4s ease;
+      }
+
+      .restriction-btn:hover {
+          transform: translateY(-4px) scale(1.05);
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      }
+
+      /* Executor Styles */
+      .executor-container {
+          background: rgba(255, 255, 255, 0.08); /* More visible background */
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(0, 170, 255, 0.3); /* Lapis border */
+          border-radius: 20px;
+          padding: 24px;
+          height: 600px;
+          display: flex;
+          flex-direction: column;
+          box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+      }
+
+      /* New Tab System Styles */
+      .radio-container {
+        --main-color: #00aaff; /* Lapis color */
+        --main-color-opacity: #00aaff1c;
+
+        /* change this according inputs count */
+        --total-radio: 3;
+
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        padding-left: 0.5rem;
+        margin-bottom: 20px;
+      }
+      .radio-container input {
+        cursor: pointer;
+        appearance: none;
+      }
+      .radio-container .glider-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        background: linear-gradient(
+          0deg,
+          rgba(0, 0, 0, 0) 0%,
+          rgba(27, 27, 27, 1) 50%,
+          rgba(0, 0, 0, 0) 100%
+        );
+        width: 1px;
+      }
+      .radio-container .glider-container .glider {
+        position: relative;
+        height: calc(100% / var(--total-radio));
+        width: 100%;
+        background: linear-gradient(
+          0deg,
+          rgba(0, 0, 0, 0) 0%,
+          var(--main-color) 50%,
+          rgba(0, 0, 0, 0) 100%
+        );
+        transition: transform 0.5s cubic-bezier(0.37, 1.95, 0.66, 0.56);
+      }
+      .radio-container .glider-container .glider::before {
+        content: "";
+        position: absolute;
+        height: 60%;
+        width: 300%;
+        top: 50%;
+        transform: translateY(-50%);
+        background: var(--main-color);
+        filter: blur(10px);
+      }
+      .radio-container .glider-container .glider::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        height: 100%;
+        width: 150px;
+        background: linear-gradient(
+          90deg,
+          var(--main-color-opacity) 0%,
+          rgba(0, 0, 0, 0) 100%
+        );
+      }
+      .radio-container label {
+        cursor: pointer;
+        padding: 1rem;
+        position: relative;
+        color: grey;
+        transition: all 0.3s ease-in-out;
+      }
+
+      .radio-container input:checked + label {
+        color: var(--main-color);
+      }
+
+      /* Dynamic glider positioning will be handled by JS */
+
+      .code-editor {
+          flex: 1;
+          background: rgba(0, 0, 0, 0.5); /* Darker editor background */
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(0, 170, 255, 0.4); /* Stronger Lapis border */
+          border-radius: 12px;
+          padding: 20px;
+          color: #e5e7eb;
+          font-family: 'JetBrains Mono', 'Courier New', monospace;
+          font-size: 14px;
+          resize: none;
+          outline: none;
+          margin-bottom: 20px;
+          transition: all 0.3s ease;
+      }
+
+      .code-editor:focus {
+          border-color: #007bff; /* Lapis border */
+          box-shadow: 0 0 0 3px rgba(0, 170, 255, 0.3); /* Stronger glow */
+      }
+
+      .executor-buttons {
+          display: flex;
+          gap: 12px;
+          flex-wrap: wrap;
+      }
+
+      .executor-btn {
+          background: linear-gradient(45deg, #007bff, #00aaff); /* Lapis gradient */
+          color: white;
+          border: none;
+          padding: 12px 20px;
+          border-radius: 10px;
+          cursor: pointer;
+          transition: all 0.4s ease;
+          font-weight: 600;
+          font-size: 14px;
+          position: relative;
+          overflow: hidden;
+      }
+
+      .executor-btn:hover {
+          transform: translateY(-4px) scale(1.05);
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      }
+
+      .executor-btn.secondary {
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(0, 170, 255, 0.3); /* Lapis border */
+          backdrop-filter: blur(10px);
+      }
+
+      .executor-btn.secondary:hover {
+          background: rgba(255, 255, 255, 0.15);
+          border-color: #007bff; /* Lapis border */
+      }
+
+      /* Activity Feed - Renamed to Lapis Card Container */
+      .lapis-card-container {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 24px;
+          margin-top: 32px;
+      }
+
+      /* Lapis Card Styles */
+      .card {
+        width: 164px;
+        height: 276px;
+        background: rgb(0, 0, 0);
+        border: 3px solid rgb(17, 4, 94);
+        border-radius: 15px;
+        position: relative;
+        padding: 5px;
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+        transition: all 1s ease;
+        color: antiquewhite;
+        margin: 0 auto; /* Center the card */
+      }
+
+      .card::before {
+        content: "";
+        width: 10px;
+        height: 10px;
+        position: absolute;
+        bottom: 10px;
+        right: 77px;
+        border-radius: 50%;
+        background-color: rgb(17, 4, 94);
+      }
+
+      .card__date {
+        display: flex;
+        flex-direction: column;
+        margin-top: 30px;
+      }
+
+      .time {
+        font-size: 2em;
+      }
+
+      .popup {
+        background-color: #444746;
+        border-radius: 5px;
+        display: flex;
+        flex-direction: column;
+        font-size: .8em;
+        padding: 3px;
+      }
+
+      .popup .title {
+        font-size: 9px;
+        color: #9cbde2;
+      }
+
+      .card__date , .popup {
+        opacity: 0;
+        transition: all .5s ease;
+      }
+
+      .card:hover {
+        transform: rotate3d(5, 5, 10, -45deg);
+        box-shadow: -40px 0px 5px 10px #289FED, -80px 0px 10px 20px #9dd2f5, -120px 0px 20px 40px #374650;
+      }
+
+      .card:hover .card__date , .card:hover .popup {
+        opacity: 1;
+      }
+
+      /* No Orders Display */
+      .no-orders-display {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: calc(100vh - 300px);
+          text-align: center;
+          color: rgba(255, 255, 255, 0.6);
+      }
+
+      .no-orders-icon {
+          font-size: 4rem;
+          margin-bottom: 20px;
+          opacity: 0.5;
+      }
+
+      .no-orders-title {
+          font-size: 1.5rem;
+          margin-bottom: 12px;
+          color: rgba(255, 255, 255, 0.8);
+      }
+
+      .no-orders-message {
+          font-size: 1rem;
+          line-height: 1.6;
+      }
+
+      /* Modal Styles */
+      .modal {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.8);
+          backdrop-filter: blur(10px);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 10000;
+          opacity: 0;
+          visibility: hidden;
+          transition: all 0.3s ease;
+      }
+
+      .modal.show {
+          opacity: 1;
+          visibility: visible;
+      }
+
+      .modal-content {
+          background: rgba(255, 255, 255, 0.08); /* More visible background */
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(0, 170, 255, 0.4); /* Stronger Lapis border */
+          border-radius: 20px;
+          padding: 32px;
+          max-width: 500px;
+          width: 90%;
+          transform: scale(0.8);
+          transition: transform 0.3s ease;
+          position: relative;
+          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+      }
+
+      .modal.show .modal-content {
+          transform: scale(1);
+      }
+
+      .modal-title {
+          font-size: 1.5rem;
+          margin-bottom: 24px;
+          color: #99ccff; /* Lighter lapis for titles */
+          font-weight: 600;
+          filter: drop-shadow(0 0 8px rgba(0, 170, 255, 0.3));
+      }
+
+      .modal-buttons {
+          display: flex;
+          gap: 12px;
+          justify-content: flex-end;
+          margin-top: 24px;
+      }
+
+      /* Enhanced Order Confirmation Modal */
+      .order-confirmation-modal .modal-content {
+          max-width: 600px;
+          text-align: center;
+      }
+
+      .order-success-icon {
+          font-size: 4rem;
+          color: #00cc00;
+          margin-bottom: 20px;
+      }
+
+      .order-details {
+          background: rgba(0, 0, 0, 0.4); /* Darker background */
+          border: 1px solid rgba(0, 170, 255, 0.4); /* Stronger Lapis border */
+          border-radius: 12px;
+          padding: 20px;
+          margin: 20px 0;
+          text-align: left;
+          font-family: 'Courier New', monospace;
+          font-size: 14px;
+          line-height: 1.8;
+          color: #e5e7eb;
+      }
+
+      .order-details .order-field {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 8px;
+          padding: 4px 0;
+          border-bottom: 1px solid rgba(0, 170, 255, 0.2); /* Stronger Lapis border */
+      }
+
+      .order-details .order-field:last-child {
+          border-bottom: none;
+          margin-bottom: 0;
+      }
+
+      .order-details .order-label {
+          color: #99ccff; /* Lighter lapis for labels */
+          font-weight: 600;
+      }
+
+      .order-details .order-value {
+          color: #ffffff;
+      }
+
+      .screenshot-instruction {
+          border: 1px solid rgba(255, 255, 0, 0.4);
+          border-radius: 12px;
+          padding: 16px;
+          margin: 20px 0;
+          color: #ffff00;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+      }
+
+      .screenshot-instruction-icon {
+          font-size: 1.5rem;
+      }
+
+      /* Discord Invitation Modal */
+      .discord-modal .modal-content {
+          text-align: center;
+          background: linear-gradient(135deg, rgba(0, 170, 255, 0.15), rgba(0, 170, 255, 0.05)); /* More visible Lapis gradient */
+          border-color: #007bff; /* Lapis border */
+      }
+
+      .discord-icon {
+          font-size: 4rem;
+          color: #007bff; /* Lapis icon */
+          margin-bottom: 20px;
+      }
+
+      .discord-title {
+          color: #007bff; /* Lapis title */
+          font-size: 1.8rem;
+          margin-bottom: 16px;
+      }
+
+      .discord-message {
+          color: rgba(255, 255, 255, 0.8);
+          margin-bottom: 24px;
+          line-height: 1.6;
+      }
+
+      .discord-btn {
+          background: #007bff; /* Lapis button */
+          color: white;
+          border: none;
+          padding: 14px 28px;
+          border-radius: 12px;
+          cursor: pointer;
+          font-weight: 600;
+          font-size: 16px;
+          margin-right: 12px;
+          transition: all 0.4s ease;
+      }
+
+      .discord-btn:hover {
+          background: #0056b3; /* Darker lapis hover */
+          transform: translateY(-4px) scale(1.05);
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      }
+
+      /* Roblox Connection Success Modal */
+      .roblox-success-modal .modal-content {
+          text-align: center;
+          background: linear-gradient(135deg, rgba(0, 204, 0, 0.15), rgba(0, 170, 255, 0.05)); /* Green and lapis gradient */
+          border-color: #00cc00;
+      }
+
+      .roblox-success-icon {
+          font-size: 4rem;
+          color: #00cc00;
+          margin-bottom: 20px;
+      }
+
+      .roblox-success-title {
+          color: #00cc00;
+          font-size: 1.8rem;
+          margin-bottom: 16px;
+      }
+
+      .roblox-success-message {
+          color: rgba(255, 255, 255, 0.8);
+          margin-bottom: 24px;
+          line-height: 1.6;
+      }
+
+      /* Settings Styles */
+      .settings-section {
+          background: rgba(255, 255, 255, 0.08); /* More visible background */
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(0, 170, 255, 0.3); /* Lapis border */
+          border-radius: 20px;
+          padding: 28px;
+          margin-bottom: 24px;
+          transition: all 0.4s ease;
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      }
+
+      .settings-section:hover {
+          border-color: rgba(0, 170, 255, 0.5); /* More visible border on hover */
+          transform: translateY(-4px) scale(1.01);
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      }
+
+      .settings-title {
+          font-size: 1.3rem;
+          margin-bottom: 24px;
+          color: #99ccff; /* Lapis for titles */
+          font-weight: 600;
+          filter: drop-shadow(0 0 8px rgba(0, 170, 255, 0.3));
+      }
+
+      .file-input-wrapper {
+          position: relative;
+          display: inline-block;
+          cursor: pointer;
+          background: linear-gradient(45deg, #007bff, #00aaff); /* Lapis gradient */
+          color: white;
+          padding: 12px 20px;
+          border-radius: 12px;
+          transition: all 0.4s ease;
+          font-weight: 600;
+          overflow: hidden;
+      }
+
+      .file-input-wrapper:hover {
+          transform: translateY(-4px) scale(1.05);
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      }
+
+      .file-input-wrapper input[type="file"] {
+          position: absolute;
+          opacity: 0;
+          width: 100%;
+          height: 100%;
+          cursor: pointer;
+      }
+
+      /* Time Editor Styles */
+      .time-editor {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin: 10px 0;
+          padding: 12px;
+          background: rgba(0, 170, 255, 0.15); /* Lapis background */
+          border-radius: 8px;
+          border: 1px solid rgba(0, 170, 255, 0.4); /* Stronger Lapis border */
+      }
+
+      .time-input {
+          background: rgba(255, 255, 255, 0.15);
+          border: 1px solid rgba(0, 170, 255, 0.4); /* Stronger Lapis border */
+          color: white;
+          padding: 8px 12px;
+          border-radius: 6px;
+          width: 80px;
+          text-align: center;
+      }
+
+      .time-input:focus {
+          outline: none;
+          border-color: #007bff; /* Lapis border */
+          box-shadow: 0 0 0 2px rgba(0, 170, 255, 0.3);
+      }
+
+      /* Blacklist Status Styles */
+      .blacklist-status {
+          display: inline-block;
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 12px;
+          font-weight: 600;
+          text-transform: uppercase;
+      }
+
+      .blacklist-status.active {
+          color: #00cc00;
+          border: 1px solid rgba(0, 204, 0, 0.4);
+      }
+
+      .blacklist-status.blacklisted {
+          color: #ff0000;
+          border: 1px solid rgba(255, 0, 0, 0.4);
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+          .sidebar {
+              transform: translateX(-100%);
+          }
+
+          .sidebar.open {
+              transform: translateX(0);
+          }
+
+          .main-content {
+              margin-left: 0;
+          }
+
+          .menu-toggle {
+              display: block;
+          }
+
+          .dashboard-grid {
+              grid-template-columns: 1fr;
+          }
+
+          .lapis-card-container {
+              grid-template-columns: 1fr;
+          }
+
+          .item-list {
+              grid-template-columns: 1fr;
+          }
+
+          .content-title {
+              font-size: 2rem;
+          }
+
+          .game-card-content {
+              flex-direction: column;
+              height: auto;
+          }
+
+          .game-image-section {
+              width: 100%;
+              height: 200px;
+              border-radius: 16px 16px 0 0;
+          }
+      }
+
+      /* Utility Classes */
+      .hidden {
+          display: none !important;
+      }
+
+      .admin-only {
+          display: none;
+      }
+
+      .admin-only.show {
+          display: block;
+      }
+
+      /* Animation Classes */
+      .fade-in {
+          animation: fadeIn 0.5s ease-out;
+      }
+
+      @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+      }
+
+      /* Scrollbar Styling */
+      ::-webkit-scrollbar {
+          width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.1); /* More visible track */
+          border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+          background: rgba(0, 170, 255, 0.5); /* Stronger Lapis scrollbar */
+          border-radius: 4px;
+          transition: all 0.3s ease;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+          background: rgba(0, 170, 255, 0.7); /* Stronger Lapis scrollbar */
+      }
+
+      /* Selection styling */
+      ::selection {
+          background: rgba(0, 170, 255, 0.4); /* Stronger Lapis selection */
+          color: white;
+      }
+
+      /* Focus styles for accessibility */
+      *:focus {
+          outline: 2px solid rgba(0, 170, 255, 0.7); /* Stronger Lapis outline */
+          outline-offset: 2px;
+      }
+
+      button:focus,
+      input:focus,
+      textarea:focus {
+          outline: none;
+      }
+
+      /* Featured Game Card */
+      .featured-game-card {
+          background: rgba(255, 255, 255, 0.08); /* More visible background */
+          backdrop-filter: blur(20px);
+          border-radius: 20px;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          padding: 20px;
+          transition: 0.3s;
+      }
+
+      .featured-game-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      }
+
+      .button {
+          cursor: pointer;
+          border: none;
+          background: #007bff; /* Lapis button */
+          color: #fff;
+          width: 100px;
+          height: 100px;
+          border-radius: 50%;
+          overflow: hidden;
+          position: relative;
+          display: grid;
+          place-content: center;
+          transition: background 300ms, transform 200ms;
+          font-weight: 600;
+      }
+
+      .button__text {
+          position: absolute;
+          inset: 0;
+          animation: text-rotation 8s linear infinite;
+      }
+
+      .button__text > span {
+          position: absolute;
+          inset: 7px;
+      }
+
+      .button__circle {
+          position: relative;
+          width: 40px;
+          height: 40px;
+          overflow: hidden;
+          background: #212121;
+          color: #007bff; /* Lapis color */
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+      }
+
+      .button__icon--copy {
+          position: absolute;
+          transform: translate(-150%, 150%);
+      }
+
+      .button:hover {
+          background: #000;
+          transform: scale(1.05);
+      }
+
+      .button:hover .button__icon {
+          color: #fff;
+      }
+
+      .button:hover .button__icon:first-child {
+          transition: transform 0.3s ease-in-out;
+          transform: translate(150%, -150%);
+      }
+
+      .button:hover .button__icon--copy {
+          transition: transform 0.3s ease-in-out 0.1s;
+          transform: translate(0);
+      }
+
+      @keyframes text-rotation {
+          to {
+              rotate: 360deg;
+          }
+      }
+
+      .button:active {
+          transform: scale(0.95);
+      }
+
+      /* Custom Popup Styles */
+      .custom-popup-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.7);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 10001;
+          opacity: 0;
+          visibility: hidden;
+          transition: opacity 0.3s ease, visibility 0.3s ease;
+      }
+
+      .custom-popup-overlay.show {
+          opacity: 1;
+          visibility: visible;
+      }
+
+      .custom-popup-content {
+          background: rgba(255, 255, 255, 0.1); /* More visible background */
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(0, 170, 255, 0.5); /* Stronger Lapis border */
+          border-radius: 20px;
+          padding: 30px;
+          width: 350px;
+          text-align: center;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+          transform: scale(0.9);
+          transition: transform 0.3s ease;
+      }
+
+      .custom-popup-overlay.show .custom-popup-content {
+          transform: scale(1);
+      }
+
+      .custom-popup-header {
+          font-size: 1.8rem;
+          font-weight: 700;
+          margin-bottom: 20px;
+          background: linear-gradient(45deg, #99ccff, #ffffff); /* Lapis gradient */
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+      }
+
+      .custom-popup-message {
+          font-size: 1rem;
+          color: rgba(255, 255, 255, 0.95);
+          line-height: 1.6;
+          margin-bottom: 15px;
+          min-height: 50px;
+          text-align: left;
+      }
+
+      .custom-popup-message p {
+          margin-bottom: 8px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+      }
+
+      .custom-popup-icon {
+          font-size: 2.5rem;
+          margin-bottom: 20px;
+      }
+
+      .custom-popup-icon.success {
+          color: #00cc00;
+      }
+
+      .custom-popup-icon.error {
+          color: #ff0000;
+      }
+
+      .custom-popup-icon.info {
+          color: #00aaff; /* Lapis info */
+      }
+
+      .custom-popup-buttons {
+          margin-top: 20px;
+      }
+
+      .custom-popup-buttons .btn {
+          width: auto;
+          padding: 10px 25px;
+          margin: 0 5px;
+      }
+
+      /* Typing Animation */
+      .typing-animation {
+          display: inline-block;
+          overflow: hidden;
+          white-space: nowrap;
+          border-right: 2px solid;
+          animation: typing 0.05s steps(1, end) forwards, blink-caret 0.75s step-end infinite;
+      }
+
+      @keyframes typing {
+          from { width: 0 }
+          to { width: 100% }
+      }
+
+      @keyframes blink-caret {
+          from, to { border-color: transparent }
+          50% { border-color: white }
+      }
+  </style>
+</head>
+<body>
+  <!-- Custom Background Container -->
+  <div class="container"></div>
+  <!-- Lapis Overlay for Background Theme and Mouse Movement -->
+  <div class="lapis-overlay"></div>
+
+  <!-- Custom Popup Modal -->
+  <div class="custom-popup-overlay" id="customPopup">
+      <div class="custom-popup-content">
+          <div class="custom-popup-icon" id="customPopupIcon"></div>
+          <h2 class="custom-popup-header" id="customPopupTitle"></h2>
+          <div class="custom-popup-message" id="customPopupMessage"></div>
+          <div class="custom-popup-buttons" id="customPopupButtons">
+              <button class="btn" onclick="closeModal('customPopup')">OK</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Auth Container -->
+  <div class="auth-container" id="authContainer">
+      <div class="auth-box">
+          <h1 class="auth-title">Welcome to Lapis</h1>
+          
+          <!-- Login Form -->
+          <div id="loginForm">
+              <div class="form-group">
+                  <label for="loginEmail">Email</label>
+                  <input type="email" id="loginEmail" required>
+              </div>
+              <div class="form-group">
+                  <label for="loginPassword">Password</label>
+                  <input type="password" id="loginPassword" required>
+              </div>
+              <button class="btn" onclick="login()">Login</button>
+              <a href="#" class="auth-link" onclick="showRegister()">Don’t have an account yet? Sign up</a>
+              <div class="error-message" id="loginError"></div>
+          </div>
+
+          <!-- Register Form -->
+          <div id="registerForm" class="hidden">
+              <div class="form-group">
+                  <label for="registerUsername">Username</label>
+                  <input type="text" id="registerUsername" required>
+                  <div id="usernameMessage" class="validation-message"></div>
+              </div>
+              <div class="form-group">
+                  <label for="registerEmail">Email</label>
+                  <input type="email" id="registerEmail" required>
+                  <div id="emailMessage" class="validation-message"></div>
+              </div>
+              <div class="form-group">
+                  <label for="registerPassword">Password</label>
+                  <input type="password" id="registerPassword" required>
+                  <div id="passwordMessage" class="validation-message"></div>
+              </div>
+              <div class="form-group">
+                  <label for="confirmPassword">Confirm Password</label>
+                  <input type="password" id="confirmPassword" required>
+                  <div id="confirmPasswordMessage" class="validation-message"></div>
+              </div>
+              <button class="btn" onclick="register()">Register</button>
+              <a href="#" class="auth-link" onclick="showLogin()">Back to Login</a>
+              <div class="error-message" id="registerError"></div>
+          </div>
+      </div>
+  </div>
+
+  <!-- Main Application -->
+  <div class="main-app" id="mainApp">
+      <!-- Sidebar -->
+      <div class="sidebar" id="sidebar">
+          <div class="sidebar-header">
+              <div class="sidebar-logo">
+                  Lapis
+                  <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+              </div>
+              <div class="user-profile">
+                  <div class="user-avatar" id="sidebarAvatar">U</div>
+                  <div class="user-info">
+                      <h4 id="sidebarUsername">Welcome, User</h4>
+                      <p id="sidebarUserType">NaN days left</p>
+                  </div>
+              </div>
+          </div>
+
+          <nav class="sidebar-nav">
+              <div class="nav-section">
+                  <div class="nav-section-title">MAIN</div>
+                  <button class="nav-item active" onclick="switchSection('dashboard')">
+                      <span class="nav-item-icon icon-home"></span>
+                      Dashboard
+                  </button>
+                  <button class="nav-item" onclick="checkAccessAndSwitchSection('games')">
+                      <span class="nav-item-icon icon-gamepad"></span>
+                      Games
+                  </button>
+                  <button class="nav-item" onclick="checkAccessAndSwitchSection('scripthub')">
+                      <span class="nav-item-icon icon-script"></span>
+                      Script Hub
+                  </button>
+                  <button class="nav-item hidden" id="myScriptsNavItem" onclick="checkAccessAndSwitchSection('scripts')">
+                      <span class="nav-item-icon icon-document"></span>
+                      My Scripts
+                  </button>
+                  <button class="nav-item" onclick="checkAccessAndSwitchSection('executor')">
+                      <span class="nav-item-icon icon-lightning"></span>
+                      Executor
+                  </button>
+              </div>
+
+              <div class="nav-section" id="toolsDropdown">
+                  <div class="nav-items-container">
+                      <button class="nav-item" onclick="switchSection('settings')">
+                          <span class="nav-item-icon icon-settings"></span>
+                          Settings
+                      </button>
+                      <button class="nav-item" onclick="switchSection('redeem')">
+                          <span class="nav-item-icon icon-ticket"></span>
+                          Redeem Key
+                      </button>
+                      <button class="nav-item" onclick="switchSection('support')">
+                          <span class="nav-item-icon icon-question"></span>
+                          Support
+                      </button>
+                      <button class="nav-item admin-only" onclick="switchSection('whitelist')">
+                          <span class="nav-item-icon icon-users"></span>
+                          User Management
+                      </button>
+                      <button class="nav-item admin-only" onclick="switchSection('orders')">
+                          <span class="nav-item-icon icon-clipboard"></span>
+                          Orders
+                      </button>
+                  </div>
+              </div>
+          </nav>
+
+          <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-content" id="mainContent">
+          <!-- Dashboard Section -->
+          <div class="content-section active" id="dashboardSection">
+              <div class="content-header">
+                  <h1 class="content-title">Dashboard</h1>
+                  <p class="content-subtitle" id="welcomeMessage">Welcome back to Lapis, User!</p>
+              </div>
+
+              <div class="dashboard-grid">
+                  <div class="dashboard-card" onclick="checkAccessAndSwitchSection('games')">
+                      <div class="card-header">
+                          <h3 class="card-title">Available Games</h3>
+                          <span class="card-icon icon-gamepad"></span>
+                      </div>
+                      <div class="card-value" id="gameCount">1</div>
+                      <div class="card-description">Games ready to play</div>
+                  </div>
+
+                  <div class="dashboard-card" onclick="checkAccessAndSwitchSection('scripthub')">
+                      <div class="card-header">
+                          <h3 class="card-title">Script Hub</h3>
+                          <span class="card-icon icon-script"></span>
+                      </div>
+                      <div class="card-value">50+</div>
+                      <div class="card-description">Scripts available</div>
+                  </div>
+
+                  <div class="dashboard-card">
+                      <div class="card-header">
+                          <h3 class="card-title">Account Status</h3>
+                          <span class="card-icon icon-user"></span>
+                      </div>
+                      <div class="card-value" id="accountStatus">User</div>
+                      <div class="card-description" id="timeLeft">NaN days left</div>
+                  </div>
+              </div>
+
+              <div class="lapis-card-container">
+                  <div class="card">
+                      <div class="card__date">
+                          <span class="time" id="lapisCardTime"></span>
+                          <span class="date" id="lapisCardDate"></span>
+                      </div>
+                      <div class="popup">
+                          <p class="title">Software update</p>
+                          <p>Update Coming Soon!</p>
+                      </div>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Games Section -->
+          <div class="content-section" id="gamesSection">
+              <div class="content-header">
+                  <h1 class="content-title">Games</h1>
+                  <p class="content-subtitle">Browse and join available games</p>
+              </div>
+
+              <div class="section-card">
+                  <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                      <input type="text" class="search-bar" placeholder="Search games..." id="gameSearch" oninput="searchGames()" style="margin-bottom: 0; flex: 1;">
+                      <button class="btn admin-only" onclick="showAddGameModal()" style="white-space: nowrap;">Add Game</button>
+                  </div>
+                  <div class="item-list" id="gamesList">
+                      <!-- Games will be populated here -->
+                  </div>
+              </div>
+          </div>
+
+          <!-- Script Hub Section -->
+          <div class="content-section" id="scripthubSection">
+              <div class="content-header">
+                  <h1 class="content-title">Script Hub</h1>
+                  <p class="content-subtitle">Discover and use popular Roblox scripts</p>
+              </div>
+
+              <div class="section-card">
+                  <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                      <input type="text" class="search-bar" placeholder="Search scripts..." id="scriptSearch" oninput="searchScripts()" style="margin-bottom: 0; flex: 1;">
+                      <button class="btn admin-only" onclick="showAddHubScriptModal()" style="white-space: nowrap;">Add Script</button>
+                  </div>
+                  
+                  <div class="item-list" id="allScripts">
+                      <!-- All scripts will be populated here -->
+                  </div>
+              </div>
+          </div>
+
+          <!-- My Scripts Section -->
+          <div class="content-section" id="scriptsSection">
+              <div class="content-header">
+                  <h1 class="content-title">My Scripts</h1>
+                  <p class="content-subtitle">Manage your personal script collection</p>
+              </div>
+
+              <div class="section-card">
+                  <input type="text" class="search-bar" placeholder="Search my scripts..." id="myScriptSearch" oninput="searchMyScripts()">
+                  <button class="btn" onclick="showAddScriptModal()" style="margin-bottom: 20px;">Add New Script</button>
+                  <div class="item-list" id="myScriptsList">
+                      <!-- User scripts will be populated here -->
+                  </div>
+              </div>
+          </div>
+
+          <!-- Executor Section -->
+          <div class="content-section" id="executorSection">
+              <!-- The content of this section will be dynamically loaded by JavaScript -->
+          </div>
+
+          <!-- User Management Section -->
+          <div class="content-section" id="whitelistSection">
+              <div class="content-header">
+                  <h1 class="content-title">User Management</h1>
+                  <p class="content-subtitle">Manage user access, time, and blacklist status</p>
+              </div>
+
+              <div class="section-card">
+                  <input type="text" class="search-bar" placeholder="Search users..." id="userSearch" oninput="searchUsers()">
+                  <div class="item-list" id="userList">
+                      <!-- User list will be populated here by JavaScript -->
+                  </div>
+              </div>
+          </div>
+
+          <!-- Orders Section -->
+          <div class="content-section" id="ordersSection">
+              <div class="content-header">
+                  <h1 class="content-title">Pending Orders</h1>
+                  <p class="content-subtitle">Review and fulfill user access key requests</p>
+              </div>
+
+              <div class="section-card">
+                  <div class="item-list" id="ordersList">
+                      <!-- Orders list will be populated here by JavaScript -->
+                  </div>
+              </div>
+          </div>
+
+          <!-- Settings Section -->
+          <div class="content-section" id="settingsSection">
+              <div class="content-header">
+                  <h1 class="content-title">Settings</h1>
+                  <p class="content-subtitle">Manage your account and preferences</p>
+              </div>
+
+              <div class="settings-section">
+                  <h2 class="settings-title">Profile Settings</h2>
+                  <div class="form-group">
+                      <label>Profile Picture</label>
+                      <div class="file-input-wrapper">
+                          <input type="file" id="profilePicInput" accept="image/*" onchange="updateProfilePic()">
+                          Upload Picture
+                      </div>
+                  </div>
+                  <div class="form-group">
+                      <label for="newUsername">Username</label>
+                      <input type="text" id="newUsername" placeholder="Enter new username">
+                  </div>
+                  <div class="form-group">
+                      <label for="newEmail">Email</label>
+                      <input type="email" id="newEmail" placeholder="Enter new email">
+                  </div>
+                  <div class="form-group">
+                      <label for="newPassword">New Password</label>
+                      <input type="password" id="newPassword" placeholder="Enter new password">
+                  </div>
+                  <button class="btn" onclick="updateProfile()">Update Profile</button>
+              </div>
+
+              <div class="settings-section">
+                  <h2 class="settings-title">Roblox Connection</h2>
+                  <p style="margin-bottom: 15px;">Connect your Roblox account to execute scripts.</p>
+                  <div id="robloxConnectionContainer">
+                      <!-- This content will be dynamically updated by JavaScript -->
+                  </div>
+              </div>
+          </div>
+
+          <!-- Redeem Key Section -->
+          <div class="content-section" id="redeemSection">
+              <div class="content-header">
+                  <h1 class="content-title">Redeem Key</h1>
+                  <p class="content-subtitle">Extend your access with a redemption key</p>
+              </div>
+
+              <div class="settings-section">
+                  <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                      <input type="text" class="search-bar" id="keyInput" placeholder="Enter your access key" style="margin-bottom: 0;">
+                      <button class="btn" onclick="redeemKey()">Redeem</button>
+                  </div>
+                  <div id="keyMessage" class="error-message"></div>
+                  
+                  <div class="dashboard-card" style="margin: 20px 0;">
+                      <div class="card-header">
+                          <h3 class="card-title">Remaining Access Time</h3>
+                          <span class="card-icon icon-clock"></span>
+                      </div>
+                      <div class="card-value" id="accessTimeLeft">0d 0h 0m 0s</div>
+                      <div class="card-description">Time until expiration</div>
+                  </div>
+
+                  <button class="btn btn-pulse" onclick="window.location.href='https://galaxia-gateway.github.io/-/order-page'">Don't have a key? Buy now</button>
+              </div>
+          </div>
+
+          <!-- Support Section -->
+          <div class="content-section" id="supportSection">
+              <div class="content-header">
+                  <h1 class="content-title">Support</h1>
+                  <p class="content-subtitle">Get help and join our community</p>
+              </div>
+
+              <div class="section-card" style="text-align: center; padding: 60px 20px;">
+                  <h2 style="font-size: 1.5rem; margin-bottom: 30px; color: #e5e7eb;">Need Help? Join our support server</h2>
+                  <button class="button" onclick="joinDiscord()">
+                      <p class="button__text">
+                          <span style="--index: 0;">D</span>
+                          <span style="--index: 1;">I</span>
+                          <span style="--index: 2;">S</span>
+                          <span style="--index: 3;">C</span>
+                          <span style="--index: 4;">O</span>
+                          <span style="--index: 5;">R</span>
+                          <span style="--index: 6;">D</span>
+                          <span style="--index: 7;"> </span>
+                          <span style="--index: 8;">D</span>
+                          <span style="--index: 9;">I</span>
+                          <span style="--index: 10;">S</span>
+                          <span style="--index: 11;">C</span>
+                          <span style="--index: 12;">O</span>
+                          <span style="--index: 13;">R</span>
+                          <span style="--index: 14;">D</span>
+                      </p>
+                      <div class="button__circle">
+                          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="button__icon" width="25">
+                              <path d="M13.545 2.907a13.227 13.227 0 0 0-3.257-1.011.05.05 0 0 0-.052.025c-.141.25-.297.577-.406.833a12.19 12.19 0 0 0-3.658 0 8.258 8.258 0 0 0-.412-.833.051.051 0 0 0-.052-.025c-1.125.194-2.22.534-3.257 1.011a.041.041 0 0 0-.021.018C.356 6.024-.213 9.047.066 12.032c.001.014.01.028.021.037a13.276 13.276 0 0 0 3.995 2.02.05.05 0 0 0 .056-.019c.308-.42.582-.863.818-1.329a.05.05 0 0 0-.01-.059.051.051 0 0 0-.018-.011 8.875 8.875 0 0 1-1.248-.595.05.05 0 0 1-.02-.066.051.051 0 0 1 .015-.019c.084-.063.168-.129.248-.195a.05.05 0 0 1 .051-.007c2.619 1.196 5.454 1.196 8.041 0a.052.052 0 0 1 .053.007c.08.066.164.132.248.195a.051.051 0 0 1-.004.085 8.254 8.254 0 0 1-1.249.594.05.05 0 0 0-.03.03.052.052 0 0 0 .003.041c.24.465.515.909.817 1.329a.05.05 0 0 0 .056.019 13.235 13.235 0 0 0 4.001-2.02.049.049 0 0 0 .021-.037c.334-3.451-.559-6.449-2.366-9.106a.034.034 0 0 0-.02-.019Zm-8.198 7.307c-.789 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.45.73 1.438 1.613 0 .888-.637 1.612-1.438 1.612Zm5.316 0c-.788 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.451.73 1.438 1.613 0 .888-.631 1.612-1.438 1.612Z" fill="currentColor"></path>
+                          </svg>
+                          <svg viewBox="0 0 16 16" fill="none" width="25" xmlns="http://www.w3.org/2000/svg" class="button__icon button__icon--copy">
+                              <path d="M13.545 2.907a13.227 13.227 0 0 0-3.257-1.011.05.05 0 0 0-.052.025c-.141.25-.297.577-.406.833a12.19 12.19 0 0 0-3.658 0 8.258 8.258 0 0 0-.412-.833.051.051 0 0 0-.052-.025c-1.125.194-2.22.534-3.257 1.011a.041.041 0 0 0-.021.018C.356 6.024-.213 9.047.066 12.032c.001.014.01.028.021.037a13.276 13.276 0 0 0 3.995 2.02.05.05 0 0 0 .056-.019c.308-.42.582-.863.818-1.329a.05.05 0 0 0-.01-.059.051.051 0 0 0-.018-.011 8.875 8.875 0 0 1-1.248-.595.05.05 0 0 1-.02-.066.051.051 0 0 1 .015-.019c.084-.063.168-.129.248-.195a.05.05 0 0 1 .051-.007c2.619 1.196 5.454 1.196 8.041 0a.052.052 0 0 1 .053.007c.08.066.164.132.248.195a.051.051 0 0 1-.004.085 8.254 8.254 0 0 1-1.249.594.05.05 0 0 0-.03.03.052.052 0 0 0 .003.041c.24.465.515.909.817 1.329a.05.05 0 0 0 .056.019 13.235 13.235 0 0 0 4.001-2.02.049.049 0 0 0 .021-.037c.334-3.451-.559-6.449-2.366-9.106a.034.034 0 0 0-.02-.019Zm-8.198 7.307c-.789 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.45.73 1.438 1.613 0 .888-.637 1.612-1.438 1.612Zm5.316 0c-.788 0-1.438-.724-1.438-1.612 0-.889.637-1.613 1.438-1.613.807 0 1.451.73 1.438 1.613 0 .888-.631 1.612-1.438 1.612Z" fill="currentColor"></path>
+                          </svg>
+                      </div>
+                  </button>
+              </div>
+          </div>
+      </div>
+
+  <!-- Roblox Connection Success Modal -->
+  <div class="modal roblox-success-modal" id="robloxSuccessModal">
+      <div class="modal-content">
+          <div class="roblox-success-icon">
+              <i class="fa-solid fa-check-circle"></i>
+          </div>
+          <h2 class="roblox-success-title">Account Connected!</h2>
+          <p class="roblox-success-message">
+              Your Roblox account has been successfully connected. You can now access the script executor and all premium features.
+          </p>
+          <div class="modal-buttons">
+              <button class="btn" onclick="closeModal('robloxSuccessModal')">Continue</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Blacklist Message Modal -->
+  <div class="modal" id="blacklistMessageModal">
+      <div class="modal-content">
+          <div class="modal-title">Script Blacklisted!</div>
+          <p class="discord-message">This script is blacklisted. You cannot execute any scripts for <span id="blacklistCountdown"></span>.</p>
+          <div class="modal-buttons">
+              <button class="btn" onclick="closeModal('blacklistMessageModal')">OK</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Connection Required Modal -->
+  <div class="modal" id="connectModal">
+      <div class="modal-content">
+          <div class="modal-title">Connection Required</div>
+          <p class="discord-message">You need to connect your Roblox account to access the Executor.</p>
+          <div class="modal-buttons">
+              <button class="btn" onclick="document.getElementById('connectModal').classList.remove('show')">Okay</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Order Error Modal -->
+  <div class="modal" id="orderModal">
+      <div class="modal-content">
+          <div class="modal-title">Missing Information</div>
+          <p class="discord-message">Please fill in all the fields before generating an order.</p>
+          <div class="modal-buttons">
+              <button class="btn btn-secondary" onclick="document.getElementById('orderModal').classList.remove('show')">Close</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Free User Modal -->
+  <div class="modal" id="freeUserModal">
+      <div class="modal-content">
+          <div class="modal-title">Free User Access</div>
+          <p class="discord-message">You are a free user, to access the rest of the features redeem a key!</p>
+          <p style="text-align: center; font-size: 1.2rem; margin-bottom: 20px;">
+              Closing in: <span id="freeUserCountdown">10</span>s
+          </p>
+          <div class="modal-buttons">
+              <button class="btn" onclick="closeModal('freeUserModal')" id="freeUserCloseBtn" disabled>Close</button>
+              <button class="btn btn-secondary" onclick="redirectToRedeemKey()">Don't have a key yet?</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- New Free User Pop-up Modal -->
+  <div class="modal" id="freeUserPopupModal">
+      <div class="modal-content">
+          <div class="modal-title">Limited Access</div>
+          <p class="discord-message">You are a free user, buy a key to gain full access!</p>
+          <div class="modal-buttons">
+              <button class="btn" onclick="closeModal('freeUserPopupModal')">OK</button>
+              <button class="btn btn-secondary" onclick="redirectToRedeemKey()">Buy Key</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Add/Edit Script Modal -->
+  <div class="modal" id="addScriptModal">
+      <div class="modal-content">
+          <h2 class="modal-title" id="addScriptModalTitle">Add New Script</h2>
+          <div class="form-group">
+              <label for="scriptName">Script Name</label>
+              <input type="text" id="scriptName" placeholder="Enter script name" required>
+          </div>
+          <div class="form-group">
+              <label for="scriptImage">Image URL (Optional)</label>
+              <input type="text" id="scriptImage" placeholder="Enter image URL">
+          </div>
+          <div class="form-group">
+              <label for="scriptContent">Script Content (Lua)</label>
+              <textarea id="scriptContent" rows="10" placeholder="Enter your Lua script here" required></textarea>
+          </div>
+          <div class="modal-buttons">
+              <button class="btn btn-secondary" onclick="closeModal('addScriptModal')">Cancel</button>
+              <button class="btn" onclick="addScript()">Save Script</button>
+          </div>
+      </div>
+  </div>
+
+  <script>
+      // Global Variables
+      let currentUser = null;
+      let isAdmin = false;
+      let currentSection = 'dashboard';
+      let executorTabs = [{ name: 'Script 1', content: '' }];
+      let activeExecutorTab = 0;
+      let editingScriptId = null;
+      let deletingScriptId = null;
+      let accessExpiration = null;
+      let countdownInterval = null;
+      let freeUserCountdownTimer = null;
+      let hasShownFreeUserPopup = false;
+
+      // Blacklist variables
+      let blacklistCooldownEndTime = 0;
+      let blacklistCountdownInterval = null;
+      let blacklistMessageModal = null;
+
+      // Enhanced Database System
+      const DATABASE = {
+          users: 'lapisUsers', /* Renamed */
+          games: 'lapisGames', /* Renamed */
+          hubScripts: 'lapisHubScripts', /* Renamed */
+          orders: 'lapisOrders', /* Renamed */
+          blacklistedEmails: 'lapisBlacklistedEmails', /* Renamed */
+          userTracking: 'lapisUserTracking' /* Renamed */
+      };
+
+      // Predefined keys (each worth 30 days)
+      const validKeys = [
+          'LAPIS-2024-ALPHA', /* Renamed */
+          'LAPIS-2024-BETA', /* Renamed */
+          'LAPIS-2024-GAMMA', /* Renamed */
+          'LAPIS-2024-DELTA', /* Renamed */
+          'LAPIS-2024-EPSILON' /* Renamed */
+      ];
+
+      // Lifetime keys
+      const lifetimeKeys = [
+          'LAPISLF-RELEASE', /* Renamed */
+          'LAPISLF-LENNY', /* Renamed */
+          'LAPISLF-EXOW', /* Renamed */
+          'LAPISLF-STAFF', /* Renamed */
+          'LAPISLF-KITKAT' /* Renamed */
+      ];
+
+      // Profanity filter
+      const profanityWords = ['fuck', 'shit', 'bitch', 'nigga', 'ass', 'cunt', 'dick'];
+
+      // Script database - combined all scripts
+      const scriptDatabase = [
+          { id: 'iy', name: 'Infinite Yield', code: "loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()" },
+          { id: 'dex', name: 'Dark Dex', code: "loadstring(game:HttpGet('https://raw.githubusercontent.com/Babyhamsta/RBLX_Scripts/main/Universal/BypassedDarkDexV3.lua', true))()" },
+          { id: 'spy', name: 'Simple Spy', code: "loadstring(game:HttpGet('https://raw.githubusercontent.com/exxtremestuffs/SimpleSpySource/raw/master/SimpleSpy.lua'))()" },
+          { id: 'hydroxide', name: 'Hydroxide', code: "loadstring(game:HttpGet('https://raw.githubusercontent.com/Upbolt/Hydroxide/revision/init.lua'))()" },
+          { id: 'esp', name: 'Unnamed ESP', code: "loadstring(game:HttpGet('https://raw.githubusercontent.com/ic3w0lf22/Unnamed-ESP/master/UnnamedESP.lua'))()" },
+          { id: 'aimbot', name: 'Aimbot GUI', code: "loadstring(game:HttpGet('https://raw.githubusercontent.com/Exunys/Aimbot-V3/main/src/Aimbot.lua'))()" },
+          { id: 'fly', name: 'Fly GUI', code: "loadstring(game:HttpGet('https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt'))()" },
+          { id: 'speed', name: 'Speed GUI', code: "loadstring(game:HttpGet('https://raw.githubusercontent.com/JynxScript/SpeedScript/main/SpeedGUI.lua'))()" },
+          { id: 'noclip', name: 'Noclip GUI', code: "loadstring(game:HttpGet('https://raw.githubusercontent.com/Nicuse/RobloxScripts/main/NoClip.lua'))()" }
+      ];
+
+      // Enhanced Database Functions
+      function initializeDatabase() {
+          // Initialize all database collections if they don't exist
+          Object.values(DATABASE).forEach(key => {
+              if (!localStorage.getItem(key)) {
+                  localStorage.setItem(key, JSON.stringify([]));
+              }
+          });
+
+          // Initialize blacklisted emails if not exists
+          if (!localStorage.getItem(DATABASE.blacklistedEmails)) {
+              localStorage.setItem(DATABASE.blacklistedEmails, JSON.stringify([]));
+          }
+      }
+
+      function trackUserActivity(userId, action, details = {}) {
+          const tracking = JSON.parse(localStorage.getItem(DATABASE.userTracking) || '[]');
+          const activity = {
+              userId,
+              action,
+              details,
+              timestamp: Date.now(),
+              date: new Date().toISOString()
+          };
+          tracking.push(activity);
+          localStorage.setItem(DATABASE.userTracking, JSON.stringify(tracking));
+      }
+
+      function isEmailBlacklisted(email) {
+          const blacklistedEmails = JSON.parse(localStorage.getItem(DATABASE.blacklistedEmails) || '[]');
+          return blacklistedEmails.includes(email.toLowerCase());
+      }
+
+      function blacklistEmail(email) {
+          const blacklistedEmails = JSON.parse(localStorage.getItem(DATABASE.blacklistedEmails) || '[]');
+          if (!blacklistedEmails.includes(email.toLowerCase())) {
+              blacklistedEmails.push(email.toLowerCase());
+              localStorage.setItem(DATABASE.blacklistedEmails, JSON.stringify(blacklistedEmails));
+          }
+      }
+
+      function unblacklistEmail(email) {
+          let blacklistedEmails = JSON.parse(localStorage.getItem(DATABASE.blacklistedEmails) || '[]');
+          blacklistedEmails = blacklistedEmails.filter(e => e !== email.toLowerCase());
+          localStorage.setItem(DATABASE.blacklistedEmails, JSON.stringify(blacklistedEmails));
+      }
+
+      function addUserToWhitelist(user) {
+          const users = JSON.parse(localStorage.getItem(DATABASE.users) || '[]');
+          const existingUserIndex = users.findIndex(u => u.id === user.id);
+          
+          if (existingUserIndex !== -1) {
+              users[existingUserIndex] = user;
+          } else {
+              users.push(user);
+          }
+          
+          localStorage.setItem(DATABASE.users, JSON.stringify(users));
+          trackUserActivity(user.id, 'added_to_whitelist', { email: user.email, username: user.username });
+      }
+
+      function distributeGameToAllUsers(game) {
+          const users = JSON.parse(localStorage.getItem(DATABASE.users) || '[]');
+          users.forEach(user => {
+              if (!user.availableGames) {
+                  user.availableGames = [];
+              }
+              if (!user.availableGames.find(g => g.id === game.id)) {
+                  user.availableGames.push(game);
+              }
+          });
+          localStorage.setItem(DATABASE.users, JSON.stringify(users));
+          trackUserActivity('system', 'game_distributed', { gameId: game.id, gameName: game.name, userCount: users.length });
+      }
+
+      // Enhanced Player Count Fetching
+      async function fetchPlayerCount(gameUrl) {
+          // Static player counts for specific games
+          if (gameUrl.includes('FREE-ADMIN-a-literal-baseplate')) {
+              return 10; // Roblox Baseplate
+          }
+          if (gameUrl.includes('The-Strongest-Battlegrounds')) {
+              return 15; // The Strongest Battlegrounds
+          }
+
+          try {
+              // Extract game ID from Roblox URL
+              const gameIdMatch = gameUrl.match(/\/games\/(\d+)/);
+              if (!gameIdMatch) {
+                  return Math.floor(Math.random() * 5000) + 100; // Fallback to random
+              }
+
+              const gameId = gameIdMatch[1];
+              
+              // Simulate API call (in real implementation, you'd use Roblox API)
+              // For demo purposes, return a simulated player count
+              const simulatedCount = Math.floor(Math.random() * 10000) + 500;
+              return simulatedCount;
+          } catch (error) {
+              console.error('Error fetching player count:', error);
+              return Math.floor(Math.random() * 5000) + 100; // Fallback
+          }
+      }
+
+      // Initialize app - Fixed loading screen issue
+      document.addEventListener('DOMContentLoaded', function() {
+          console.log('DOM loaded, starting initialization...');
+          initializeDatabase();
+
+          // Initialize countdown (keep this as it is not directly related to the loading screen being stuck)
+          try {
+              startCountdown();
+          } catch (error) {
+              console.log('Countdown initialization failed:', error);
+          }
+
+          // Initialize Lapis Card time and date
+          updateLapisCardDateTime();
+          setInterval(updateLapisCardDateTime, 1000); // Update every second
+
+          // Mouse movement effect for lapis-overlay
+          const lapisOverlay = document.querySelector('.lapis-overlay');
+          if (lapisOverlay) {
+              document.body.addEventListener('mousemove', (e) => {
+                  const x = (e.clientX / window.innerWidth) * 100;
+                  const y = (e.clientY / window.innerHeight) * 100;
+                  lapisOverlay.style.backgroundPosition = `${x}% ${y}%`;
+              });
+          }
+
+          // Directly check auth status on DOMContentLoaded, skipping all loaders
+          checkAuthStatus();
+      });
+
+      // Enhanced Authentication Functions
+      function checkAuthStatus() {
+          const userData = localStorage.getItem('lapisUser'); /* Renamed */
+          if (userData) {
+              currentUser = JSON.parse(userData);
+              isAdmin = currentUser.username === 'LAPISADMIN'; /* Renamed */
+              showMainApp();
+          } else {
+              document.getElementById('authContainer').style.display = 'flex';
+          }
+      }
+
+      function showLogin() {
+          document.getElementById('loginForm').classList.remove('hidden');
+          document.getElementById('registerForm').classList.add('hidden');
+          clearErrors();
+      }
+
+      function showRegister() {
+          document.getElementById('loginForm').classList.add('hidden');
+          document.getElementById('registerForm').classList.remove('hidden');
+          clearErrors();
+          // Clear validation messages when switching forms
+          document.querySelectorAll('.validation-message').forEach(msg => {
+              msg.textContent = '';
+              msg.classList.remove('show');
+          });
+          document.querySelectorAll('.form-group input').forEach(input => {
+              input.style.borderColor = '';
+          });
+      }
+
+      function clearErrors() {
+          document.getElementById('loginError').textContent = '';
+          document.getElementById('registerError').textContent = '';
+      }
+
+      function validateEmail(email) {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          return emailRegex.test(email);
+      }
+
+      function validatePassword(password) {
+          const hasUppercase = /[A-Z]/.test(password);
+          const hasNumber = /\d/.test(password);
+          return hasUppercase && hasNumber && password.length >= 6;
+      }
+
+      function containsProfanity(text) {
+          return profanityWords.some(word => text.toLowerCase().includes(word.toLowerCase()));
+      }
+
+      function register() {
+          const usernameInput = document.getElementById('registerUsername');
+          const emailInput = document.getElementById('registerEmail');
+          const passwordInput = document.getElementById('registerPassword');
+          const confirmPasswordInput = document.getElementById('confirmPassword');
+          const errorElement = document.getElementById('registerError');
+
+          // Trigger all validations to show messages before submission
+          const isUsernameValid = validateUsername(usernameInput, true);
+          const isEmailValid = validateEmailInput(emailInput, true);
+          const isPasswordValid = validatePasswordInput(passwordInput, true);
+          const isConfirmPasswordValid = validateConfirmPasswordInput(confirmPasswordInput, passwordInput, true);
+
+
+          if (!isUsernameValid || !isEmailValid || !isPasswordValid || !isConfirmPasswordValid) {
+              errorElement.textContent = 'Please correct the errors in the form.';
+              return;
+          }
+
+          const username = usernameInput.value.trim();
+          const email = emailInput.value.trim();
+          const password = passwordInput.value;
+          const confirmPassword = confirmPasswordInput.value;
+
+
+          // Check for existing users
+          const existingUsers = JSON.parse(localStorage.getItem(DATABASE.users) || '[]');
+          if (existingUsers.some(user => user.email === email)) {
+              errorElement.textContent = 'Email already exists.';
+              return;
+          }
+
+          if (existingUsers.some(user => user.username === username)) {
+              errorElement.textContent = 'Username already exists.';
+              return;
+          }
+
+          // Create new user
+          const newUser = {
+              id: Date.now(),
+              username,
+              email,
+              password,
+              profilePic: null,
+              robloxConnected: false,
+              robloxUsername: '',
+              accessExpiration: Date.now() + (3 * 24 * 60 * 60 * 1000), // 3-day free trial
+              blacklisted: false,
+              scripts: [],
+              availableGames: [],
+              registrationDate: Date.now(),
+              lastLogin: Date.now()
+          };
+
+          // Add to whitelist and track
+          addUserToWhitelist(newUser);
+          trackUserActivity(newUser.id, 'user_registered', { email, username });
+
+          // Show custom popup for registration success
+          showCustomPopup(
+              "LAPIS account has been made!", /* Renamed */
+              [
+                  { icon: '<i class="fa-solid fa-user"></i>', text: 'Welcome Adventurer! Go and click the button "Bring me to my palace"!' },
+                  { icon: '<i class="fa-solid fa-user"></i>', text: 'Perhaps... You\'re a peasant!' },
+                  { icon: '<i class="fa-solid fa-user"></i>', text: 'Damn yo-' }
+              ],
+              'success',
+              () => {
+                  // After popup, automatically log in the new user
+                  document.getElementById('loginEmail').value = email;
+                  document.getElementById('loginPassword').value = password;
+                  login(); 
+              }
+          );
+      }
+
+      function login() {
+          const email = document.getElementById('loginEmail').value.trim();
+          const password = document.getElementById('loginPassword').value;
+          const errorElement = document.getElementById('loginError');
+
+          if (!email || !password) {
+              errorElement.textContent = 'Please enter both email and password.';
+              return;
+          }
+
+          // Check if email is blacklisted
+          if (isEmailBlacklisted(email)) {
+              errorElement.textContent = 'This email address has been suspended. Contact support.';
+              return;
+          }
+
+          // Check for admin login
+          if (email === 'LAPISADMIN' && password === 'LAPISISRELEASING') { /* Renamed */
+              currentUser = {
+                  id: 0,
+                  username: 'LAPISADMIN', /* Renamed */
+                  email: 'admin@lapis.com', /* Renamed */
+                  profilePic: null,
+                  robloxConnected: true,
+                  robloxUsername: 'LapisAdmin', /* Renamed */
+                  accessExpiration: Date.now() + (99999999 * 24 * 60 * 60 * 1000),
+                  blacklisted: false,
+                  scripts: [],
+                  availableGames: [],
+                  lastLogin: Date.now()
+              };
+              isAdmin = true;
+              localStorage.setItem('lapisUser', JSON.stringify(currentUser)); /* Renamed */
+              trackUserActivity(0, 'admin_login', { email });
+              
+              showCustomPopup(
+                  "Welcome to LAPIS!", /* Renamed */
+                  [
+                      { icon: '<i class="fa-solid fa-user"></i>', text: 'Welcome back good sir!' },
+                      { icon: '<i class="fa-solid fa-user"></i>', text: 'Isn\'t it a lovely day?' }
+                  ],
+                  'info',
+                  () => showMainApp()
+              );
+              return;
+          }
+
+          // Regular user login
+          const existingUsers = JSON.parse(localStorage.getItem(DATABASE.users) || '[]');
+          const user = existingUsers.find(u => u.email === email && u.password === password);
+
+          if (!user) {
+              errorElement.textContent = 'Invalid email or password.';
+              return;
+          }
+
+          if (user.blacklisted) {
+              errorElement.textContent = 'Your account has been suspended. Contact support.';
+              return;
+          }
+
+          // Update last login
+          user.lastLogin = Date.now();
+          const userIndex = existingUsers.findIndex(u => u.id === user.id);
+          existingUsers[userIndex] = user;
+          localStorage.setItem(DATABASE.users, JSON.stringify(existingUsers));
+
+          currentUser = user;
+          isAdmin = false;
+          localStorage.setItem('lapisUser', JSON.stringify(currentUser)); /* Renamed */
+          trackUserActivity(user.id, 'user_login', { email });
+          
+          showCustomPopup(
+              "Welcome to LAPIS!", /* Renamed */
+              [
+                  { icon: '<i class="fa-solid fa-user"></i>', text: 'Welcome back good sir!' },
+                  { icon: '<i class="fa-solid fa-user"></i>', text: 'Isn\'t it a lovely day?' }
+                  ],
+              'info',
+              () => showMainApp()
+          );
+      }
+
+      function showMainApp() {
+          document.getElementById('authContainer').classList.add('hidden');
+          document.getElementById('mainApp').classList.add('visible');
+
+          // Update UI with user info
+          updateUserInterface();
+          loadUserData();
+
+          // Show admin elements if admin
+          if (isAdmin) {
+              document.querySelectorAll('.admin-only').forEach(el => el.classList.add('show'));
+          }
+      }
+
+      function updateUserInterface() {
+          const sidebarAvatar = document.getElementById('sidebarAvatar');
+          const sidebarUsername = document.getElementById('sidebarUsername');
+          const sidebarUserType = document.getElementById('sidebarUserType');
+          const welcomeMessage = document.getElementById('welcomeMessage');
+          const accountStatus = document.getElementById('accountStatus');
+          const timeLeftDisplay = document.getElementById('timeLeft');
+          const myScriptsNavItem = document.getElementById('myScriptsNavItem');
+
+          if (currentUser.profilePic) {
+              sidebarAvatar.innerHTML = `<img src="${currentUser.profilePic}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+          } else {
+              sidebarAvatar.textContent = currentUser.username.charAt(0).toUpperCase();
+          }
+
+          sidebarUsername.textContent = `Welcome, ${currentUser.username}`;
+          welcomeMessage.textContent = `Welcome back to Lapis, ${currentUser.username}!`; /* Renamed */
+
+          if (isAdmin) {
+              accountStatus.textContent = 'Admin';
+              sidebarUserType.textContent = 'Unlimited Access';
+              timeLeftDisplay.textContent = 'Unlimited Access';
+              myScriptsNavItem.classList.remove('hidden');
+          } else {
+              const daysLeft = Math.ceil((currentUser.accessExpiration - Date.now()) / (1000 * 60 * 60 * 24));
+
+              if (daysLeft >= 91) {
+                  accountStatus.textContent = 'Premium Lifetime User';
+                  sidebarUserType.textContent = 'Lifetime Access';
+                  timeLeftDisplay.textContent = 'Lifetime Access';
+                  myScriptsNavItem.classList.remove('hidden');
+              } else if (daysLeft > 0) {
+                  accountStatus.textContent = 'Standard User';
+                  sidebarUserType.textContent = `${daysLeft} days left`;
+                  timeLeftDisplay.textContent = `${daysLeft} days left`;
+                  myScriptsNavItem.classList.remove('hidden');
+              } else {
+                  accountStatus.textContent = 'Free User';
+                  sidebarUserType.textContent = `0 days left`;
+                  timeLeftDisplay.textContent = `0 days left`;
+                  myScriptsNavItem.classList.add('hidden');
+              }
+          }
+
+          // Update access expiration
+          accessExpiration = currentUser.accessExpiration;
+      }
+
+      function logout() {
+          if (currentUser) {
+              trackUserActivity(currentUser.id, 'user_logout', { email: currentUser.email });
+          }
+          localStorage.removeItem('lapisUser'); /* Renamed */
+          currentUser = null;
+          isAdmin = false;
+          location.reload();
+      }
+
+      // New function to check access before switching sections
+      function checkAccessAndSwitchSection(section) {
+          // Admins always have full access
+          if (isAdmin) {
+              switchSection(section);
+              return;
+          }
+
+          // Check if user's access has expired
+          if (currentUser && currentUser.accessExpiration < Date.now()) {
+              showFreeUserModal(section);
+          } else {
+              switchSection(section);
+          }
+      }
+
+      // Navigation Functions
+      function switchSection(section) {
+          // Remove active class from all nav items
+          document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+
+          // Find and activate the correct nav item
+          const navItems = document.querySelectorAll('.nav-item');
+          navItems.forEach(item => {
+              if (item.textContent.trim().toLowerCase().includes(section.toLowerCase()) ||
+                  (section === 'dashboard' && item.querySelector('.fa-house')) ||
+                  (section === 'games' && item.textContent.trim() === 'Games') ||
+                  (section === 'scripthub' && item.querySelector('.fa-scroll')) ||
+                  (section === 'scripts' && item.id === 'myScriptsNavItem') ||
+                  (section === 'executor' && item.querySelector('.fa-bolt')) ||
+                  (section === 'settings' && item.querySelector('.fa-gear')) ||
+                  (section === 'redeem' && item.querySelector('.fa-ticket')) ||
+                  (section === 'support' && item.querySelector('.fa-circle-question')) ||
+                  (section === 'whitelist' && item.querySelector('.fa-users')) ||
+                  (section === 'orders' && item.querySelector('.fa-clipboard'))) {
+                  item.classList.add('active');
+              }
+          });
+
+          // Hide all sections
+          document.querySelectorAll('.content-section').forEach(sec => {
+              sec.classList.remove('active');
+              sec.style.display = 'none';
+          });
+
+          // Show selected section
+          const targetSection = document.getElementById(section + 'Section');
+          if (targetSection) {
+              targetSection.classList.add('active');
+              targetSection.style.display = 'block';
+          }
+
+          // Reset free user popup flag if navigating away from dashboard
+          if (currentSection === 'dashboard' && section !== 'dashboard') {
+              hasShownFreeUserPopup = false;
+          }
+
+          currentSection = section;
+
+          // Load specific data when switching to certain sections
+          if (section === 'whitelist' && isAdmin) {
+              loadUserList();
+          } else if (section === 'orders' && isAdmin) {
+              loadOrdersList();
+          } else if (section === 'scripthub') {
+              loadScriptHub();
+          } else if (section === 'executor') {
+              loadExecutorContent();
+          } else if (section === 'games') {
+              loadGames();
+          } else if (section === 'settings') {
+              updateRobloxConnectionUI();
+          } else if (section === 'scripts') {
+              loadMyScripts();
+          } else if (section === 'dashboard') {
+              // Show free user popup if applicable and not already shown for this dashboard visit
+              if (!isAdmin && currentUser && currentUser.accessExpiration < Date.now() + (91 * 24 * 60 * 60 * 1000) && !hasShownFreeUserPopup) {
+                  showFreeUserPopup();
+                  hasShownFreeUserPopup = true;
+              }
+          }
+
+          // Close mobile sidebar
+          if (window.innerWidth <= 768) {
+              document.getElementById('sidebar').classList.remove('open');
+          }
+      }
+
+      function toggleSidebar() {
+          document.getElementById('sidebar').classList.toggle('open');
+      }
+
+      // Executor Content Loading
+      function loadExecutorContent() {
+          const executorSection = document.getElementById('executorSection');
+
+          if (!currentUser.robloxConnected && !isAdmin) {
+              // Show restriction message
+              executorSection.innerHTML = `
+                  <div class="content-header">
+                      <h1 class="content-title">Executor</h1>
+                      <p class="content-subtitle">Script execution environment</p>
+                  </div>
+                  <div class="section-card">
+                      <div class="executor-restricted">
+                          <div class="restriction-icon"><i class="fa-solid fa-lock"></i></div>
+                          <h3 class="restriction-title">Executor Access Restricted</h3>
+                          <p class="restriction-message">
+                              You need to connect your Roblox account before you can use the script executor.
+                              This helps us ensure secure script execution and account safety.
+                          </p>
+                          <button class="restriction-btn" onclick="switchSection('settings')">
+                              Connect Roblox Account
+                          </button>
+                      </div>
+                  </div>
+              `;
+          } else {
+              // Show executor interface
+              executorSection.innerHTML = `
+                  <div class="content-header">
+                      <h1 class="content-title">Executor</h1>
+                      <p class="content-subtitle">Execute Lua scripts safely</p>
+                  </div>
+                  <div class="section-card">
+                      <div class="executor-container">
+                          <div class="radio-container" id="executorTabsContainer">
+                              <!-- Tabs will be dynamically generated here -->
+                              <div class="glider-container">
+                                  <div class="glider"></div>
+                              </div>
+                          </div>
+                          <textarea class="code-editor" id="codeEditor0" placeholder="-- Enter your Lua script here"></textarea>
+                          <div class="executor-buttons">
+                              <button class="executor-btn" onclick="executeScript()">Execute</button>
+                              <button class="executor-btn secondary" onclick="saveScript()">Save</button>
+                              <button class="executor-btn secondary" onclick="loadScript()">Load</button>
+                              <button class="executor-btn secondary" onclick="resetCharacter()">Reset Character</button>
+                              <button class="executor-btn secondary" onclick="clearEditor()">Clear</button>
+                          </div>
+                      </div>
+                  </div>
+              `;
+
+              // Initialize executor tabs
+              setTimeout(() => {
+                  renderExecutorTabs();
+                  updateCodeEditor();
+              }, 100);
+          }
+      }
+
+      // Data Loading Functions
+      function loadUserData() {
+          loadGames();
+          loadScriptHub();
+          loadMyScripts();
+          updateDashboardCounts();
+      }
+
+      async function loadGames() {
+          const gamesList = document.getElementById('gamesList');
+          const storedGames = JSON.parse(localStorage.getItem(DATABASE.games) || '[]');
+
+          // Always include default game
+          const defaultGame = {
+              id: 'baseplate',
+              name: 'Roblox Baseplate',
+              players: 10,
+              description: 'The classic Roblox baseplate experience. Perfect for testing scripts and building your creations.',
+              image: 'https://tr.rbxcdn.com/180DAY-08a0d68ad3934983001733becdc4e938/768/432/Image/Webp/noFilter',
+              gameUrl: 'https://www.roblox.com/games/4835383112/FREE-ADMIN-a-literal-baseplate'
+          };
+
+          // New game to add
+          const newGame = {
+              id: 'thestrongestbattlegrounds',
+              name: 'The Strongest Battlegrounds',
+              players: 15,
+              description: 'A popular fighting game on Roblox.',
+              image: 'https://tr.rbxcdn.com/180DAY-ccd8bcf9f66dc37834534d2cb3cfd1b9/768/432/Image/Webp/noFilter',
+              gameUrl: 'https://www.roblox.com/games/10449761463/The-Strongest-Battlegrounds'
+          };
+
+          // Filter out default game and new game if they exist in storedGames to avoid duplicates, then add them
+          const allGames = [
+              defaultGame,
+              newGame,
+              ...storedGames.filter(game => game.id !== defaultGame.id && game.id !== newGame.id)
+          ];
+
+          gamesList.innerHTML = '';
+          
+          for (const game of allGames) {
+              const gameElement = document.createElement('div');
+              gameElement.className = 'list-item';
+              
+              // Fetch real player count if URL is provided
+              let playerCount = game.players;
+              // Only fetch if not one of the static games
+              if (game.gameUrl && game.id !== 'baseplate' && game.id !== 'thestrongestbattlegrounds') {
+                  try {
+                      playerCount = await fetchPlayerCount(game.gameUrl);
+                  } catch (error) {
+                      console.error('Failed to fetch player count for', game.name, ':', error);
+                  }
+              }
+
+              gameElement.innerHTML = `
+                  <div class="game-card-content">
+                      <div class="game-image-section">
+                          <img src="${game.image || 'https://via.placeholder.com/140/007bff/FFFFFF?text=' + encodeURIComponent(game.name)}" alt="${game.name}"> /* Lapis placeholder */
+                      </div>
+                      <div class="game-info-section">
+                          <div class="game-details">
+                              <h3>${game.name}</h3>
+                              <div class="game-stats"><i class="fa-solid fa-users"></i> ${playerCount.toLocaleString()} players</div>
+                              <p>${game.description || 'A fun Roblox game experience.'}</p>
+                          </div>
+                          <div class="game-actions">
+                              <button class="action-btn" onclick="joinGame('${game.gameUrl}')">Join Game</button>
+                              ${isAdmin ? `<button class="action-btn danger" onclick="deleteGame('${game.id}')">Delete</button>` : ''}
+                          </div>
+                      </div>
+                  </div>
+              `;
+              gamesList.appendChild(gameElement);
+          }
+      }
+
+      function loadScriptHub() {
+          const allScriptsContainer = document.getElementById('allScripts');
+          allScriptsContainer.innerHTML = '';
+
+          // Load hub scripts from localStorage
+          const hubScripts = JSON.parse(localStorage.getItem(DATABASE.hubScripts) || '[]');
+          const allScripts = [...scriptDatabase, ...hubScripts];
+
+          allScripts.forEach(script => {
+              const scriptElement = createScriptElement(script, true);
+              allScriptsContainer.appendChild(scriptElement);
+          });
+      }
+
+      function createScriptElement(script, isHubScript = false) {
+          const scriptElement = document.createElement('div');
+          scriptElement.className = 'script-item';
+
+          const adminDeleteBtn = isHubScript && isAdmin && !scriptDatabase.find(s => s.id === script.id)
+              ? `<button class="action-btn danger" onclick="deleteHubScript('${script.id}')">Delete</button>`
+              : '';
+
+          scriptElement.innerHTML = `
+              <div class="item-info">
+                  <div class="item-details">
+                      <h3>${script.name}</h3>
+                      <p>${script.description || 'A powerful Roblox script for enhanced gameplay.'}</p>
+                  </div>
+              </div>
+              <div class="item-actions">
+                  <button class="action-btn" onclick="copyScript('${script.id}')">Copy Script</button>
+                  <button class="action-btn" onclick="loadToEditor('${script.id}', 'hub')">Load to Editor</button>
+                  ${adminDeleteBtn}
+              </div>
+          `;
+          return scriptElement;
+      }
+
+      function loadMyScripts() {
+          const scriptsList = document.getElementById('myScriptsList');
+          scriptsList.innerHTML = '';
+
+          // Ensure currentUser.scripts is initialized
+          if (!currentUser.scripts) {
+              currentUser.scripts = [];
+          }
+
+          if (currentUser.scripts.length === 0) {
+              scriptsList.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.7); padding: 40px;">No scripts yet. Add your first script!</p>';
+              return;
+          }
+
+          currentUser.scripts.forEach(script => {
+              const scriptElement = document.createElement('div');
+              scriptElement.className = 'script-item';
+              scriptElement.innerHTML = `
+                  <div class="item-info">
+                      <div class="item-icon"><i class="fa-solid fa-file-code"></i></div>
+                      <div class="item-details">
+                          <h3>${script.name}</h3>
+                          <p>Created: ${new Date(script.created).toLocaleDateString()}</p>
+                      </div>
+                  </div>
+                  <div class="item-actions">
+                      <button class="action-btn" onclick="editScript(${script.id})">Edit</button>
+                      <button class="action-btn danger" onclick="deleteScript(${script.id})">Delete</button>
+                      <button class="action-btn" onclick="loadToEditor(${script.id}, 'user')">Load to Editor</button>
+                  </div>
+              `;
+              scriptsList.appendChild(scriptElement);
+          });
+      }
+
+      function updateDashboardCounts() {
+          const games = JSON.parse(localStorage.getItem(DATABASE.games) || '[]');
+          document.getElementById('gameCount').textContent = games.length + 2;
+      }
+
+      // Enhanced User Management Functions
+      function loadUserList() {
+          const userList = document.getElementById('userList');
+          const storedUsers = JSON.parse(localStorage.getItem(DATABASE.users) || '[]');
+
+          userList.innerHTML = '';
+
+          if (storedUsers.length === 0) {
+              userList.innerHTML = `
+                  <div class="no-orders-display">
+                      <div class="no-orders-icon"><i class="fa-solid fa-users"></i></div>
+                      <h3 class="no-orders-title">No users found</h3>
+                      <p class="no-orders-message">User accounts will appear here after registration.</p>
+                  </div>
+              `;
+              return;
+          }
+
+          storedUsers.forEach(user => {
+              const userCard = document.createElement('div');
+              userCard.className = 'script-item';
+              const daysLeft = Math.ceil((user.accessExpiration - Date.now()) / (1000 * 60 * 60 * 24));
+              const statusClass = user.blacklisted ? 'blacklisted' : 'active';
+              const statusText = user.blacklisted ? 'Blacklisted' : 'Active';
+
+              userCard.innerHTML = `
+                  <div class="item-info">
+                      <div class="item-icon"><i class="fa-solid fa-user-circle"></i></div>
+                      <div class="item-details">
+                          <h3>${user.username} <span class="blacklist-status ${statusClass}">${statusText}</span></h3>
+                          <p>Email: ${user.email}<br>
+                             Expires: ${new Date(user.accessExpiration).toLocaleDateString()}<br>
+                             Days Left: ${Math.max(0, daysLeft)} days<br>
+                             Roblox: ${user.robloxConnected ? user.robloxUsername : 'Not Connected'}
+                          </p>
+                      </div>
+                  </div>
+                  <div class="item-actions">
+                      <button class="action-btn" onclick="showEditUserTimeModal('${user.id}')">Edit Time</button>
+                      <button class="action-btn ${user.blacklisted ? '' : 'danger'}" onclick="toggleUserBlacklist('${user.id}')">
+                          ${user.blacklisted ? 'Unblacklist' : 'Blacklist'}
+                      </button>
+                      <button class="action-btn danger" onclick="blacklistUserEmail('${user.email}')">Blacklist Email</button>
+                  </div>
+              `;
+              userList.appendChild(userCard);
+          });
+      }
+
+      function showEditUserTimeModal(userId) {
+          const users = JSON.parse(localStorage.getItem(DATABASE.users) || '[]');
+          const user = users.find(u => u.id == userId);
+          if (!user) return;
+
+          const timeLeft = user.accessExpiration - Date.now();
+          const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+
+          const newDays = prompt(`Edit time for ${user.username}\nCurrent: ${Math.max(0, days)} days, ${Math.max(0, hours)} hours\n\nEnter new days:`, Math.max(0, days));
+          if (newDays === null) return;
+
+          const newHours = prompt(`Enter new hours (0-23):`, Math.max(0, hours));
+          if (newHours === null) return;
+
+          const daysNum = parseInt(newDays) || 0;
+          const hoursNum = parseInt(newHours) || 0;
+
+          if (daysNum < 0 || hoursNum < 0 || hoursNum > 23) {
+              alert('Please enter valid time values (days >= 0, hours 0-23)');
+              return;
+          }
+
+          const newExpiration = Date.now() + (daysNum * 24 * 60 * 60 * 1000) + (hoursNum * 60 * 60 * 1000);
+          user.accessExpiration = newExpiration;
+
+          const userIndex = users.findIndex(u => u.id == userId);
+          users[userIndex] = user;
+          localStorage.setItem(DATABASE.users, JSON.stringify(users));
+
+          trackUserActivity(userId, 'time_edited_by_admin', { 
+              adminId: currentUser.id, 
+              newDays: daysNum, 
+              newHours: hoursNum,
+              targetUser: user.username
+          });
+
+          loadUserList();
+          alert(`Updated ${user.username}'s time to ${daysNum} days and ${hoursNum} hours.`);
+      }
+
+      function toggleUserBlacklist(userId) {
+          const users = JSON.parse(localStorage.getItem(DATABASE.users) || '[]');
+          const userIndex = users.findIndex(u => u.id == userId);
+
+          if (userIndex !== -1) {
+              const wasBlacklisted = users[userIndex].blacklisted;
+              users[userIndex].blacklisted = !users[userIndex].blacklisted;
+              localStorage.setItem(DATABASE.users, JSON.stringify(users));
+
+              trackUserActivity(userId, wasBlacklisted ? 'user_unblacklisted' : 'user_blacklisted', {
+                  adminId: currentUser.id,
+                  targetUser: users[userIndex].username,
+                  targetEmail: users[userIndex].email
+              });
+
+              loadUserList();
+              alert(`User ${users[userIndex].blacklisted ? 'blacklisted' : 'unblacklisted'} successfully.`);
+          }
+      }
+
+      function blacklistUserEmail(email) {
+          if (confirm(`Are you sure you want to permanently blacklist the email "${email}"? This will prevent any future registrations or logins with this email.`)) {
+              blacklistEmail(email);
+              
+              // Also blacklist the user account
+              const users = JSON.parse(localStorage.getItem(DATABASE.users) || '[]');
+              const userIndex = users.findIndex(u => u.email === email);
+              if (userIndex !== -1) {
+                  users[userIndex].blacklisted = true;
+                  localStorage.setItem(DATABASE.users, JSON.stringify(users));
+              }
+
+              trackUserActivity('system', 'email_blacklisted', {
+                  adminId: currentUser.id,
+                  blacklistedEmail: email
+              });
+
+              loadUserList();
+              alert(`Email "${email}" has been permanently blacklisted.`);
+          }
+      }
+
+      // Orders Display Function
+      function loadOrdersList() {
+          const ordersList = document.getElementById('ordersList');
+          const orders = JSON.parse(localStorage.getItem(DATABASE.orders) || '[]');
+
+          if (orders.length === 0) {
+              ordersList.innerHTML = `
+                  <div class="no-orders-display">
+                      <div class="no-orders-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+                      <h3 class="no-orders-title">No orders to display</h3>
+                      <p class="no-orders-message">When users generate orders, they will appear here for management.</p>
+                  </div>
+              `;
+              return;
+          }
+
+          ordersList.innerHTML = '';
+          orders.forEach(order => {
+              const orderElement = document.createElement('div');
+              orderElement.className = 'script-item';
+              orderElement.innerHTML = `
+                  <div class="item-info">
+                      <div class="item-icon"><i class="fa-solid fa-receipt"></i></div>
+                      <div class="item-details">
+                          <h3>Order #${order.id}</h3>
+                          <p>Email: ${order.email}<br>Username: ${order.username}<br>Plan: ${order.subscription}<br>Payment: ${order.paymentMethod}<br>Status: ${order.status || 'Pending'}</p>
+                      </div>
+                  </div>
+                  <div class="item-actions">
+                      <button class="action-btn" onclick="fulfillOrder('${order.id}')">Fulfill</button>
+                      <button class="action-btn danger" onclick="cancelOrder('${order.id}')">Cancel</button>
+                  </div>
+              `;
+              ordersList.appendChild(orderElement);
+          });
+      }
+
+      // Search Functions
+      function searchGames() {
+          const searchTerm = document.getElementById('gameSearch').value.toLowerCase();
+          const gameItems = document.querySelectorAll('#gamesList .list-item');
+
+          gameItems.forEach(item => {
+              const title = item.querySelector('h3').textContent.toLowerCase();
+              const description = item.querySelector('p').textContent.toLowerCase();
+
+              if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                  item.style.display = 'block';
+              } else {
+                  item.style.display = 'none';
+              }
+          });
+      }
+
+      function searchScripts() {
+          const searchTerm = document.getElementById('scriptSearch').value.toLowerCase();
+          const scriptItems = document.querySelectorAll('#scripthubSection .script-item');
+
+          scriptItems.forEach(item => {
+              const title = item.querySelector('h3').textContent.toLowerCase();
+              const description = item.querySelector('p').textContent.toLowerCase();
+
+              if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                  item.style.display = 'block';
+              } else {
+                  item.style.display = 'none';
+              }
+          });
+      }
+
+      function searchMyScripts() {
+          const searchTerm = document.getElementById('myScriptSearch').value.toLowerCase();
+          const scriptItems = document.querySelectorAll('#myScriptsList .script-item');
+
+          scriptItems.forEach(item => {
+              const title = item.querySelector('h3').textContent.toLowerCase();
+
+              if (title.includes(searchTerm)) {
+                  item.style.display = 'block';
+              } else {
+                  item.style.display = 'none';
+              }
+          });
+      }
+
+      function searchUsers() {
+          const searchTerm = document.getElementById('userSearch').value.toLowerCase();
+          const userItems = document.querySelectorAll('#userList .script-item');
+
+          userItems.forEach(item => {
+              const title = item.querySelector('h3').textContent.toLowerCase();
+              const description = item.querySelector('p').textContent.toLowerCase();
+
+              if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                  item.style.display = 'block';
+              } else {
+                  item.style.display = 'none';
+              }
+          });
+      }
+
+      // Script Functions
+      function copyScript(scriptId) {
+          let scriptCode = '';
+
+          // Find script in database
+          const hubScripts = JSON.parse(localStorage.getItem(DATABASE.hubScripts) || '[]');
+          const allScripts = [...scriptDatabase, ...hubScripts];
+          const script = allScripts.find(s => s.id === scriptId);
+
+          if (!script) {
+              alert('Script not found!');
+              return;
+          }
+
+          scriptCode = script.code;
+
+          // Copy to clipboard
+          navigator.clipboard.writeText(scriptCode).then(() => {
+              alert('Script copied to clipboard!');
+              trackUserActivity(currentUser.id, 'script_copied', { scriptId, scriptName: script.name });
+          }).catch(() => {
+              // Fallback for older browsers
+              const textArea = document.createElement('textarea');
+              textArea.value = scriptCode;
+              document.body.appendChild(textArea);
+              textArea.select();
+              document.execCommand('copy');
+              document.body.removeChild(textArea);
+              alert('Script copied to clipboard!');
+              trackUserActivity(currentUser.id, 'script_copied', { scriptId, scriptName: script.name });
+          });
+      }
+
+      function loadToEditor(scriptId, type) {
+          let script = null;
+          if (type === 'hub') {
+              const hubScripts = JSON.parse(localStorage.getItem(DATABASE.hubScripts) || '[]');
+              const allScripts = [...scriptDatabase, ...hubScripts];
+              script = allScripts.find(s => s.id === scriptId);
+          } else if (type === 'user') {
+              script = currentUser.scripts.find(s => s.id === scriptId);
+          }
+
+          if (!script) {
+              alert('Script not found!');
+              return;
+          }
+
+          // Check if Roblox is connected (unless admin)
+          if (!currentUser.robloxConnected && !isAdmin) {
+              alert('Please connect your Roblox account in Settings before using the executor.');
+              return;
+          }
+
+          // Switch to executor section
+          switchSection('executor');
+
+          // Load script into active editor tab
+          setTimeout(() => {
+              const editor = document.getElementById(`codeEditor${activeExecutorTab}`);
+              if (editor) {
+                  editor.value = script.content || script.code;
+                  executorTabs[activeExecutorTab].content = editor.value;
+                  trackUserActivity(currentUser.id, 'script_loaded_to_editor', { scriptId, scriptName: script.name, type: type });
+              }
+          }, 200);
+      }
+
+      function showAddScriptModal() {
+          // Reset form for new script
+          document.getElementById('addScriptModalTitle').textContent = 'Add New Script';
+          document.getElementById('scriptName').value = '';
+          document.getElementById('scriptImage').value = '';
+          document.getElementById('scriptContent').value = '';
+          editingScriptId = null;
+
+          document.getElementById('addScriptModal').classList.add('show');
+      }
+
+      function addScript() {
+          const name = document.getElementById('scriptName').value.trim();
+          const image = document.getElementById('scriptImage').value.trim();
+          const content = document.getElementById('scriptContent').value.trim();
+
+          if (!name || !content) {
+              alert('Please enter both script name and content.');
+              return;
+          }
+
+          if (editingScriptId) {
+              // Editing existing script
+              const scriptIndex = currentUser.scripts.findIndex(s => s.id === editingScriptId);
+              if (scriptIndex !== -1) {
+                  currentUser.scripts[scriptIndex].name = name;
+                  currentUser.scripts[scriptIndex].image = image;
+                  currentUser.scripts[scriptIndex].content = content;
+                  updateUserInStorage();
+                  trackUserActivity(currentUser.id, 'user_script_edited', { scriptId: editingScriptId, scriptName: name });
+                  alert('Script updated successfully!');
+              }
+              editingScriptId = null;
+          } else if (isAdmin && currentSection === 'scripthub') {
+              // Add to hub scripts (Admin only)
+              const hubScripts = JSON.parse(localStorage.getItem(DATABASE.hubScripts) || '[]');
+
+              if (hubScripts.some(script => script.name === name)) {
+                  alert('A script with this name already exists in the hub.');
+                  return;
+              }
+
+              const newScript = {
+                  id: 'hub_' + Date.now(),
+                  name,
+                  code: content,
+                  description: 'Custom admin script',
+                  created: Date.now()
+              };
+
+              hubScripts.push(newScript);
+              localStorage.setItem(DATABASE.hubScripts, JSON.stringify(hubScripts));
+              trackUserActivity(currentUser.id, 'hub_script_added', { scriptId: newScript.id, scriptName: name });
+              loadScriptHub();
+              alert('Script added to hub successfully!');
+          } else {
+              // Add to user scripts
+              if (!currentUser.scripts) {
+                  currentUser.scripts = [];
+              }
+              if (currentUser.scripts.some(script => script.name === name)) {
+                  alert('A script with this name already exists in your personal scripts.');
+                  return;
+              }
+
+              const newScript = {
+                  id: Date.now(),
+                  name,
+                  image,
+                  content,
+                  created: Date.now()
+              };
+
+              currentUser.scripts.push(newScript);
+              updateUserInStorage();
+              trackUserActivity(currentUser.id, 'user_script_added', { scriptId: newScript.id, scriptName: name });
+              alert('Script added to your personal scripts successfully!');
+          }
+
+          closeModal('addScriptModal');
+          loadMyScripts();
+          updateDashboardCounts();
+      }
+
+      function editScript(scriptId) {
+          const script = currentUser.scripts.find(s => s.id === scriptId);
+          if (!script) return;
+
+          editingScriptId = scriptId;
+          document.getElementById('addScriptModalTitle').textContent = 'Edit Script';
+          document.getElementById('scriptName').value = script.name;
+          document.getElementById('scriptImage').value = script.image || '';
+          document.getElementById('scriptContent').value = script.content;
+          document.getElementById('addScriptModal').classList.add('show');
+      }
+
+      function deleteScript(scriptId) {
+          if (confirm('Are you sure you want to delete this script?')) {
+              const script = currentUser.scripts.find(s => s.id === scriptId);
+              currentUser.scripts = currentUser.scripts.filter(s => s.id !== scriptId);
+              updateUserInStorage();
+              trackUserActivity(currentUser.id, 'user_script_deleted', { scriptId, scriptName: script?.name });
+              loadMyScripts();
+              updateDashboardCounts();
+          }
+      }
+
+      function deleteHubScript(scriptId) {
+          if (confirm('Are you sure you want to delete this script from the hub?')) {
+              let hubScripts = JSON.parse(localStorage.getItem(DATABASE.hubScripts) || '[]');
+              const script = hubScripts.find(s => s.id === scriptId);
+              hubScripts = hubScripts.filter(s => s.id !== scriptId);
+              localStorage.setItem(DATABASE.hubScripts, JSON.stringify(hubScripts));
+              trackUserActivity(currentUser.id, 'hub_script_deleted', { scriptId, scriptName: script?.name });
+              loadScriptHub();
+          }
+      }
+
+      function updateUserInStorage() {
+          localStorage.setItem('lapisUser', JSON.stringify(currentUser)); /* Renamed */
+
+          // Also update in users array if not admin
+          if (!isAdmin) {
+              const users = JSON.parse(localStorage.getItem(DATABASE.users) || '[]');
+              const userIndex = users.findIndex(u => u.id === currentUser.id);
+              if (userIndex !== -1) {
+                  users[userIndex] = currentUser;
+                  localStorage.setItem(DATABASE.users, JSON.stringify(users));
+              }
+          }
+      }
+
+      // Enhanced Game Functions
+      function showAddGameModal() {
+          document.getElementById('addGameModal').classList.add('show');
+      }
+
+      async function addGame() {
+          const name = document.getElementById('gameName').value.trim();
+          const gameURL = document.getElementById('gameURL').value.trim();
+          const description = document.getElementById('gameDescription').value.trim();
+          const imageURL = document.getElementById('gameImageURL').value.trim();
+
+          if (!name || !description) {
+              alert('Please enter game name and description.');
+              return;
+          }
+
+          const games = JSON.parse(localStorage.getItem(DATABASE.games) || '[]');
+          if (games.some(game => game.name === name)) {
+              alert('A game with this name already exists.');
+              return;
+          }
+
+          // Fetch player count if URL provided
+          let playerCount = Math.floor(Math.random() * 5000) + 100;
+          if (gameURL) {
+              try {
+                  playerCount = await fetchPlayerCount(gameURL);
+              } catch (error) {
+                  console.error('Failed to fetch player count:', error);
+              }
+          }
+
+          const newGame = {
+              id: 'game_' + Date.now(),
+              name,
+              gameUrl: gameURL,
+              players: playerCount,
+              description,
+              image: imageURL || null,
+              addedBy: currentUser.id,
+              dateAdded: Date.now()
+          };
+
+          games.push(newGame);
+          localStorage.setItem(DATABASE.games, JSON.stringify(games));
+
+          // Distribute game to all existing users
+          distributeGameToAllUsers(newGame);
+
+          trackUserActivity(currentUser.id, 'game_added', { gameId: newGame.id, gameName: name });
+          loadGames();
+          updateDashboardCounts();
+          closeModal('addGameModal');
+
+          // Clear form
+          document.getElementById('gameName').value = '';
+          document.getElementById('gameURL').value = '';
+          document.getElementById('gameDescription').value = '';
+          document.getElementById('gameImageURL').value = '';
+
+          alert(`Game "${name}" has been added with ${playerCount.toLocaleString()} active players!`);
+      }
+
+      function deleteGame(gameId) {
+          if (gameId === 'baseplate') {
+              alert('Cannot delete the default baseplate game.');
+              return;
+          }
+          if (gameId === 'thestrongestbattlegrounds') {
+              alert('Cannot delete this featured game.');
+              return;
+          }
+
+          if (confirm('Are you sure you want to delete this game?')) {
+              let games = JSON.parse(localStorage.getItem(DATABASE.games) || '[]');
+              const game = games.find(g => g.id === gameId);
+              games = games.filter(game => g.id !== gameId);
+              localStorage.setItem(DATABASE.games, JSON.stringify(games));
+
+              // Remove game from all users
+              const users = JSON.parse(localStorage.getItem(DATABASE.users) || '[]');
+              users.forEach(user => {
+                  if (user.availableGames) {
+                      user.availableGames = user.availableGames.filter(g => g.id !== gameId);
+                  }
+              });
+              localStorage.setItem(DATABASE.users, JSON.stringify(users));
+
+              trackUserActivity(currentUser.id, 'game_deleted', { gameId, gameName: game?.name });
+              loadGames();
+              updateDashboardCounts();
+          }
+      }
+
+      function joinGame(gameUrl) {
+          // Open the Roblox game URL in a new tab
+          window.open(gameUrl, '_blank');
+          trackUserActivity(currentUser.id, 'game_joined', { gameUrl });
+      }
+
+      // Executor Functions
+      function addExecutorTab() {
+          const tabCount = executorTabs.length + 1;
+          executorTabs.push({ name: `Script ${tabCount}`, content: '' });
+          renderExecutorTabs();
+          switchExecutorTab(executorTabs.length - 1);
+      }
+
+      function closeExecutorTab(index) {
+          if (executorTabs.length === 1) return;
+
+          executorTabs.splice(index, 1);
+          if (activeExecutorTab >= executorTabs.length) {
+              activeExecutorTab = executorTabs.length - 1;
+          }
+          renderExecutorTabs();
+          switchExecutorTab(activeExecutorTab);
+      }
+
+      function renderExecutorTabs() {
+          const tabsContainer = document.getElementById('executorTabsContainer');
+          if (!tabsContainer) return;
+
+          // Remove existing tab inputs and labels, but keep the glider-container
+          const existingInputs = tabsContainer.querySelectorAll('input[type="radio"]');
+          const existingLabels = tabsContainer.querySelectorAll('label');
+          existingInputs.forEach(input => input.remove());
+          existingLabels.forEach(label => label.remove());
+
+          // Set --total-radio custom property
+          tabsContainer.style.setProperty('--total-radio', executorTabs.length);
+
+          executorTabs.forEach((tab, index) => {
+              const input = document.createElement('input');
+              input.type = 'radio';
+              input.name = 'executorTab';
+              input.id = `executorTab${index}`;
+              input.checked = (index === activeExecutorTab);
+              input.addEventListener('change', () => switchExecutorTab(index));
+
+              const label = document.createElement('label');
+              label.htmlFor = `executorTab${index}`;
+              label.textContent = tab.name;
+
+              tabsContainer.insertBefore(input, tabsContainer.querySelector('.glider-container'));
+              tabsContainer.insertBefore(label, tabsContainer.querySelector('.glider-container'));
+          });
+
+          // Add a button to add new tabs
+          const addTabButton = document.createElement('button');
+          addTabButton.className = 'add-tab-btn';
+          addTabButton.textContent = '+';
+          addTabButton.onclick = addExecutorTab;
+          tabsContainer.appendChild(addTabButton);
+
+          // Update glider position
+          updateGliderPosition();
+      }
+
+      function updateGliderPosition() {
+          const glider = document.querySelector('.radio-container .glider');
+          if (glider) {
+              glider.style.transform = `translateY(${activeExecutorTab * 100}%)`;
+          }
+      }
+
+      function switchExecutorTab(index) {
+          // Save current tab content
+          if (activeExecutorTab < executorTabs.length) {
+              const currentEditor = document.getElementById(`codeEditor${activeExecutorTab}`);
+              if (currentEditor) {
+                  executorTabs[activeExecutorTab].content = currentEditor.value;
+              }
+          }
+
+          activeExecutorTab = index;
+
+          // Update tab appearance and glider position
+          renderExecutorTabs();
+
+          // Update editor content
+          updateCodeEditor();
+      }
+
+      function updateCodeEditor() {
+          // Remove existing editors
+          document.querySelectorAll('.code-editor').forEach(editor => editor.remove());
+
+          // Create new editor for active tab
+          const editorContainer = document.querySelector('.executor-container');
+          const buttonsContainer = document.querySelector('.executor-buttons');
+
+          if (!editorContainer || !buttonsContainer) return;
+
+          const editor = document.createElement('textarea');
+          editor.className = 'code-editor';
+          editor.id = `codeEditor${activeExecutorTab}`;
+          editor.placeholder = '-- Enter your Lua script here';
+          editor.value = executorTabs[activeExecutorTab].content;
+
+          editorContainer.insertBefore(editor, buttonsContainer);
+      }
+
+      function executeScript() {
+          if (!currentUser.robloxConnected && !isAdmin) {
+              alert('Please connect your Roblox account in Settings before executing scripts.');
+              return;
+          }
+
+          const editor = document.getElementById(`codeEditor${activeExecutorTab}`);
+          const code = editor.value.trim();
+
+          if (!code) {
+              alert('Please enter some code to execute.');
+              return;
+          }
+
+          // Blacklist check
+          if (code.includes('print("ninja")')) {
+              const now = Date.now();
+              if (blacklistCooldownEndTime === 0 || now >= blacklistCooldownEndTime) {
+                  // Set cooldown for 59 seconds and 999 milliseconds
+                  blacklistCooldownEndTime = now + (59 * 1000) + 999;
+                  startBlacklistCountdown();
+              }
+              showBlacklistMessage();
+              trackUserActivity(currentUser.id, 'blacklisted_script_attempt', { scriptContent: code.substring(0, 100) });
+              return;
+          }
+
+          // Check if currently under cooldown
+          if (Date.now() < blacklistCooldownEndTime) {
+              showBlacklistMessage();
+              return;
+          }
+
+          // Simulate script execution
+          trackUserActivity(currentUser.id, 'script_executed', { 
+              codeLength: code.length,
+              robloxAccount: currentUser.robloxUsername 
+          });
+          alert('Script executed successfully! (This is a simulation)');
+      }
+
+      function saveScript() {
+          const editor = document.getElementById(`codeEditor${activeExecutorTab}`);
+          const code = editor.value.trim();
+
+          if (!code) {
+              alert('No code to save.');
+              return;
+          }
+
+          const scriptName = prompt('Enter script name:');
+          if (!scriptName) return;
+
+          // Check for duplicate names
+          if (!currentUser.scripts) {
+              currentUser.scripts = [];
+          }
+          if (currentUser.scripts.some(script => script.name === scriptName)) {
+              alert('A script with this name already exists.');
+              return;
+          }
+
+          const newScript = {
+              id: Date.now(),
+              name: scriptName,
+              content: code,
+              created: Date.now()
+          };
+
+          currentUser.scripts.push(newScript);
+          updateUserInStorage();
+          trackUserActivity(currentUser.id, 'script_saved', { scriptId: newScript.id, scriptName });
+          loadMyScripts();
+          updateDashboardCounts();
+          alert('Script saved successfully!');
+      }
+
+      function loadScript() {
+          if (!currentUser.scripts || currentUser.scripts.length === 0) {
+              alert('No saved scripts found.');
+              return;
+          }
+
+          const scriptNames = currentUser.scripts.map(s => s.name);
+          const selectedName = prompt(`Select script to load:\n${scriptNames.join('\n')}`);
+
+          if (!selectedName) return;
+
+          const script = currentUser.scripts.find(s => s.name === selectedName);
+          if (script) {
+              const editor = document.getElementById(`codeEditor${activeExecutorTab}`);
+              editor.value = script.content;
+              executorTabs[activeExecutorTab].content = script.content;
+              trackUserActivity(currentUser.id, 'script_loaded', { scriptId: script.id, scriptName: selectedName });
+          }
+      }
+
+      function resetCharacter() {
+          if (!currentUser.robloxConnected && !isAdmin) {
+              alert('Please connect your Roblox account in Settings first.');
+              return;
+          }
+          trackUserActivity(currentUser.id, 'character_reset', { robloxAccount: currentUser.robloxUsername });
+          alert('Character reset! (This is a simulation)');
+      }
+
+      function clearEditor() {
+          const editor = document.getElementById(`codeEditor${activeExecutorTab}`);
+          if (editor) {
+              editor.value = '';
+              executorTabs[activeExecutorTab].content = '';
+          }
+      }
+
+      // Blacklist Cooldown Functions
+      function startBlacklistCountdown() {
+          if (blacklistCountdownInterval) {
+              clearInterval(blacklistCountdownInterval);
+          }
+          blacklistCountdownInterval = setInterval(updateBlacklistCountdown, 10);
+          updateBlacklistCountdown();
+      }
+
+      function updateBlacklistCountdown() {
+          const now = Date.now();
+          const timeLeft = blacklistCooldownEndTime - now;
+          const countdownElement = document.getElementById('blacklistCountdown');
+
+          if (timeLeft <= 0) {
+              clearInterval(blacklistCountdownInterval);
+              blacklistCountdownInterval = null;
+              blacklistCooldownEndTime = 0;
+              if (countdownElement) {
+                  countdownElement.textContent = '0s 0ms';
+              }
+              if (blacklistMessageModal && blacklistMessageModal.classList.contains('show')) {
+                  closeModal('blacklistMessageModal');
+              }
+              return;
+          }
+
+          const totalSeconds = Math.floor(timeLeft / 1000);
+          const milliseconds = Math.floor(timeLeft % 1000);
+
+          const seconds = totalSeconds;
+          const ms = milliseconds;
+
+          if (countdownElement) {
+              countdownElement.textContent = `${seconds}s ${ms}ms`;
+          }
+      }
+
+      function showBlacklistMessage() {
+          blacklistMessageModal = document.getElementById('blacklistMessageModal');
+          if (blacklistMessageModal) {
+              blacklistMessageModal.classList.add('show');
+              updateBlacklistCountdown();
+          }
+      }
+
+      // Settings Functions
+      function updateProfile() {
+          const newUsername = document.getElementById('newUsername').value.trim();
+          const newEmail = document.getElementById('newEmail').value.trim();
+          const newPassword = document.getElementById('newPassword').value;
+
+          if (newUsername && newUsername !== currentUser.username) {
+              currentUser.username = newUsername;
+          }
+
+          if (newEmail && newEmail !== currentUser.email) {
+              if (!validateEmail(newEmail)) {
+                  alert('Please enter a valid email address.');
+                  return;
+              }
+
+              if (isEmailBlacklisted(newEmail)) {
+                  alert('This email address has been blacklisted.');
+                  return;
+              }
+
+              currentUser.email = newEmail;
+          }
+
+          if (newPassword) {
+              if (!validatePassword(newPassword)) {
+                  alert('Password must contain at least 1 uppercase letter and 1 number.');
+                  return;
+              }
+              currentUser.password = newPassword;
+          }
+
+          updateUserInStorage();
+          updateUserInterface();
+          trackUserActivity(currentUser.id, 'profile_updated', { 
+              updatedFields: { username: !!newUsername, email: !!newEmail, password: !!newPassword }
+          });
+          alert('Profile updated successfully!');
+
+          // Clear form
+          document.getElementById('newUsername').value = '';
+          document.getElementById('newEmail').value = '';
+          document.getElementById('newPassword').value = '';
+      }
+
+      function updateProfilePic() {
+          const file = document.getElementById('profilePicInput').files[0];
+          if (file) {
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                  currentUser.profilePic = e.target.result;
+                  updateUserInStorage();
+                  updateUserInterface();
+                  trackUserActivity(currentUser.id, 'profile_picture_updated');
+                  alert('Profile picture updated successfully!');
+              };
+              reader.readAsDataURL(file);
+          }
+      }
+
+      function connectRoblox() {
+          const robloxUsernameInput = document.getElementById('robloxUsername');
+          const robloxUsername = robloxUsernameInput.value.trim();
+
+          if (!robloxUsername) {
+              alert('Please enter your Roblox username.');
+              return;
+          }
+
+          currentUser.robloxUsername = robloxUsername;
+          currentUser.robloxConnected = true;
+          updateUserInStorage();
+
+          trackUserActivity(currentUser.id, 'roblox_connected', { robloxUsername });
+          
+          // Show success modal
+          document.getElementById('robloxSuccessModal').classList.add('show');
+          
+          updateRobloxConnectionUI();
+          if (currentSection === 'executor') {
+              loadExecutorContent();
+          }
+      }
+
+      function disconnectRoblox() {
+          const oldUsername = currentUser.robloxUsername;
+          currentUser.robloxUsername = '';
+          currentUser.robloxConnected = false;
+          updateUserInStorage();
+          trackUserActivity(currentUser.id, 'roblox_disconnected', { oldRobloxUsername: oldUsername });
+          alert('Roblox account disconnected.');
+          updateRobloxConnectionUI();
+          if (currentSection === 'executor') {
+              loadExecutorContent();
+          }
+      }
+
+      function updateRobloxConnectionUI() {
+          const robloxConnectionContainer = document.getElementById('robloxConnectionContainer');
+          if (!robloxConnectionContainer) return;
+
+          if (currentUser.robloxConnected) {
+              robloxConnectionContainer.innerHTML = `
+                  <p style="margin-bottom: 10px;">Currently Connected: <b>${currentUser.robloxUsername}</b></p>
+                  <button class="btn btn-secondary" onclick="disconnectRoblox()">Change Account</button>
+              `;
+          } else {
+              robloxConnectionContainer.innerHTML = `
+                  <div class="form-group">
+                      <label for="robloxUsername">Roblox Username</label>
+                      <input type="text" id="robloxUsername" placeholder="Enter your Roblox username">
+                  </div>
+                  <button class="btn" onclick="connectRoblox()">Connect Account</button>
+              `;
+          }
+      }
+
+      // Key Redemption Functions
+      function redeemKey() {
+          const keyInput = document.getElementById('keyInput');
+          const key = keyInput.value.trim().toUpperCase();
+          const messageElement = document.getElementById('keyMessage');
+
+          if (!key) {
+              messageElement.textContent = 'Please enter a key.';
+              messageElement.style.color = '#ff0000';
+              return;
+          }
+
+          if (validKeys.includes(key)) {
+              // Add 30 days to current expiration
+              const currentExpiration = currentUser.accessExpiration || Date.now();
+              const newExpiration = Math.max(currentExpiration, Date.now()) + (30 * 24 * 60 * 60 * 1000);
+
+              currentUser.accessExpiration = newExpiration;
+              accessExpiration = newExpiration;
+              updateUserInStorage();
+              updateUserInterface();
+
+              trackUserActivity(currentUser.id, 'key_redeemed', { key, daysAdded: 30 });
+
+              showCustomPopup(
+                  "✅ Key Verified Successfully!",
+                  [
+                      { text: 'Welcome to **LAPIS**.' }, /* Renamed */
+                      { text: 'Your access key has been validated, and your ice binding spell has been provoked!' },
+                      { text: 'Enjoy full access to all features.' }
+                  ],
+                  'success',
+                  () => showMainApp()
+              );
+              keyInput.value = '';
+
+              // Remove used key (optional, depending on if keys are single-use)
+              const keyIndex = validKeys.indexOf(key);
+              if (keyIndex > -1) {
+                  validKeys.splice(keyIndex, 1);
+              }
+          } else if (lifetimeKeys.includes(key)) {
+              // Set lifetime access
+              const newExpiration = Date.now() + (99999999 * 24 * 60 * 60 * 1000);
+
+              currentUser.accessExpiration = newExpiration;
+              accessExpiration = newExpiration;
+              updateUserInStorage();
+              updateUserInterface();
+
+              trackUserActivity(currentUser.id, 'lifetime_key_redeemed', { key });
+
+              showCustomPopup(
+                  "✅ Key Verified Successfully!",
+                  [
+                      { text: 'Welcome to **LAPIS**.' }, /* Renamed */
+                      { text: 'Your access key has been validated, and your ice binding spell has been provoked!' },
+                      { text: 'Enjoy full access to all features.' }
+                  ],
+                  'success',
+                  () => showMainApp()
+              );
+              keyInput.value = '';
+
+              // Remove used lifetime key (optional)
+              const keyIndex = lifetimeKeys.indexOf(key);
+              if (keyIndex > -1) {
+                  lifetimeKeys.splice(keyIndex, 1);
+              }
+          }
+          else {
+              showCustomPopup(
+                  "❌ Key is Invalid!",
+                  [
+                      { text: 'You are not welcome to gain access and freedom!' }
+                  ],
+                  'error'
+              );
+          }
+      }
+
+      function showBuyModal() {
+          document.getElementById('buyModal').classList.add('show');
+          // Reset dropdowns when showing modal
+          document.getElementById('selectedPaymentMethod').textContent = 'Select Payment Method';
+          document.getElementById('paymentMethod').value = '';
+          document.getElementById('selectedSubscription').textContent = 'Select Plan';
+          document.getElementById('subscription').value = '';
+      }
+
+      function selectDropdownOption(dropdownId, value, text) {
+          document.getElementById(dropdownId).value = value;
+          document.getElementById(`selected${dropdownId.charAt(0).toUpperCase() + dropdownId.slice(1)}`).textContent = text;
+      }
+
+      function generateOrder() {
+          const email = document.getElementById('buyEmail').value.trim();
+          const username = document.getElementById('buyUsername').value.trim();
+          const paymentMethod = document.getElementById('paymentMethod').value;
+          const subscription = document.getElementById('subscription').value;
+
+          if (!email || !username || !paymentMethod || !subscription) {
+              showOrderError();
+              return;
+          }
+
+          if (isEmailBlacklisted(email)) {
+              alert('This email address has been blacklisted and cannot be used for orders.');
+              return;
+          }
+
+          const orderId = `LP-${Date.now()}`; /* Renamed */
+          const orderDetails = {
+              id: orderId,
+              email: email,
+              username: username,
+              paymentMethod: paymentMethod,
+              subscription: subscription,
+              timestamp: new Date().toLocaleString(),
+              status: 'pending',
+              createdBy: currentUser.id,
+              dateCreated: Date.now()
+          };
+
+          // Save order to localStorage
+          const orders = JSON.parse(localStorage.getItem(DATABASE.orders) || '[]');
+          orders.push(orderDetails);
+          localStorage.setItem(DATABASE.orders, JSON.stringify(orders));
+
+          trackUserActivity(currentUser.id, 'order_generated', { 
+              orderId, 
+              email, 
+              username, 
+              paymentMethod, 
+              subscription 
+          });
+
+          // Show order confirmation modal
+          showOrderConfirmation(orderDetails);
+          closeModal('buyModal');
+      }
+
+      function showOrderConfirmation(orderDetails) {
+          const modal = document.getElementById('orderConfirmationModal');
+          const detailsContent = document.getElementById('orderDetailsContent');
+
+          detailsContent.innerHTML = `
+              <div class="order-field">
+                  <span class="order-label">Order ID:</span>
+                  <span class="order-value">${orderDetails.id}</span>
+              </div>
+              <div class="order-field">
+                  <span class="order-label">Email:</span>
+                  <span class="order-value">${orderDetails.email}</span>
+              </div>
+              <div class="order-field">
+                  <span class="order-label">Username:</span>
+                  <span class="order-value">${orderDetails.username}</span>
+              </div>
+              <div class="order-field">
+                  <span class="order-label">Payment Method:</span>
+                  <span class="order-value">${orderDetails.paymentMethod}</span>
+              </div>
+              <div class="order-field">
+                  <span class="order-label">Plan:</span>
+                  <span class="order-value">${orderDetails.subscription}</span>
+              </div>
+              <div class="order-field">
+                  <span class="order-label">Generated:</span>
+                  <span class="order-value">${orderDetails.timestamp}</span>
+              </div>
+              <div class="order-field">
+                  <span class="order-label">Status:</span>
+                  <span class="order-value">Pending Payment</span>
+              </div>
+          `;
+
+          modal.classList.add('show');
+      }
+
+      function showDiscordModal() {
+          closeModal('orderConfirmationModal');
+          document.getElementById('discordModal').classList.add('show');
+      }
+
+      function showOrderError() {
+          document.getElementById('orderModal').classList.add('show');
+      }
+
+      // Support Functions
+      function joinDiscord() {
+          trackUserActivity(currentUser.id, 'discord_join_attempted');
+          alert('Discord invite would open here. (https://discord.gg/lapis)'); /* Renamed */
+      }
+
+      // Admin Functions
+      function fulfillOrder(orderId) {
+          const orders = JSON.parse(localStorage.getItem(DATABASE.orders) || '[]');
+          const orderIndex = orders.findIndex(o => o.id === orderId);
+
+          if (orderIndex !== -1) {
+              orders[orderIndex].status = 'fulfilled';
+              orders[orderIndex].fulfilledBy = currentUser.id;
+              orders[orderIndex].fulfilledDate = Date.now();
+              localStorage.setItem(DATABASE.orders, JSON.stringify(orders));
+              
+              trackUserActivity(currentUser.id, 'order_fulfilled', { 
+                  orderId, 
+                  customerEmail: orders[orderIndex].email 
+              });
+              
+              loadOrdersList();
+              alert('Order fulfilled successfully!');
+          }
+      }
+
+      function cancelOrder(orderId) {
+          if (confirm('Are you sure you want to cancel this order?')) {
+              let orders = JSON.parse(localStorage.getItem(DATABASE.orders) || '[]');
+              const order = orders.find(o => o.id === orderId);
+              orders = orders.filter(o => o.id !== orderId);
+              localStorage.setItem(DATABASE.orders, JSON.stringify(orders));
+              
+              trackUserActivity(currentUser.id, 'order_cancelled', { 
+                  orderId, 
+                  customerEmail: order?.email 
+              });
+              
+              loadOrdersList();
+              alert('Order cancelled successfully!');
+          }
+      }
+
+      function showAddHubScriptModal() {
+          document.getElementById('addScriptModalTitle').textContent = 'Add New Hub Script';
+          document.getElementById('scriptName').value = '';
+          document.getElementById('scriptImage').value = '';
+          document.getElementById('scriptContent').value = '';
+          editingScriptId = null;
+          document.getElementById('addScriptModal').classList.add('show');
+      }
+
+      // Countdown Functions
+      function startCountdown() {
+          if (countdownInterval) {
+              clearInterval(countdownInterval);
+          }
+
+          countdownInterval = setInterval(updateCountdown, 1000);
+          updateCountdown();
+      }
+
+      function updateCountdown() {
+          const accessTimeLeftElement = document.getElementById('accessTimeLeft');
+          if (!accessTimeLeftElement) return;
+
+          if (!currentUser || !accessExpiration) {
+              accessTimeLeftElement.textContent = '0d 0h 0m 0s';
+              return;
+          }
+
+          const now = Date.now();
+          const timeLeft = accessExpiration - now;
+
+          if (timeLeft <= 0) {
+              accessTimeLeftElement.textContent = 'EXPIRED';
+              return;
+          }
+
+          const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+          const timeString = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+          accessTimeLeftElement.textContent = timeString;
+      }
+
+      // Modal Functions
+      function closeModal(modalId) {
+          document.getElementById(modalId).classList.remove('show');
+          // Clear free user countdown if that modal is closed
+          if (modalId === 'freeUserModal' && freeUserCountdownTimer) {
+              clearInterval(freeUserCountdownTimer);
+              freeUserCountdownTimer = null;
+          }
+      }
+
+      // New Free User Modal Functions
+      function showFreeUserModal(targetSection) {
+          const modal = document.getElementById('freeUserModal');
+          const countdownElement = document.getElementById('freeUserCountdown');
+          const closeBtn = document.getElementById('freeUserCloseBtn');
+          let timeLeft = 10;
+
+          countdownElement.textContent = timeLeft;
+          closeBtn.disabled = true;
+
+          modal.classList.add('show');
+
+          // Clear any existing timer
+          if (freeUserCountdownTimer) {
+              clearInterval(freeUserCountdownTimer);
+          }
+
+          freeUserCountdownTimer = setInterval(() => {
+              timeLeft--;
+              countdownElement.textContent = timeLeft;
+
+              if (timeLeft <= 0) {
+                  clearInterval(freeUserCountdownTimer);
+                  freeUserCountdownTimer = null;
+                  closeBtn.disabled = false;
+                  countdownElement.textContent = '0';
+              }
+          }, 1000);
+      }
+
+      function showFreeUserPopup() {
+          document.getElementById('freeUserPopupModal').classList.add('show');
+      }
+
+      function redirectToRedeemKey() {
+          closeModal('freeUserModal');
+          closeModal('freeUserPopupModal');
+          switchSection('redeem');
+      }
+
+      // Custom Popup Functionality
+      function showCustomPopup(title, messages, type, callback = null) {
+          const popup = document.getElementById('customPopup');
+          const popupIcon = document.getElementById('customPopupIcon');
+          const popupTitle = document.getElementById('customPopupTitle');
+          const popupMessageContainer = document.getElementById('customPopupMessage');
+          const popupButtons = document.getElementById('customPopupButtons');
+
+          popupTitle.innerHTML = title;
+          popupMessageContainer.innerHTML = '';
+          popupIcon.className = `custom-popup-icon ${type}`;
+          
+          // Set icon based on type
+          if (type === 'success') {
+              popupIcon.innerHTML = '<i class="fa-solid fa-check-circle"></i>';
+          } else if (type === 'error') {
+              popupIcon.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+          } else if (type === 'info') {
+              popupIcon.innerHTML = '<i class="fa-solid fa-circle-info"></i>';
+          }
+
+          // Remove existing buttons and add a new "OK" button
+          popupButtons.innerHTML = '';
+          const okButton = document.createElement('button');
+          okButton.className = 'btn';
+          okButton.textContent = 'OK';
+          popupButtons.appendChild(okButton);
+
+          popup.classList.add('show');
+
+          let messageIndex = 0;
+          let charIndex = 0;
+          let currentParagraph = null;
+          let typingInterval = null;
+
+          const typeMessage = () => {
+              if (messageIndex < messages.length) {
+                  if (charIndex === 0) {
+                      currentParagraph = document.createElement('p');
+                      if (messages[messageIndex].icon) {
+                          currentParagraph.innerHTML = messages[messageIndex].icon + ' ';
+                      }
+                      popupMessageContainer.appendChild(currentParagraph);
+                  }
+
+                  const fullText = messages[messageIndex].text;
+                  const boldedText = fullText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+                  if (charIndex < boldedText.length) {
+                      currentParagraph.innerHTML = (messages[messageIndex].icon ? messages[messageIndex].icon + ' ' : '') + boldedText.substring(0, charIndex + 1);
+                      charIndex++;
+                  } else {
+                      // Message finished, remove typing animation class
+                      currentParagraph.classList.remove('typing-animation');
+                      messageIndex++;
+                      charIndex = 0;
+                      if (messageIndex < messages.length) {
+                          // Start next message after a short delay
+                          setTimeout(() => {
+                              currentParagraph.classList.add('typing-animation');
+                              typeMessage();
+                          }, 500);
+                      } else {
+                          // All messages typed, enable OK button and set callback
+                          okButton.onclick = () => {
+                              closeModal('customPopup');
+                              if (callback) {
+                                  callback();
+                              }
+                          };
+                      }
+                  }
+              }
+          };
+
+          // Start typing animation
+          typingInterval = setInterval(typeMessage, 50);
+      }
+
+      // Function to update Lapis Card Date and Time
+      function updateLapisCardDateTime() {
+          const now = new Date();
+          const timeElement = document.getElementById('lapisCardTime');
+          const dateElement = document.getElementById('lapisCardDate');
+
+          if (timeElement && dateElement) {
+              const hours = String(now.getHours()).padStart(2, '0');
+              const minutes = String(now.getMinutes()).padStart(2, '0');
+              const seconds = String(now.getSeconds()).padStart(2, '0');
+              timeElement.textContent = `${hours}:${minutes}:${seconds}`;
+
+              const options = { weekday: 'short', day: '2-digit', month: 'long' };
+              dateElement.textContent = now.toLocaleDateString('en-US', options);
+          }
+      }
+
+      // Close modals when clicking outside
+      document.addEventListener('click', function(e) {
+          if (e.target.classList.contains('modal')) {
+              if (e.target.id !== 'freeUserModal' && e.target.id !== 'freeUserPopupModal' && e.target.id !== 'customPopup') {
+                  e.target.classList.remove('show');
+              } else if (e.target.id === 'freeUserModal' && document.getElementById('freeUserCloseBtn').disabled === false) {
+                  e.target.classList.remove('show');
+              } else if (e.target.id === 'freeUserPopupModal') {
+                  e.target.classList.remove('show');
+              } else if (e.target.id === 'customPopup') {
+                  e.target.classList.remove('show');
+              }
+          }
+      });
+
+      // Handle window resize for mobile
+      window.addEventListener('resize', function() {
+          if (window.innerWidth > 768) {
+              document.getElementById('sidebar').classList.remove('open');
+          }
+      });
+
+  </script>
+
+  <script>
+      document.addEventListener("DOMContentLoaded", function () {
+          const iconMap = {
+              'icon-home': 'fa-house',
+              'icon-gamepad': 'fa-gamepad',
+              'icon-script': 'fa-scroll',
+              'icon-document': 'fa-file-lines',
+              'icon-lightning': 'fa-bolt',
+              'icon-settings': 'fa-gear',
+              'icon-ticket': 'fa-ticket',
+              'icon-question': 'fa-circle-question',
+              'icon-users': 'fa-users',
+              'icon-clipboard': 'fa-clipboard',
+              'icon-user': 'fa-user',
+              'icon-clock': 'fa-clock',
+              'icon-star': 'fa-star',
+              'icon-check': 'fa-check',
+              'icon-camera': 'fa-camera',
+              'icon-lock': 'fa-lock',
+              'icon-error': 'fa-xmark'
+          };
+
+          for (const cls in iconMap) {
+              document.querySelectorAll(`.${cls}`).forEach(el => {
+                  const icon = document.createElement('i');
+                  icon.className = `fa-solid ${iconMap[cls]}`;
+                  icon.style.marginRight = '8px';
+                  el.innerHTML = '';
+                  el.appendChild(icon);
+              });
+          }
+      });
+  </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const usernameInput = document.getElementById('registerUsername');
+    const emailInput = document.getElementById('registerEmail');
+    const passwordInput = document.getElementById('registerPassword');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+
+    const usernameMessage = document.getElementById('usernameMessage');
+    const emailMessage = document.getElementById('emailMessage');
+    const passwordMessage = document.getElementById('passwordMessage');
+    const confirmPasswordMessage = document.getElementById('confirmPasswordMessage');
+
+    const badWords = ['fuck', 'shit', 'bitch', 'nigga', 'ass', 'cunt', 'dick'];
+
+    function showValidationMessage(messageBox, message, isValid) {
+        messageBox.textContent = message;
+        messageBox.classList.add('show');
+        messageBox.style.color = isValid ? 'limegreen' : 'red';
+    }
+
+    function hideValidationMessage(messageBox) {
+        messageBox.textContent = '';
+        messageBox.classList.remove('show');
+    }
+
+    function validateUsername(input, isSubmission = false) {
+        const val = input.value.trim().toLowerCase();
+        if (val === '' && !isSubmission) {
+            hideValidationMessage(usernameMessage);
+            input.style.borderColor = '';
+            return false;
+        }
+        const isValid = val.length >= 8 && !badWords.some(word => val.includes(word));
+        if (isValid) {
+            hideValidationMessage(usernameMessage);
+            input.style.borderColor = 'limegreen';
+        } else {
+            showValidationMessage(usernameMessage, 'Username must be at least 8 characters and not contain bad words.', false);
+            input.style.borderColor = 'red';
+        }
+        return isValid;
+    }
+
+    function validateEmailInput(input, isSubmission = false) {
+        const val = input.value.trim().toLowerCase();
+        if (val === '' && !isSubmission) {
+            hideValidationMessage(emailMessage);
+            input.style.borderColor = '';
+            return false;
+        }
+        const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) &&
+            (val.endsWith('@gmail.com') || val.endsWith('@yahoo.com'));
+        if (isValid) {
+            hideValidationMessage(emailMessage);
+            input.style.borderColor = 'limegreen';
+        } else {
+            showValidationMessage(emailMessage, 'Email must be Gmail or Yahoo and in a valid format.', false);
+            input.style.borderColor = 'red';
+        }
+        return isValid;
+    }
+
+    function validatePasswordInput(input, isSubmission = false) {
+        const val = input.value;
+        if (val === '' && !isSubmission) {
+            hideValidationMessage(passwordMessage);
+            input.style.borderColor = '';
+            return false;
+        }
+        const isValid = val.length >= 8;
+        if (isValid) {
+            hideValidationMessage(passwordMessage);
+            input.style.borderColor = 'limegreen';
+        } else {
+            showValidationMessage(passwordMessage, 'Password must be at least 8 characters.', false);
+            input.style.borderColor = 'red';
+        }
+        validateConfirmPasswordInput(confirmPasswordInput, input);
+        return isValid;
+    }
+
+    function validateConfirmPasswordInput(input, passwordRefInput, isSubmission = false) {
+        const val = input.value;
+        const passwordVal = passwordRefInput.value;
+        if (val === '' && !isSubmission) {
+            hideValidationMessage(confirmPasswordMessage);
+            input.style.borderColor = '';
+            return false;
+        }
+        const isValid = val === passwordVal && val.length > 0;
+        if (isValid) {
+            hideValidationMessage(confirmPasswordMessage);
+            input.style.borderColor = 'limegreen';
+        } else {
+            showValidationMessage(confirmPasswordMessage, 'Passwords must match.', false);
+            input.style.borderColor = 'red';
+        }
+        return isValid;
+    }
+
+    // Event listeners for real-time validation
+    usernameInput.addEventListener('input', () => validateUsername(usernameInput));
+    usernameInput.addEventListener('blur', () => validateUsername(usernameInput, true));
+
+    emailInput.addEventListener('input', () => validateEmailInput(emailInput));
+    emailInput.addEventListener('blur', () => validateEmailInput(emailInput, true));
+
+    passwordInput.addEventListener('input', () => validatePasswordInput(passwordInput));
+    passwordInput.addEventListener('blur', () => validatePasswordInput(passwordInput, true));
+
+    confirmPasswordInput.addEventListener('input', () => validateConfirmPasswordInput(confirmPasswordInput, passwordInput));
+    confirmPasswordInput.addEventListener('blur', () => validateConfirmPasswordInput(confirmPasswordInput, passwordInput, true));
+
+    // Override the global register function to use the new validation
+    window.register = function() {
+        const usernameInput = document.getElementById('registerUsername');
+        const emailInput = document.getElementById('registerEmail');
+        const passwordInput = document.getElementById('registerPassword');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const errorElement = document.getElementById('registerError');
+
+        // Trigger all validations for submission
+        const isUsernameValid = validateUsername(usernameInput, true);
+        const isEmailValid = validateEmailInput(emailInput, true);
+        const isPasswordValid = validatePasswordInput(passwordInput, true);
+        const isConfirmPasswordValid = validateConfirmPasswordInput(confirmPasswordInput, passwordInput, true);
+
+        if (!isUsernameValid || !isEmailValid || !isPasswordValid || !isConfirmPasswordValid) {
+            errorElement.textContent = 'Please correct the errors in the form.';
+            errorElement.style.color = 'red';
+            return;
+        }
+
+        // Original registration logic (copied from your provided script)
+        const username = usernameInput.value.trim();
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+
+        // Check for existing users
+        const existingUsers = JSON.parse(localStorage.getItem(DATABASE.users) || '[]');
+        if (existingUsers.some(user => user.email === email)) {
+            errorElement.textContent = 'Email already exists.';
+            errorElement.style.color = 'red';
+            return;
+        }
+
+        if (existingUsers.some(user => user.username === username)) {
+            errorElement.textContent = 'Username already exists.';
+            errorElement.style.color = 'red';
+            return;
+        }
+
+        // Create new user
+        const newUser = {
+            id: Date.now(),
+            username,
+            email,
+            password,
+            profilePic: null,
+            robloxConnected: false,
+            robloxUsername: '',
+            accessExpiration: Date.now() + (3 * 24 * 60 * 60 * 1000),
+            blacklisted: false,
+            scripts: [],
+            availableGames: [],
+            registrationDate: Date.now(),
+            lastLogin: Date.now()
+        };
+
+        // Add to whitelist and track
+        addUserToWhitelist(newUser);
+        trackUserActivity(newUser.id, 'user_registered', { email, username });
+
+        // Show custom popup for registration success
+        showCustomPopup(
+            "LAPIS account has been made!",
+            [
+                { icon: '<i class="fa-solid fa-user"></i>', text: 'Welcome Adventurer! Go and click the button "Bring me to my palace"!' },
+                { icon: '<i class="fa-solid fa-user"></i>', text: 'Perhaps... You\'re a peasant!' },
+                { icon: '<i class="fa-solid fa-user"></i>', text: 'Damn yo-' }
+            ],
+            'success',
+            () => {
+                // After popup, proceed to login and then dashboard
+                document.getElementById('loginEmail').value = email;
+                document.getElementById('loginPassword').value = password;
+                login();
+            }
+        );
+    };
+});
+</script>
+
+</body>
+</html>
